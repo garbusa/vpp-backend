@@ -6,11 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="domain" />
         <module name="infrastructure" />
-        <module name="masterdata-service" />
-        <module name="action-service" />
-        <module name="forecast-service" />
+        <module name="domain" />
         <module name="application" />
       </profile>
     </annotationProcessing>
