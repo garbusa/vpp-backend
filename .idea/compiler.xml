@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="domain" />
+        <module name="infrastructure" />
+        <module name="masterdata-service" />
+        <module name="action-service" />
+        <module name="forecast-service" />
+        <module name="application" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="de.uol.vpp.action" target="1.5" />
+      <module name="de.uol.vpp.forecast" target="1.5" />
+      <module name="de.uol.vpp.masterdata" target="1.5" />
+      <module name="de.uol.vpp.masterdata.application" target="1.5" />
+      <module name="de.uol.vpp.masterdata.domain" target="1.5" />
+      <module name="de.uol.vpp.masterdata.infrastructure" target="1.5" />
+      <module name="de.uol.vpp.shared-api" target="1.5" />
+      <module name="shared-api" target="1.5" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
