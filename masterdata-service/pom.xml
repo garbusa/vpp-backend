@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>spring</module>
         <module>application</module>
         <module>domain</module>
         <module>infrastructure</module>
