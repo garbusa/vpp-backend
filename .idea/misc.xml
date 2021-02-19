@@ -15,14 +15,6 @@
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
-    <option name="ignoredFiles">
-      <set>
-        <option value="$PROJECT_DIR$/de.uol.vpp.masterdata/de.uol.vpp.masterdata.application/pom.xml" />
-        <option value="$PROJECT_DIR$/de.uol.vpp.masterdata/de.uol.vpp.masterdata.domain/pom.xml" />
-        <option value="$PROJECT_DIR$/de.uol.vpp.masterdata/de.uol.vpp.masterdata.infrastructure/pom.xml" />
-        <option value="$PROJECT_DIR$/shared-api/pom.xml" />
-      </set>
-    </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
