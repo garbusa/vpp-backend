@@ -6,8 +6,8 @@ import lombok.Data;
 @ValueObject
 @Data
 public class ProducerDimensionVO {
-    private Double height;
-    private Double width;
-    private Double length;
-    private Double weight;
+    private final Double height;
+    private final Double width;
+    private final Double length;
+    private final Double weight;
 }

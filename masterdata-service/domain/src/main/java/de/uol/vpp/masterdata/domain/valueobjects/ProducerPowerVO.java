@@ -6,5 +6,5 @@ import lombok.Data;
 @ValueObject
 @Data
 public class ProducerPowerVO {
-    private Double ratedPower;
+    private final Double ratedPower;
 }

@@ -8,7 +8,7 @@ import lombok.Data;
 @ValueObject
 @Data
 public class ProducerTypeVO {
-    private ProductType productType;
-    private EnergyType energyType;
+    private final ProductType productType;
+    private final EnergyType energyType;
 }
 

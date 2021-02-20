@@ -6,5 +6,5 @@ import lombok.Data;
 @ValueObject
 @Data
 public class ProducerIdVO {
-    private String id;
+    private final String id;
 }

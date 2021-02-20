@@ -26,7 +26,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
     private final InfrastructureEntityConverter converter;
 
     @Override
-    public List<HouseholdAggregate> getAllByVppKey(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException {
+    public List<HouseholdAggregate> getAllByVirtualPowerPlant(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException {
         Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getId());
         return virtualPowerPlantOptional.map(virtualPowerPlant -> jpaRepository.findAllByVirtualPowerPlant(virtualPowerPlant)
                 .stream()

@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Entity
 @Data
 public class Producer {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,6 +33,4 @@ public class Producer {
     @ManyToOne
     @JoinColumn(name = "decentralized_power_plant_id")
     private DecentralizedPowerPlant decentralizedPowerPlant;
-
-
 }

@@ -1,10 +1,10 @@
 package de.uol.vpp.masterdata.application.rest;
 
 import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
-import de.uol.vpp.masterdata.application.dto.DecentralizedPowerPlantDTO;
+import de.uol.vpp.masterdata.application.dto.HouseholdDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
-import de.uol.vpp.masterdata.domain.services.DecentralizedPowerPlantServiceException;
-import de.uol.vpp.masterdata.domain.services.IDecentralizedPowerPlantService;
+import de.uol.vpp.masterdata.domain.services.HouseholdServiceException;
+import de.uol.vpp.masterdata.domain.services.IHouseholdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,15 +16,15 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/dpp", produces = MediaType.APPLICATION_JSON_VALUE)
-public class DecentralizedPowerPlantController {
+@RequestMapping(path = "/household", produces = MediaType.APPLICATION_JSON_VALUE)
+public class HouseholdController {
 
-    private final IDecentralizedPowerPlantService service;
+    private final IHouseholdService service;
     private final ApplicationEntityConverter converter;
 
     @Transactional
     @GetMapping(path = "/by/vpp/{vppBusinessKey}")
-    public ResponseEntity<?> getAllDecentralizedPowerPlantsByVirtualPowerPlantId(@PathVariable String vppBusinessKey) {
+    public ResponseEntity<?> getAllHouseholdsByVirtualPowerPlantId(@PathVariable String vppBusinessKey) {
         try {
             return new ResponseEntity<>(
                     new ApiResponse(true, false, "dpp's successfully fetched.",
@@ -33,19 +33,19 @@ public class DecentralizedPowerPlantController {
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
                     ), HttpStatus.OK);
-        } catch (DecentralizedPowerPlantServiceException e) {
+        } catch (HouseholdServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         }
     }
 
     @Transactional
     @GetMapping(path = "/{businessKey}")
-    public ResponseEntity<?> getOneDecentralizedPowerPlant(@PathVariable String businessKey) {
+    public ResponseEntity<?> getOneHousehold(@PathVariable String businessKey) {
         try {
             return new ResponseEntity<>(
                     new ApiResponse(true, false, "dpp successfully fetched", service.get(businessKey))
                     , HttpStatus.OK);
-        } catch (DecentralizedPowerPlantServiceException e) {
+        } catch (HouseholdServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
@@ -54,19 +54,32 @@ public class DecentralizedPowerPlantController {
 
     @Transactional
     @PostMapping
-    public ResponseEntity<?> saveDecentralizedPowerPlant(@RequestBody DecentralizedPowerPlantDTO dto,
-                                                         @RequestParam String virtualPowerPlantBusinessKey) {
+    public ResponseEntity<?> saveHousehold(@RequestBody HouseholdDTO dto,
+                                           @RequestParam String virtualPowerPlantBusinessKey) {
         try {
             service.save(converter.toDomain(dto), virtualPowerPlantBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
                     true, false, "dpp successfully created and assigned", null
             ));
-        } catch (DecentralizedPowerPlantServiceException e) {
+        } catch (HouseholdServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         }
 
+    }
+
+    @Transactional
+    @DeleteMapping(path = "/{businessKey}")
+    public ResponseEntity<?> deleteHousehold(@PathVariable String businessKey) {
+        try {
+            service.delete(businessKey);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "household successfully deleted", null));
+        } catch (HouseholdServiceException e) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        }
     }
 
 }

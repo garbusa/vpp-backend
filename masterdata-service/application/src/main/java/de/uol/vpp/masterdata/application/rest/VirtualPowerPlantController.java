@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,6 +23,7 @@ public class VirtualPowerPlantController {
     private final IVirtualPowerPlantService service;
     private final ApplicationEntityConverter converter;
 
+    @Transactional
     @GetMapping
     public ResponseEntity<?> getAllVirtualPowerPlants() {
         try {
@@ -36,6 +38,7 @@ public class VirtualPowerPlantController {
         }
     }
 
+    @Transactional
     @GetMapping(path = "/{businessKey}")
     public ResponseEntity<?> getOneVirtualPowerPlant(@PathVariable String businessKey) {
         try {
@@ -47,6 +50,7 @@ public class VirtualPowerPlantController {
         }
     }
 
+    @Transactional
     @PostMapping
     public ResponseEntity<?> saveVirtualPowerPlant(@RequestBody VirtualPowerPlantDTO dto) {
         try {
@@ -60,6 +64,7 @@ public class VirtualPowerPlantController {
         }
     }
 
+    @Transactional
     @DeleteMapping(path = "/{businessKey}")
     public ResponseEntity<?> deleteVirtualPowerPlant(@PathVariable String businessKey) {
         try {

@@ -14,7 +14,6 @@ import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpa
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,7 +54,6 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
         }
     }
 
-    @Transactional
     @Override
     public void assign(DecentralizedPowerPlantAggregate domainEntity, VirtualPowerPlantAggregate virtualPowerPlant) throws DecentralizedPowerPlantRepositoryException {
         Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(domainEntity.getDecentralizedPowerPlantId().getId());

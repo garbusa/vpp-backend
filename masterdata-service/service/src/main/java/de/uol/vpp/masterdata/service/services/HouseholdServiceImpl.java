@@ -29,7 +29,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional;
             virtualPowerPlantOptional = virtualPowerPlantRepository.getById(new VirtualPowerPlantIdVO(vppBusinessKey));
             if (virtualPowerPlantOptional.isPresent()) {
-                return repository.getAllByVppKey(virtualPowerPlantOptional.get());
+                return repository.getAllByVirtualPowerPlant(virtualPowerPlantOptional.get());
             }
             throw new HouseholdServiceException(
                     String.format("There is no vpp %s to find any dpp's", vppBusinessKey)

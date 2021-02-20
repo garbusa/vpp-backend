@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IHouseholdRepository {
-    List<HouseholdAggregate> getAllByVppKey(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException;
+    List<HouseholdAggregate> getAllByVirtualPowerPlant(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException;
 
     Optional<HouseholdAggregate> getById(HouseholdIdVO id);
 
@@ -17,5 +17,4 @@ public interface IHouseholdRepository {
     void deleteById(HouseholdIdVO id) throws HouseholdRepositoryException;
 
     void assign(HouseholdAggregate entity, VirtualPowerPlantAggregate virtualPowerPlant) throws HouseholdRepositoryException;
-
 }

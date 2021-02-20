@@ -6,5 +6,5 @@ import lombok.Data;
 @ValueObject
 @Data
 public class HouseholdMemberAmountVO {
-    private Integer amount;
+    private final Integer amount;
 }
