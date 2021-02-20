@@ -4,21 +4,24 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.uol.vpp</groupId>
-        <artifactId>vpp</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
-
+    <groupId>de.uol.vpp</groupId>
     <artifactId>masterdata-service</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
-        <module>spring</module>
         <module>application</module>
+        <module>service</module>
         <module>domain</module>
         <module>infrastructure</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+        </dependency>
+    </dependencies>
     
 </project>
