@@ -7,6 +7,6 @@ import lombok.Data;
 @ValueObject
 @Data
 public class StorageTypeVO {
-    private EnergyType energyType;
+    private final EnergyType energyType;
 }
 

@@ -10,6 +10,4 @@ import javax.persistence.Embeddable;
 public class StoragePower {
     @Column(nullable = false)
     private Double ratedPower;
-    @Column(nullable = false)
-    private Double efficiency;
 }

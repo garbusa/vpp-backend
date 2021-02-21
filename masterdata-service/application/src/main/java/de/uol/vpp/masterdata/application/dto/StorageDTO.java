@@ -6,6 +6,5 @@ import lombok.Data;
 public class StorageDTO {
     private String storageId;
     private Double ratedPower;
-    private Double efficiency;
     private String energyType;
 }

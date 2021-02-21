@@ -1,10 +1,10 @@
 package de.uol.vpp.masterdata.application.rest;
 
 import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
-import de.uol.vpp.masterdata.application.dto.ProducerDTO;
+import de.uol.vpp.masterdata.application.dto.StorageDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
-import de.uol.vpp.masterdata.domain.services.IProducerService;
-import de.uol.vpp.masterdata.domain.services.ProducerServiceException;
+import de.uol.vpp.masterdata.domain.services.IStorageService;
+import de.uol.vpp.masterdata.domain.services.StorageServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,25 +16,25 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/producer", produces = MediaType.APPLICATION_JSON_VALUE)
-public class ProducerController {
+@RequestMapping(path = "/storage", produces = MediaType.APPLICATION_JSON_VALUE)
+public class StorageController {
 
-    private final IProducerService service;
+    private final IStorageService service;
     private final ApplicationEntityConverter converter;
 
     @Transactional
     @GetMapping(path = "/by/dpp/{" +
             "dppBusinessKey}")
-    public ResponseEntity<?> getAllProducersByDecentralizedPowerPlant(@PathVariable String dppBusinessKey) {
+    public ResponseEntity<?> getAllStoragesByDecentralizedPowerPlant(@PathVariable String dppBusinessKey) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "producers successfully fetched.",
+                    new ApiResponse(true, false, "storages successfully fetched.",
                             service.getAllByDecentralizedPowerPlantId(dppBusinessKey)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
                     ), HttpStatus.OK);
-        } catch (ProducerServiceException e) {
+        } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         }
     }
@@ -42,28 +42,28 @@ public class ProducerController {
     @Transactional
     @GetMapping(path = "/by/household/{" +
             "householdBusinessKey}")
-    public ResponseEntity<?> getAllProducersByHousehold(@PathVariable String householdBusinessKey) {
+    public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdBusinessKey) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "producers successfully fetched.",
+                    new ApiResponse(true, false, "storages successfully fetched.",
                             service.getAllByHouseholdId(householdBusinessKey)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
                     ), HttpStatus.OK);
-        } catch (ProducerServiceException e) {
+        } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         }
     }
 
     @Transactional
     @GetMapping(path = "/{businessKey}")
-    public ResponseEntity<?> getOneProducer(@PathVariable String businessKey) {
+    public ResponseEntity<?> getOneStorage(@PathVariable String businessKey) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "producer successfully fetched", service.get(businessKey))
+                    new ApiResponse(true, false, "storage successfully fetched", service.get(businessKey))
                     , HttpStatus.OK);
-        } catch (ProducerServiceException e) {
+        } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
@@ -72,14 +72,14 @@ public class ProducerController {
 
     @Transactional
     @PostMapping("/by/dpp")
-    public ResponseEntity<?> saveProducerWithDecentralizedPowerPlant(@RequestBody ProducerDTO dto,
-                                                                     @RequestParam String decentralizedPowerPlantBusinessKey) {
+    public ResponseEntity<?> saveStorageWithDecentralizedPowerPlant(@RequestBody StorageDTO dto,
+                                                                    @RequestParam String decentralizedPowerPlantBusinessKey) {
         try {
             service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), decentralizedPowerPlantBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "producer successfully created and assigned to dpp", null
+                    true, false, "storage successfully created and assigned to dpp", null
             ));
-        } catch (ProducerServiceException e) {
+        } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
@@ -88,14 +88,14 @@ public class ProducerController {
 
     @Transactional
     @PostMapping("/by/household")
-    public ResponseEntity<?> saveProducerWithHousehold(@RequestBody ProducerDTO dto,
-                                                       @RequestParam String householdBusinessKey) {
+    public ResponseEntity<?> saveStorageWithHousehold(@RequestBody StorageDTO dto,
+                                                      @RequestParam String householdBusinessKey) {
         try {
             service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "producer successfully created and assigned to household", null
+                    true, false, "storage successfully created and assigned to household", null
             ));
-        } catch (ProducerServiceException e) {
+        } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
@@ -104,11 +104,11 @@ public class ProducerController {
 
     @Transactional
     @DeleteMapping(path = "/{businessKey}")
-    public ResponseEntity<?> deleteProducer(@PathVariable String businessKey) {
+    public ResponseEntity<?> deleteStorage(@PathVariable String businessKey) {
         try {
             service.delete(businessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "producer successfully deleted", null));
-        } catch (ProducerServiceException e) {
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "Storage successfully deleted", null));
+        } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);

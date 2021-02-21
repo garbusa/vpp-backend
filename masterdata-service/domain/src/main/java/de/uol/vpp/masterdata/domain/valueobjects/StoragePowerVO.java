@@ -6,6 +6,5 @@ import lombok.Data;
 @ValueObject
 @Data
 public class StoragePowerVO {
-    private Double ratedPower;
-    private Double efficiency;
+    private final Double ratedPower;
 }

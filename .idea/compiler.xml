@@ -6,9 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="infrastructure" />
-        <module name="domain" />
         <module name="application" />
+        <module name="domain" />
+        <module name="infrastructure" />
         <module name="service" />
       </profile>
     </annotationProcessing>
@@ -21,7 +21,7 @@
       <module name="de.uol.vpp.masterdata.infrastructure" target="1.5" />
       <module name="de.uol.vpp.shared-api" target="1.5" />
       <module name="shared-api" target="1.5" />
-      <module name="spring" target="11" />
+      <module name="spring" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

@@ -1,15 +1,14 @@
 package de.uol.vpp.masterdata.application;
 
-import de.uol.vpp.masterdata.application.dto.DecentralizedPowerPlantDTO;
-import de.uol.vpp.masterdata.application.dto.HouseholdDTO;
-import de.uol.vpp.masterdata.application.dto.ProducerDTO;
-import de.uol.vpp.masterdata.application.dto.VirtualPowerPlantDTO;
+import de.uol.vpp.masterdata.application.dto.*;
 import de.uol.vpp.masterdata.domain.EnergyType;
 import de.uol.vpp.masterdata.domain.ProductType;
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
+import de.uol.vpp.masterdata.domain.entities.ConsumerEntity;
 import de.uol.vpp.masterdata.domain.entities.ProducerEntity;
+import de.uol.vpp.masterdata.domain.entities.StorageEntity;
 import de.uol.vpp.masterdata.domain.valueobjects.*;
 import org.springframework.stereotype.Service;
 
@@ -106,4 +105,48 @@ public class ApplicationEntityConverter {
         );
         return domainEntity;
     }
+
+    public ConsumerDTO toApplication(ConsumerEntity domainEntity) {
+        ConsumerDTO dto = new ConsumerDTO();
+        dto.setConsumerId(domainEntity.getConsumerId().getId());
+        dto.setConsumingPower(domainEntity.getConsumerPower().getConsumingPower());
+        return dto;
+    }
+
+    public ConsumerEntity toDomain(ConsumerDTO dto) {
+        ConsumerEntity domainEntity = new ConsumerEntity();
+        domainEntity.setConsumerId(
+                new ConsumerIdVO(dto.getConsumerId())
+        );
+        domainEntity.setConsumerPower(
+                new ConsumerPowerVO(dto.getConsumingPower())
+        );
+        return domainEntity;
+    }
+
+    public StorageDTO toApplication(StorageEntity domainEntity) {
+        StorageDTO dto = new StorageDTO();
+        dto.setStorageId(domainEntity.getStorageId().getId());
+        dto.setRatedPower(domainEntity.getStoragePower().getRatedPower());
+        dto.setEnergyType(domainEntity.getStorageType().getEnergyType().toString());
+        return dto;
+    }
+
+    public StorageEntity toDomain(StorageDTO dto) {
+        StorageEntity domainEntity = new StorageEntity();
+        domainEntity.setStorageId(
+                new StorageIdVO(dto.getStorageId())
+        );
+        domainEntity.setStoragePower(
+                new StoragePowerVO(dto.getRatedPower())
+        );
+        domainEntity.setStorageType(
+                new StorageTypeVO(EnergyType.valueOf(
+                        dto.getEnergyType()
+                ))
+        );
+        return domainEntity;
+    }
+
+
 }
