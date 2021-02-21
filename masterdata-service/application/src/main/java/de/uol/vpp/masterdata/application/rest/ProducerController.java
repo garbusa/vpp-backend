@@ -40,7 +40,7 @@ public class ProducerController {
     }
 
     @Transactional
-    @GetMapping(path = "/by/dpp/{" +
+    @GetMapping(path = "/by/household/{" +
             "householdBusinessKey}")
     public ResponseEntity<?> getAllProducersByHousehold(@PathVariable String householdBusinessKey) {
         try {
@@ -71,7 +71,7 @@ public class ProducerController {
     }
 
     @Transactional
-    @PostMapping
+    @PostMapping("/by/dpp")
     public ResponseEntity<?> saveProducerWithDecentralizedPowerPlant(@RequestBody ProducerDTO dto,
                                                                      @RequestParam String decentralizedPowerPlantBusinessKey) {
         try {
@@ -87,7 +87,7 @@ public class ProducerController {
     }
 
     @Transactional
-    @PostMapping
+    @PostMapping("/by/household")
     public ResponseEntity<?> saveProducerWithHousehold(@RequestBody ProducerDTO dto,
                                                        @RequestParam String householdBusinessKey) {
         try {
