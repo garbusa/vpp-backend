@@ -1,6 +1,7 @@
 package de.uol.vpp.masterdata.infrastructure.entities;
 
 import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StoragePower;
+import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StorageStatus;
 import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StorageType;
 import lombok.Data;
 
@@ -22,6 +23,9 @@ public class Storage {
 
     @Embedded
     private StorageType storageType;
+
+    @Embedded
+    private StorageStatus storageStatus;
 
     @ManyToOne
     @JoinColumn(name = "household_id")

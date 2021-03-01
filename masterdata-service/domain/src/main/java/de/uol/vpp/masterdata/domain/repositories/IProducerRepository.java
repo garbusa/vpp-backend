@@ -4,6 +4,7 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.ProducerEntity;
 import de.uol.vpp.masterdata.domain.valueobjects.ProducerIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.ProducerStatusVO;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,8 @@ public interface IProducerRepository {
     void assignToHousehold(ProducerEntity entity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException;
 
     void deleteById(ProducerIdVO id) throws ProducerRepositoryException;
+
+    void updateStatus(ProducerIdVO producerIdVO, ProducerStatusVO producerStatusVO) throws ProducerRepositoryException;
+
+    void update(ProducerIdVO id, ProducerEntity domainEntity) throws ProducerRepositoryException;
 }

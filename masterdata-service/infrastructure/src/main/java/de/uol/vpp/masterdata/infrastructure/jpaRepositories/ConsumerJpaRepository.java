@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ConsumerJpaRepository extends JpaRepository<Consumer, Long> {
-    Optional<Consumer> findOneByBusinessKey(String businessKeyy);
+    Optional<Consumer> findOneByBusinessKey(String businessKey);
 
     List<Consumer> findAllByHousehold(Household household);
 }

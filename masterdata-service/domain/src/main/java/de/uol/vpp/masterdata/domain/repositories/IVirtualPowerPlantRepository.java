@@ -14,4 +14,12 @@ public interface IVirtualPowerPlantRepository {
     void save(VirtualPowerPlantAggregate entity) throws VirtualPowerPlantRepositoryException;
 
     void deleteById(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException;
+
+    void publish(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException;
+
+    void unpublish(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException;
+
+    boolean isPublished(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException;
+
+    void update(VirtualPowerPlantIdVO id, VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantRepositoryException;
 }

@@ -11,5 +11,7 @@ public interface IDecentralizedPowerPlantService {
 
     void save(DecentralizedPowerPlantAggregate domainEntity, String virtualPowerPlantBusinessKey) throws DecentralizedPowerPlantServiceException;
 
-    void delete(String businessKey) throws DecentralizedPowerPlantServiceException;
+    void delete(String businessKey, String vppBusinessKey) throws DecentralizedPowerPlantServiceException;
+
+    void update(String businessKey, DecentralizedPowerPlantAggregate toDomain, String vppBusinessKey) throws DecentralizedPowerPlantServiceException;
 }

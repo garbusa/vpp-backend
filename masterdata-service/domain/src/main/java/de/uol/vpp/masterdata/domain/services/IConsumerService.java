@@ -12,5 +12,10 @@ public interface IConsumerService {
 
     void save(ConsumerEntity domainEntity, String householdBusinessKey) throws ConsumerServiceException;
 
-    void delete(String businessKey) throws ConsumerServiceException;
+    void delete(String businessKey, String vppBusinessKey) throws ConsumerServiceException;
+
+    void updateStatus(String businessKey, boolean isRunning, String vppBusinessKey) throws ConsumerServiceException;
+
+    void update(String businessKey, ConsumerEntity toDomain, String vppBusinessKey) throws ConsumerServiceException;
+
 }

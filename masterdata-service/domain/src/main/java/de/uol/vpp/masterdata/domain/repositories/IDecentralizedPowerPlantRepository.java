@@ -8,13 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IDecentralizedPowerPlantRepository {
-    List<DecentralizedPowerPlantAggregate> getAllByVppKey(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws VirtualPowerPlantRepositoryException;
+    List<DecentralizedPowerPlantAggregate> getAllByVppKey(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws VirtualPowerPlantRepositoryException, DecentralizedPowerPlantRepositoryException;
 
-    Optional<DecentralizedPowerPlantAggregate> getById(DecentralizedPowerPlantIdVO id);
+    Optional<DecentralizedPowerPlantAggregate> getById(DecentralizedPowerPlantIdVO id) throws DecentralizedPowerPlantRepositoryException;
 
     void save(DecentralizedPowerPlantAggregate entity) throws DecentralizedPowerPlantRepositoryException;
 
     void deleteById(DecentralizedPowerPlantIdVO id) throws DecentralizedPowerPlantRepositoryException;
 
     void assign(DecentralizedPowerPlantAggregate entity, VirtualPowerPlantAggregate virtualPowerPlant) throws DecentralizedPowerPlantRepositoryException;
+
+    void update(DecentralizedPowerPlantIdVO id, DecentralizedPowerPlantAggregate domainEntity) throws DecentralizedPowerPlantRepositoryException;
 }

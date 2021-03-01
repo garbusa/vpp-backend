@@ -7,13 +7,9 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 @Data
-public class ProducerDimension {
+public class ProducerStatus {
     @Column(nullable = false)
-    private Double height;
+    private boolean isRunning;
     @Column(nullable = false)
-    private Double width;
-    @Column(nullable = false)
-    private Double length;
-    @Column(nullable = false)
-    private Double weight;
+    private Double capacity;
 }

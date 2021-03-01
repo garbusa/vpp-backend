@@ -9,7 +9,9 @@ public interface IHouseholdService {
 
     HouseholdAggregate get(String businessKey) throws HouseholdServiceException;
 
-    void save(HouseholdAggregate domainEntity, String virtualPowerPlantBusinessKey) throws HouseholdServiceException;
+    void save(HouseholdAggregate domainEntity, String vppBusinessKey) throws HouseholdServiceException;
 
-    void delete(String businessKey) throws HouseholdServiceException;
+    void delete(String businessKey, String vppBusinessKey) throws HouseholdServiceException;
+
+    void update(String businessKey, HouseholdAggregate toDomain, String vppBusinessKey) throws HouseholdServiceException;
 }

@@ -41,6 +41,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.js").permitAll()
                 .antMatchers("/vpp/**").permitAll()
                 .antMatchers("/dpp/**").permitAll()
+                .antMatchers("/household/**").permitAll()
+                .antMatchers("/producer/**").permitAll()
+                .antMatchers("/storage/**").permitAll()
+                .antMatchers("/consumer/**").permitAll()
                 .anyRequest()
                 .authenticated();
 

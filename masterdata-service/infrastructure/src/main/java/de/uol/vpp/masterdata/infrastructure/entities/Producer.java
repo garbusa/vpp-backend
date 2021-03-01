@@ -1,7 +1,7 @@
 package de.uol.vpp.masterdata.infrastructure.entities;
 
-import de.uol.vpp.masterdata.infrastructure.entities.embeddables.ProducerDimension;
 import de.uol.vpp.masterdata.infrastructure.entities.embeddables.ProducerPower;
+import de.uol.vpp.masterdata.infrastructure.entities.embeddables.ProducerStatus;
 import de.uol.vpp.masterdata.infrastructure.entities.embeddables.ProducerType;
 import lombok.Data;
 
@@ -18,13 +18,13 @@ public class Producer {
     private String businessKey;
 
     @Embedded
-    private ProducerPower power;
+    private ProducerPower producerPower;
 
     @Embedded
-    private ProducerDimension dimension;
+    private ProducerType producerType;
 
     @Embedded
-    private ProducerType type;
+    private ProducerStatus producerStatus;
 
     @ManyToOne
     @JoinColumn(name = "household_id")

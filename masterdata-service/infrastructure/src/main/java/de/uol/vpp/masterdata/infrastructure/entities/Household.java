@@ -29,7 +29,7 @@ public class Household {
     private Integer memberAmount;
 
     @ManyToOne
-    @JoinColumn(name = "virtual_power_plant_id", nullable = false)
+    @JoinColumn(name = "virtual_power_plant_id")
     private VirtualPowerPlant virtualPowerPlant;
 
 

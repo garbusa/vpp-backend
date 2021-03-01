@@ -3,6 +3,8 @@ package de.uol.vpp.masterdata.application.rest;
 import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
 import de.uol.vpp.masterdata.application.dto.ProducerDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
+import de.uol.vpp.masterdata.application.payload.ProducerStatusUpdateRequest;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
 import de.uol.vpp.masterdata.domain.services.IProducerService;
 import de.uol.vpp.masterdata.domain.services.ProducerServiceException;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,7 +23,6 @@ public class ProducerController {
     private final IProducerService service;
     private final ApplicationEntityConverter converter;
 
-    @Transactional
     @GetMapping(path = "/by/dpp/{" +
             "dppBusinessKey}")
     public ResponseEntity<?> getAllProducersByDecentralizedPowerPlant(@PathVariable String dppBusinessKey) {
@@ -39,7 +39,6 @@ public class ProducerController {
         }
     }
 
-    @Transactional
     @GetMapping(path = "/by/household/{" +
             "householdBusinessKey}")
     public ResponseEntity<?> getAllProducersByHousehold(@PathVariable String householdBusinessKey) {
@@ -56,12 +55,11 @@ public class ProducerController {
         }
     }
 
-    @Transactional
     @GetMapping(path = "/{businessKey}")
     public ResponseEntity<?> getOneProducer(@PathVariable String businessKey) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "producer successfully fetched", service.get(businessKey))
+                    new ApiResponse(true, false, "producer successfully fetched", converter.toApplication(service.get(businessKey)))
                     , HttpStatus.OK);
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -70,43 +68,41 @@ public class ProducerController {
         }
     }
 
-    @Transactional
-    @PostMapping("/by/dpp")
+    @PostMapping("/by/dpp/{dppBusinessKey}")
     public ResponseEntity<?> saveProducerWithDecentralizedPowerPlant(@RequestBody ProducerDTO dto,
-                                                                     @RequestParam String decentralizedPowerPlantBusinessKey) {
+                                                                     @PathVariable String dppBusinessKey) {
         try {
-            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), decentralizedPowerPlantBusinessKey);
+            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), dppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "producer successfully created and assigned to dpp", null
+                    true, false, "producer successfully created and assigned to dpp", converter.toApplication(service.get(dto.getProducerId()))
             ));
-        } catch (ProducerServiceException e) {
+        } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @Transactional
-    @PostMapping("/by/household")
+    @PostMapping("/by/household/{householdBusinessKey}")
     public ResponseEntity<?> saveProducerWithHousehold(@RequestBody ProducerDTO dto,
-                                                       @RequestParam String householdBusinessKey) {
+                                                       @PathVariable String householdBusinessKey) {
         try {
             service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "producer successfully created and assigned to household", null
+                    true, false, "producer successfully created and assigned to household",
+                    converter.toApplication(service.get(dto.getProducerId()))
             ));
-        } catch (ProducerServiceException e) {
+        } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @Transactional
     @DeleteMapping(path = "/{businessKey}")
-    public ResponseEntity<?> deleteProducer(@PathVariable String businessKey) {
+    public ResponseEntity<?> deleteProducer(@PathVariable String businessKey, @RequestParam String vppBusinessKey) {
         try {
-            service.delete(businessKey);
+            service.delete(businessKey, vppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(true, false, "producer successfully deleted", null));
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -114,5 +110,38 @@ public class ProducerController {
             ), HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping(path = "/status")
+    public ResponseEntity<?> updateStatus(@RequestBody ProducerStatusUpdateRequest request) {
+        try {
+            service.updateStatus(
+                    request.getBusinessKey(),
+                    request.getCapacity(),
+                    request.isRunning(),
+                    request.getVppBusinessKey()
+            );
+            return ResponseEntity.ok(new ApiResponse(
+                    true, false, "consumer status successfully toggled", converter.toApplication(service.get(request.getBusinessKey()))
+            ));
+        } catch (ProducerServiceException e) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping(path = "/{businessKey}")
+    public ResponseEntity<?> updateProducer(@PathVariable String businessKey, @RequestBody ProducerDTO newDto, @RequestParam String vppBusinessKey) {
+        try {
+            service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "producer successfully updated",
+                    converter.toApplication(service.get(newDto.getProducerId()))));
+        } catch (ProducerServiceException | ProducerException e) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }

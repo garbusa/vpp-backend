@@ -12,4 +12,10 @@ public interface IVirtualPowerPlantService {
     void save(VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantServiceException;
 
     void delete(String businessKey) throws VirtualPowerPlantServiceException;
+
+    void publish(String businessKey) throws VirtualPowerPlantServiceException;
+
+    void unpublish(String businessKey) throws VirtualPowerPlantServiceException;
+
+    void update(String businessKey, VirtualPowerPlantAggregate toDomain) throws VirtualPowerPlantServiceException;
 }

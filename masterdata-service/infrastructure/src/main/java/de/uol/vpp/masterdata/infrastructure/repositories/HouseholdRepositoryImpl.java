@@ -2,6 +2,7 @@ package de.uol.vpp.masterdata.infrastructure.repositories;
 
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
+import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
 import de.uol.vpp.masterdata.domain.repositories.HouseholdRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IHouseholdRepository;
 import de.uol.vpp.masterdata.domain.valueobjects.HouseholdIdVO;
@@ -11,11 +12,12 @@ import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.HouseholdJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +29,39 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
 
     @Override
     public List<HouseholdAggregate> getAllByVirtualPowerPlant(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException {
-        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getId());
-        return virtualPowerPlantOptional.map(virtualPowerPlant -> jpaRepository.findAllByVirtualPowerPlant(virtualPowerPlant)
-                .stream()
-                .map(converter::toDomain)
-                .collect(Collectors.toList()))
-                .orElseThrow(() -> new HouseholdRepositoryException(
+        try {
+            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getId());
+            if (virtualPowerPlantOptional.isPresent()) {
+                List<HouseholdAggregate> result = new ArrayList<>();
+                for (Household household : jpaRepository.findAllByVirtualPowerPlant(virtualPowerPlantOptional.get())) {
+                    result.add(converter.toDomain(household));
+                }
+                return result;
+            } else {
+                throw new HouseholdRepositoryException(
                         String.format("There is no VPP with id %s to get all households", virtualPowerPlantAggregate.getVirtualPowerPlantId().getId())
-                ));
+                );
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new HouseholdRepositoryException("failed to get all households. constraint violation occured.");
+        } catch (HouseholdException e) {
+            throw new HouseholdRepositoryException(e.getMessage(), e);
+        }
     }
 
     @Override
-    public Optional<HouseholdAggregate> getById(HouseholdIdVO id) {
-        Optional<Household> result = jpaRepository.findOneByBusinessKey(id.getId());
-        return result.map(converter::toDomain);
+    public Optional<HouseholdAggregate> getById(HouseholdIdVO id) throws HouseholdRepositoryException {
+        try {
+            Optional<Household> result = jpaRepository.findOneByBusinessKey(id.getId());
+            if (result.isPresent()) {
+                return Optional.of(converter.toDomain(result.get()));
+            }
+            return Optional.empty();
+        } catch (DataIntegrityViolationException e) {
+            throw new HouseholdRepositoryException("failed to get household. constraint violation occured.");
+        } catch (HouseholdException e) {
+            throw new HouseholdRepositoryException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -48,50 +69,77 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
         try {
             Household jpaEntity = converter.toInfrastructure(entity);
             jpaRepository.saveAndFlush(jpaEntity);
-        } catch (Exception e) {
-            throw new HouseholdRepositoryException(e.getMessage(), e);
+        } catch (DataIntegrityViolationException e) {
+            throw new HouseholdRepositoryException("failed to save household. constraint violation occured.");
         }
     }
 
     @Override
     public void deleteById(HouseholdIdVO id) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
-        if (jpaEntity.isPresent()) {
-            try {
-                jpaRepository.delete(jpaEntity.get());
-            } catch (Exception e) {
-                throw new HouseholdRepositoryException(e.getMessage(), e);
+        try {
+            Optional<Household> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
+            if (jpaEntity.isPresent()) {
+                try {
+                    jpaRepository.delete(jpaEntity.get());
+                } catch (Exception e) {
+                    throw new HouseholdRepositoryException(e.getMessage(), e);
+                }
+            } else {
+                throw new HouseholdRepositoryException(
+                        String.format("household %s can not be found and can not be deleted", id.getId())
+                );
             }
-        } else {
-            throw new HouseholdRepositoryException(
-                    String.format("household %s can not be found and can not be deleted", id.getId())
-            );
+        } catch (DataIntegrityViolationException e) {
+            throw new HouseholdRepositoryException("failed to delete household. constraint violation occured.");
         }
     }
 
     @Override
     public void assign(HouseholdAggregate entity, VirtualPowerPlantAggregate virtualPowerPlant) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(entity.getHouseholdId().getId());
-        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getId());
-        if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
-            Household jpaEntity = jpaEntityOptional.get();
-            VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
-            if (jpaEntity.getVirtualPowerPlant() == null) {
-                jpaEntity.setVirtualPowerPlant(virtualPowerPlantJpaEntity);
-                jpaRepository.saveAndFlush(jpaEntity);
-                virtualPowerPlantJpaEntity.getHouseholds().add(jpaEntity);
-                virtualPowerPlantJpaRepository.saveAndFlush(virtualPowerPlantJpaEntity);
+        try {
+            Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(entity.getHouseholdId().getId());
+            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getId());
+            if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
+                Household jpaEntity = jpaEntityOptional.get();
+                VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
+                if (jpaEntity.getVirtualPowerPlant() == null) {
+                    jpaEntity.setVirtualPowerPlant(virtualPowerPlantJpaEntity);
+                    jpaRepository.saveAndFlush(jpaEntity);
+                    virtualPowerPlantJpaEntity.getHouseholds().add(jpaEntity);
+                    virtualPowerPlantJpaRepository.saveAndFlush(virtualPowerPlantJpaEntity);
+                } else {
+                    throw new HouseholdRepositoryException(
+                            String.format("Dpp %s is already assigned to vpp %s", entity.getHouseholdId().getId(),
+                                    jpaEntity.getVirtualPowerPlant().getBusinessKey())
+                    );
+                }
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("Dpp %s is already assigned to vpp %s", entity.getHouseholdId().getId(),
-                                jpaEntity.getVirtualPowerPlant().getBusinessKey())
+                        String.format("An error occured while assigning dpp %s to vpp %s", entity.getHouseholdId().getId(),
+                                virtualPowerPlant.getVirtualPowerPlantId().getId())
                 );
             }
-        } else {
-            throw new HouseholdRepositoryException(
-                    String.format("An error occured while assigning dpp %s to vpp %s", entity.getHouseholdId().getId(),
-                            virtualPowerPlant.getVirtualPowerPlantId().getId())
-            );
+        } catch (DataIntegrityViolationException e) {
+            throw new HouseholdRepositoryException("failed to assign household. constraint violation occured.");
         }
     }
+
+    @Override
+    public void update(HouseholdIdVO id, HouseholdAggregate domainEntity) throws HouseholdRepositoryException {
+        try {
+            Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
+            if (jpaEntityOptional.isPresent()) {
+                Household jpaEntity = jpaEntityOptional.get();
+                Household updated = converter.toInfrastructure(domainEntity);
+                jpaEntity.setBusinessKey(updated.getBusinessKey());
+                jpaEntity.setMemberAmount(updated.getMemberAmount());
+                jpaRepository.saveAndFlush(jpaEntity);
+            } else {
+                throw new HouseholdRepositoryException("failed to update household. can not find household entity.");
+            }
+        } catch (DataIntegrityViolationException e) {
+            throw new HouseholdRepositoryException("failed to update household. constraint violation occured.");
+        }
+    }
+
 }

@@ -2,15 +2,17 @@ package de.uol.vpp.masterdata.domain.aggregates;
 
 import de.uol.vpp.masterdata.domain.architecture.Aggregate;
 import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantPublishedVO;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Aggregate
 @Data
 public class VirtualPowerPlantAggregate {
     private VirtualPowerPlantIdVO virtualPowerPlantId;
-    private List<HouseholdAggregate> households;
-    private List<DecentralizedPowerPlantAggregate> decentralizedPowerPlants;
-    private boolean configured;
+    private List<HouseholdAggregate> households = new ArrayList<>();
+    private List<DecentralizedPowerPlantAggregate> decentralizedPowerPlants = new ArrayList<>();
+    private VirtualPowerPlantPublishedVO published;
 }

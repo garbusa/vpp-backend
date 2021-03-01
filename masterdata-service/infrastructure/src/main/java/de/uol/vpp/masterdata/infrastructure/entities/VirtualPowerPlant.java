@@ -22,5 +22,5 @@ public class VirtualPowerPlant {
     private List<DecentralizedPowerPlant> decentralizedPowerPlants;
 
     @Column(nullable = false)
-    private boolean configured;
+    private boolean published;
 }

@@ -1,54 +1,168 @@
 package de.uol.vpp.masterdata.infrastructure;
 
-import de.uol.vpp.masterdata.domain.EnergyType;
-import de.uol.vpp.masterdata.domain.ProductType;
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.entities.ConsumerEntity;
 import de.uol.vpp.masterdata.domain.entities.ProducerEntity;
 import de.uol.vpp.masterdata.domain.entities.StorageEntity;
+import de.uol.vpp.masterdata.domain.exceptions.*;
 import de.uol.vpp.masterdata.domain.valueobjects.*;
 import de.uol.vpp.masterdata.infrastructure.entities.*;
 import de.uol.vpp.masterdata.infrastructure.entities.embeddables.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class InfrastructureEntityConverter {
 
-    public VirtualPowerPlantAggregate toDomain(VirtualPowerPlant jpaEntity) {
-        VirtualPowerPlantAggregate domainEntity = new VirtualPowerPlantAggregate();
-        domainEntity.setVirtualPowerPlantId(
-                new VirtualPowerPlantIdVO(jpaEntity.getBusinessKey())
+    public VirtualPowerPlantAggregate toDomain(VirtualPowerPlant jpaEntity) throws VirtualPowerPlantException {
+        try {
+            VirtualPowerPlantAggregate domainEntity = new VirtualPowerPlantAggregate();
+            domainEntity.setVirtualPowerPlantId(
+                    new VirtualPowerPlantIdVO(jpaEntity.getBusinessKey())
+            );
+            List<DecentralizedPowerPlantAggregate> list = new ArrayList<>();
+            for (DecentralizedPowerPlant decentralizedPowerPlant : jpaEntity.getDecentralizedPowerPlants()) {
+                DecentralizedPowerPlantAggregate toDomain = this.toDomain(decentralizedPowerPlant);
+                list.add(toDomain);
+            }
+            domainEntity.setDecentralizedPowerPlants(
+                    list
+            );
+            List<HouseholdAggregate> result = new ArrayList<>();
+            for (Household household : jpaEntity.getHouseholds()) {
+                HouseholdAggregate toDomain = this.toDomain(household);
+                result.add(toDomain);
+            }
+            domainEntity.setHouseholds(
+                    result
+            );
+            domainEntity.setPublished(new VirtualPowerPlantPublishedVO(jpaEntity.isPublished()));
+            return domainEntity;
+        } catch (Exception e) {
+            throw new VirtualPowerPlantException(e.getMessage(), e);
+        }
+
+    }
+
+    public DecentralizedPowerPlantAggregate toDomain(DecentralizedPowerPlant jpaEntity) throws DecentralizedPowerPlantException {
+        try {
+            DecentralizedPowerPlantAggregate domainEntity = new DecentralizedPowerPlantAggregate();
+            domainEntity.setDecentralizedPowerPlantId(
+                    new DecentralizedPowerPlantIdVO(jpaEntity.getBusinessKey())
+            );
+            List<ProducerEntity> producers = new ArrayList<>();
+            for (Producer producer : jpaEntity.getProducers()) {
+                producers.add(this.toDomain(producer));
+            }
+            domainEntity.setProducers(
+                    producers
+            );
+            List<StorageEntity> storages = new ArrayList<>();
+            for (Storage storage : jpaEntity.getStorages()) {
+                storages.add(this.toDomain(storage));
+            }
+            domainEntity.setStorages(
+                    storages
+            );
+            return domainEntity;
+        } catch (Exception e) {
+            throw new DecentralizedPowerPlantException(e.getMessage(), e);
+        }
+    }
+
+    public HouseholdAggregate toDomain(Household jpaEntity) throws HouseholdException {
+        try {
+            HouseholdAggregate domainEntity = new HouseholdAggregate();
+            domainEntity.setHouseholdId(
+                    new HouseholdIdVO(jpaEntity.getBusinessKey())
+            );
+            domainEntity.setHouseholdMemberAmount(
+                    new HouseholdMemberAmountVO(jpaEntity.getMemberAmount())
+            );
+            List<ProducerEntity> producers = new ArrayList<>();
+            for (Producer producer : jpaEntity.getProducers()) {
+                producers.add(this.toDomain(producer));
+            }
+            domainEntity.setProducers(
+                    producers
+            );
+            List<StorageEntity> storages = new ArrayList<>();
+            for (Storage storage : jpaEntity.getStorages()) {
+                storages.add(this.toDomain(storage));
+            }
+            domainEntity.setStorages(
+                    storages
+            );
+            List<ConsumerEntity> consumers = new ArrayList<>();
+            for (Consumer storage : jpaEntity.getConsumers()) {
+                consumers.add(this.toDomain(storage));
+            }
+            domainEntity.setConsumers(
+                    consumers
+            );
+            return domainEntity;
+        } catch (Exception e) {
+            throw new HouseholdException(e.getMessage(), e);
+        }
+    }
+
+    public ProducerEntity toDomain(Producer jpaEntity) throws ProducerException {
+        ProducerEntity domainEntity = new ProducerEntity();
+        domainEntity.setProducerId(
+                new ProducerIdVO(jpaEntity.getBusinessKey())
         );
-        domainEntity.setDecentralizedPowerPlants(
-                jpaEntity.getDecentralizedPowerPlants().stream().map(this::toDomain)
-                        .collect(Collectors.toList())
+        domainEntity.setProducerPower(
+                new ProducerPowerVO(jpaEntity.getProducerPower().getRatedPower())
         );
-        domainEntity.setHouseholds(
-                jpaEntity.getHouseholds().stream().map(this::toDomain)
-                        .collect(Collectors.toList())
+        domainEntity.setProducerType(
+                new ProducerTypeVO(
+                        jpaEntity.getProducerType().getProductType(),
+                        jpaEntity.getProducerType().getEnergyType()
+                )
         );
-        domainEntity.setConfigured(jpaEntity.isConfigured());
+        domainEntity.setProducerStatus(
+                new ProducerStatusVO(
+                        jpaEntity.getProducerStatus().isRunning(),
+                        jpaEntity.getProducerStatus().getCapacity()
+                )
+        );
         return domainEntity;
     }
 
-    public DecentralizedPowerPlantAggregate toDomain(DecentralizedPowerPlant jpaEntity) {
-        DecentralizedPowerPlantAggregate domainEntity = new DecentralizedPowerPlantAggregate();
-        domainEntity.setDecentralizedPowerPlantId(
-                new DecentralizedPowerPlantIdVO(jpaEntity.getBusinessKey())
+    public StorageEntity toDomain(Storage jpaEntity) throws StorageException {
+        StorageEntity domainEntity = new StorageEntity();
+        domainEntity.setStorageId(
+                new StorageIdVO(jpaEntity.getBusinessKey())
         );
+        domainEntity.setStoragePower(
+                new StoragePowerVO(jpaEntity.getStoragePower().getRatedPower())
+        );
+        domainEntity.setStorageType(
+                new StorageTypeVO(
+                        jpaEntity.getStorageType().getEnergyType()
+                )
+        );
+        domainEntity.setStorageStatus(new StorageStatusVO(jpaEntity.getStorageStatus().getCapacity()));
         return domainEntity;
     }
 
-    public HouseholdAggregate toDomain(Household jpaEntity) {
-        HouseholdAggregate domainEntity = new HouseholdAggregate();
-        domainEntity.setHouseholdId(
-                new HouseholdIdVO(jpaEntity.getBusinessKey())
+    public ConsumerEntity toDomain(Consumer jpaEntity) throws ConsumerException {
+        ConsumerEntity domainEntity = new ConsumerEntity();
+        domainEntity.setConsumerId(
+                new ConsumerIdVO(jpaEntity.getBusinessKey())
+        );
+        domainEntity.setConsumerPower(
+                new ConsumerPowerVO(jpaEntity.getConsumerPower().getConsumingPower())
+        );
+        domainEntity.setConsumerStatus(
+                new ConsumerStatusVO(jpaEntity.getConsumerStatus().isRunning())
         );
         return domainEntity;
     }
@@ -62,108 +176,76 @@ public class InfrastructureEntityConverter {
                             .collect(Collectors.toList())
             );
         }
-        jpaEntity.setHouseholds(
-                domainEntity.getHouseholds().stream().map(this::toInfrastructure)
-                        .collect(Collectors.toList())
-        );
-        jpaEntity.setConfigured(false);
+        if (domainEntity.getHouseholds() != null && !domainEntity.getHouseholds().isEmpty()) {
+            jpaEntity.setHouseholds(
+                    domainEntity.getHouseholds().stream().map(this::toInfrastructure)
+                            .collect(Collectors.toList())
+            );
+        }
+        jpaEntity.setPublished(domainEntity.getPublished().isPublished());
         return jpaEntity;
     }
 
     public DecentralizedPowerPlant toInfrastructure(DecentralizedPowerPlantAggregate domainEntity) {
         DecentralizedPowerPlant jpaEntity = new DecentralizedPowerPlant();
         jpaEntity.setBusinessKey(domainEntity.getDecentralizedPowerPlantId().getId());
+        if (domainEntity.getProducers() != null && !domainEntity.getProducers().isEmpty()) {
+            jpaEntity.setProducers(
+                    domainEntity.getProducers().stream().map(this::toInfrastructure)
+                            .collect(Collectors.toList())
+            );
+        }
+        if (domainEntity.getStorages() != null && !domainEntity.getStorages().isEmpty()) {
+            jpaEntity.setStorages(
+                    domainEntity.getStorages().stream().map(this::toInfrastructure)
+                            .collect(Collectors.toList())
+            );
+        }
         return jpaEntity;
     }
 
-    public Household toInfrastructure(HouseholdAggregate jpaEntity) {
-        Household domainEntity = new Household();
-        domainEntity.setBusinessKey(jpaEntity.getHouseholdId().getId());
-        return domainEntity;
-    }
-
-    public ProducerEntity toDomain(Producer jpaEntity) {
-        ProducerEntity domainEntity = new ProducerEntity();
-        domainEntity.setProducerId(
-                new ProducerIdVO(jpaEntity.getBusinessKey())
-        );
-        domainEntity.setProducerDimension(new ProducerDimensionVO(
-                jpaEntity.getDimension().getHeight(),
-                jpaEntity.getDimension().getWidth(),
-                jpaEntity.getDimension().getLength(),
-                jpaEntity.getDimension().getWeight()
-        ));
-        domainEntity.setProducerPower(
-                new ProducerPowerVO(jpaEntity.getPower().getRatedPower())
-        );
-        domainEntity.setProducerType(
-                new ProducerTypeVO(
-                        ProductType.valueOf(jpaEntity.getType().getProductType()),
-                        EnergyType.valueOf(jpaEntity.getType().getEnergyType())
-                )
-        );
-        return domainEntity;
+    public Household toInfrastructure(HouseholdAggregate domainEntity) {
+        Household jpaEntity = new Household();
+        jpaEntity.setBusinessKey(domainEntity.getHouseholdId().getId());
+        jpaEntity.setMemberAmount(domainEntity.getHouseholdMemberAmount().getAmount());
+        if (domainEntity.getProducers() != null && !domainEntity.getProducers().isEmpty()) {
+            jpaEntity.setProducers(
+                    domainEntity.getProducers().stream().map(this::toInfrastructure)
+                            .collect(Collectors.toList())
+            );
+        }
+        if (domainEntity.getStorages() != null && !domainEntity.getStorages().isEmpty()) {
+            jpaEntity.setStorages(
+                    domainEntity.getStorages().stream().map(this::toInfrastructure)
+                            .collect(Collectors.toList())
+            );
+        }
+        if (domainEntity.getConsumers() != null && !domainEntity.getConsumers().isEmpty()) {
+            jpaEntity.setConsumers(
+                    domainEntity.getConsumers().stream().map(this::toInfrastructure)
+                            .collect(Collectors.toList())
+            );
+        }
+        return jpaEntity;
     }
 
     public Producer toInfrastructure(ProducerEntity domainEntity) {
         Producer jpaEntity = new Producer();
         jpaEntity.setBusinessKey(domainEntity.getProducerId().getId());
-        ProducerDimension producerDimension = new ProducerDimension();
-        producerDimension.setHeight(domainEntity.getProducerDimension().getHeight());
-        producerDimension.setLength(domainEntity.getProducerDimension().getLength());
-        producerDimension.setWidth(domainEntity.getProducerDimension().getWidth());
-        producerDimension.setWeight(domainEntity.getProducerDimension().getWeight());
-        jpaEntity.setDimension(
-                producerDimension
-        );
         ProducerPower producerPower = new ProducerPower();
         producerPower.setRatedPower(domainEntity.getProducerPower().getRatedPower());
-        jpaEntity.setPower(
+        jpaEntity.setProducerPower(
                 producerPower
         );
         ProducerType producerType = new ProducerType();
         producerType.setProductType(domainEntity.getProducerType().getProductType().toString());
         producerType.setEnergyType(domainEntity.getProducerType().getEnergyType().toString());
-        jpaEntity.setType(producerType);
+        jpaEntity.setProducerType(producerType);
+        ProducerStatus status = new ProducerStatus();
+        status.setRunning(domainEntity.getProducerStatus().isRunning());
+        status.setCapacity(domainEntity.getProducerStatus().getCapacity());
+        jpaEntity.setProducerStatus(status);
         return jpaEntity;
-    }
-
-    public ConsumerEntity toDomain(Consumer jpaEntity) {
-        ConsumerEntity domainEntity = new ConsumerEntity();
-        domainEntity.setConsumerId(
-                new ConsumerIdVO(jpaEntity.getBusinessKey())
-        );
-        domainEntity.setConsumerPower(
-                new ConsumerPowerVO(jpaEntity.getConsumerPower().getConsumingPower())
-        );
-        return domainEntity;
-    }
-
-    public Consumer toInfrastructure(ConsumerEntity domainEntity) {
-        Consumer jpaEntity = new Consumer();
-        jpaEntity.setBusinessKey(domainEntity.getConsumerId().getId());
-        ConsumerPower consumerPower = new ConsumerPower();
-        consumerPower.setConsumingPower(domainEntity.getConsumerPower().getConsumingPower());
-        jpaEntity.setConsumerPower(
-                consumerPower
-        );
-        return jpaEntity;
-    }
-
-    public StorageEntity toDomain(Storage jpaEntity) {
-        StorageEntity domainEntity = new StorageEntity();
-        domainEntity.setStorageId(
-                new StorageIdVO(jpaEntity.getBusinessKey())
-        );
-        domainEntity.setStoragePower(
-                new StoragePowerVO(jpaEntity.getStoragePower().getRatedPower())
-        );
-        domainEntity.setStorageType(
-                new StorageTypeVO(
-                        EnergyType.valueOf(jpaEntity.getStorageType().getEnergyType())
-                )
-        );
-        return domainEntity;
     }
 
     public Storage toInfrastructure(StorageEntity domainEntity) {
@@ -175,6 +257,23 @@ public class InfrastructureEntityConverter {
         StorageType storageType = new StorageType();
         storageType.setEnergyType(domainEntity.getStorageType().getEnergyType().toString());
         jpaEntity.setStorageType(storageType);
+        StorageStatus storageStatus = new StorageStatus();
+        storageStatus.setCapacity(domainEntity.getStorageStatus().getCapacity());
+        jpaEntity.setStorageStatus(storageStatus);
+        return jpaEntity;
+    }
+
+    public Consumer toInfrastructure(ConsumerEntity domainEntity) {
+        Consumer jpaEntity = new Consumer();
+        jpaEntity.setBusinessKey(domainEntity.getConsumerId().getId());
+        ConsumerPower consumerPower = new ConsumerPower();
+        consumerPower.setConsumingPower(domainEntity.getConsumerPower().getConsumingPower());
+        jpaEntity.setConsumerPower(
+                consumerPower
+        );
+        ConsumerStatus status = new ConsumerStatus();
+        status.setRunning(domainEntity.getConsumerStatus().isRunning());
+        jpaEntity.setConsumerStatus(status);
         return jpaEntity;
     }
 }

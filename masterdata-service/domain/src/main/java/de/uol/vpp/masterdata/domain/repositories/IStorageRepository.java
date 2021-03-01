@@ -4,6 +4,7 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.StorageEntity;
 import de.uol.vpp.masterdata.domain.valueobjects.StorageIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.StorageStatusVO;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,8 @@ public interface IStorageRepository {
     void assignToHousehold(StorageEntity entity, HouseholdAggregate householdAggregate) throws StorageRepositoryException;
 
     void deleteById(StorageIdVO id) throws StorageRepositoryException;
+
+    void updateStatus(StorageIdVO storageIdVO, StorageStatusVO storageStatusVO) throws StorageRepositoryException;
+
+    void update(StorageIdVO id, StorageEntity domainEntity) throws StorageRepositoryException;
 }

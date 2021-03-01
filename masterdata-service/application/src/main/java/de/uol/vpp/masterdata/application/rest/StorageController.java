@@ -3,6 +3,8 @@ package de.uol.vpp.masterdata.application.rest;
 import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
 import de.uol.vpp.masterdata.application.dto.StorageDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
+import de.uol.vpp.masterdata.application.payload.StorageStatusUpdateRequest;
+import de.uol.vpp.masterdata.domain.exceptions.StorageException;
 import de.uol.vpp.masterdata.domain.services.IStorageService;
 import de.uol.vpp.masterdata.domain.services.StorageServiceException;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,7 +23,6 @@ public class StorageController {
     private final IStorageService service;
     private final ApplicationEntityConverter converter;
 
-    @Transactional
     @GetMapping(path = "/by/dpp/{" +
             "dppBusinessKey}")
     public ResponseEntity<?> getAllStoragesByDecentralizedPowerPlant(@PathVariable String dppBusinessKey) {
@@ -39,7 +39,6 @@ public class StorageController {
         }
     }
 
-    @Transactional
     @GetMapping(path = "/by/household/{" +
             "householdBusinessKey}")
     public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdBusinessKey) {
@@ -56,12 +55,11 @@ public class StorageController {
         }
     }
 
-    @Transactional
     @GetMapping(path = "/{businessKey}")
     public ResponseEntity<?> getOneStorage(@PathVariable String businessKey) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "storage successfully fetched", service.get(businessKey))
+                    new ApiResponse(true, false, "storage successfully fetched", converter.toApplication(service.get(businessKey)))
                     , HttpStatus.OK);
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -70,30 +68,56 @@ public class StorageController {
         }
     }
 
-    @Transactional
-    @PostMapping("/by/dpp")
+    @PostMapping("/by/dpp/{dppBusinessKey}")
     public ResponseEntity<?> saveStorageWithDecentralizedPowerPlant(@RequestBody StorageDTO dto,
-                                                                    @RequestParam String decentralizedPowerPlantBusinessKey) {
+                                                                    @PathVariable String dppBusinessKey) {
         try {
-            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), decentralizedPowerPlantBusinessKey);
+            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), dppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "storage successfully created and assigned to dpp", null
+                    true, false, "storage successfully created and assigned to dpp", converter.toApplication(service.get(dto.getStorageId()))
             ));
-        } catch (StorageServiceException e) {
+        } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @Transactional
-    @PostMapping("/by/household")
+    @PostMapping("/by/household/{householdBusinessKey}")
     public ResponseEntity<?> saveStorageWithHousehold(@RequestBody StorageDTO dto,
-                                                      @RequestParam String householdBusinessKey) {
+                                                      @PathVariable String householdBusinessKey) {
         try {
             service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "storage successfully created and assigned to household", null
+                    true, false, "storage successfully created and assigned to household",
+                    converter.toApplication(service.get(dto.getStorageId()))
+            ));
+        } catch (StorageServiceException | StorageException e) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping(path = "/{businessKey}")
+    public ResponseEntity<?> deleteStorage(@PathVariable String businessKey, @RequestParam String vppBusinessKey) {
+        try {
+            service.delete(businessKey, vppBusinessKey);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "Storage successfully deleted", null));
+        } catch (StorageServiceException e) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping(path = "/status")
+    public ResponseEntity<?> updateStatus(@RequestBody StorageStatusUpdateRequest request) {
+        try {
+            service.updateStatus(request.getBusinessKey(), request.getCapacity(), request.getVppBusinessKey());
+            return ResponseEntity.ok(new ApiResponse(
+                    true, false, "storage status successfully updated",
+                    converter.toApplication(service.get(request.getBusinessKey()))
             ));
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -102,13 +126,13 @@ public class StorageController {
         }
     }
 
-    @Transactional
-    @DeleteMapping(path = "/{businessKey}")
-    public ResponseEntity<?> deleteStorage(@PathVariable String businessKey) {
+    @PutMapping(path = "/{businessKey}")
+    public ResponseEntity<?> updateStorage(@PathVariable String businessKey, @RequestBody StorageDTO newDto, @RequestParam String vppBusinessKey) {
         try {
-            service.delete(businessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "Storage successfully deleted", null));
-        } catch (StorageServiceException e) {
+            service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "storage successfully updated",
+                    converter.toApplication(service.get(newDto.getStorageId()))));
+        } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);

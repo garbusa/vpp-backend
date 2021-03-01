@@ -6,4 +6,5 @@ import lombok.Data;
 public class ConsumerDTO {
     private String consumerId;
     private Double consumingPower;
+    private boolean isRunning;
 }

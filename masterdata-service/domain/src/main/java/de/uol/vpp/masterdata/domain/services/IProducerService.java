@@ -15,5 +15,9 @@ public interface IProducerService {
 
     void saveWithHousehold(ProducerEntity domainEntity, String householdBusinessKey) throws ProducerServiceException;
 
-    void delete(String businessKey) throws ProducerServiceException;
+    void delete(String businessKey, String vppBusinessKey) throws ProducerServiceException;
+
+    void updateStatus(String businessKey, Double capacity, boolean running, String vppBusinessKey) throws ProducerServiceException;
+
+    void update(String businessKey, ProducerEntity toDomain, String vppBusinessKey) throws ProducerServiceException;
 }
