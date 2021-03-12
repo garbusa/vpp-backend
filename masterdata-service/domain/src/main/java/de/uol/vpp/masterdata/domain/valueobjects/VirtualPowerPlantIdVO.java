@@ -16,6 +16,6 @@ public class VirtualPowerPlantIdVO {
         if (id == null || id.isEmpty() || id.isBlank()) {
             throw new VirtualPowerPlantException("validation for vpp id failed");
         }
-        this.id = id;
+        this.id = id.toUpperCase();
     }
 }

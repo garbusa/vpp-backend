@@ -16,6 +16,6 @@ public class DecentralizedPowerPlantIdVO {
         if (id == null || id.isEmpty() || id.isBlank()) {
             throw new DecentralizedPowerPlantException("validation for dpp id failed");
         }
-        this.id = id;
+        this.id = id.toUpperCase();
     }
 }

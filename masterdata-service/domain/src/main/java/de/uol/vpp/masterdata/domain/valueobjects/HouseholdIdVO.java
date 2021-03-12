@@ -16,6 +16,6 @@ public class HouseholdIdVO {
         if (id == null || id.isBlank() || id.isEmpty()) {
             throw new HouseholdException("validation for household id failed");
         }
-        this.id = id;
+        this.id = id.toUpperCase();
     }
 }

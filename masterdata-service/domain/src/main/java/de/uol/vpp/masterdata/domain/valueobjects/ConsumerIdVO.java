@@ -16,6 +16,6 @@ public class ConsumerIdVO {
         if (id == null || id.isBlank() || id.isEmpty()) {
             throw new ConsumerException("validation for consumer id failed");
         }
-        this.id = id;
+        this.id = id.toUpperCase();
     }
 }

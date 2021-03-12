@@ -16,6 +16,6 @@ public class ProducerIdVO {
         if (id == null || id.isEmpty() | id.isBlank()) {
             throw new ProducerException("validation for producer id failed");
         }
-        this.id = id;
+        this.id = id.toUpperCase();
     }
 }
