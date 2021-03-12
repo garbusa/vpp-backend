@@ -9,7 +9,6 @@ import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,8 +30,6 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
                 result.add(converter.toDomain(vpp));
             }
             return result;
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to get all vpps. constraint violation occured.");
         } catch (VirtualPowerPlantException e) {
             throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
         }
@@ -40,77 +37,48 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
 
     @Override
     public void save(VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantRepositoryException {
-        try {
             VirtualPowerPlant jpaEntity = converter.toInfrastructure(domainEntity);
-            jpaRepository.saveAndFlush(jpaEntity);
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to save vpp. constraint violation occured.");
-        }
-
+        jpaRepository.save(jpaEntity);
     }
 
     @Override
     public void deleteById(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
-        try {
             Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getId());
             if (result.isPresent()) {
-                try {
-                    jpaRepository.delete(result.get());
-                } catch (Exception e) {
-                    throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
-                }
+                jpaRepository.delete(result.get());
             } else {
                 throw new VirtualPowerPlantRepositoryException(
                         String.format("vpp %s can not be found and can not be deleted", id.getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to delete vpp. constraint violation occured.");
-        }
     }
 
     @Override
     public void publish(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
-        try {
             Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getId());
             if (result.isPresent()) {
-                try {
                     VirtualPowerPlant vpp = result.get();
                     vpp.setPublished(true);
-                    jpaRepository.saveAndFlush(vpp);
-                } catch (Exception e) {
-                    throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
-                }
+                jpaRepository.save(vpp);
             } else {
                 throw new VirtualPowerPlantRepositoryException(
                         String.format("vpp %s can not be found and can not be deleted", id.getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to publish vpp. constraint violation occured.");
-        }
     }
 
     @Override
     public void unpublish(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
-        try {
             Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getId());
             if (result.isPresent()) {
-                try {
                     VirtualPowerPlant vpp = result.get();
                     vpp.setPublished(false);
-                    jpaRepository.saveAndFlush(vpp);
-                } catch (Exception e) {
-                    throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
-                }
+                jpaRepository.save(vpp);
             } else {
                 throw new VirtualPowerPlantRepositoryException(
                         String.format("vpp %s can not be found and can not be deleted", id.getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to unpublish vpp. constraint violation occured.");
-        }
     }
 
     @Override
@@ -127,13 +95,13 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
     public Optional<VirtualPowerPlantAggregate> getById(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
         try {
             Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getId());
+            jpaRepository.flush();
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             } else {
                 return Optional.empty();
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to get vpp. constraint violation occured.");
+
         } catch (VirtualPowerPlantException e) {
             throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
         }
@@ -142,19 +110,15 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
 
     @Override
     public void update(VirtualPowerPlantIdVO id, VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantRepositoryException {
-        try {
             Optional<VirtualPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
             if (jpaEntityOptional.isPresent()) {
                 VirtualPowerPlant jpaEntity = jpaEntityOptional.get();
                 VirtualPowerPlant updated = converter.toInfrastructure(domainEntity);
                 jpaEntity.setBusinessKey(updated.getBusinessKey());
-                jpaRepository.saveAndFlush(jpaEntity);
+                jpaRepository.save(jpaEntity);
             } else {
                 throw new VirtualPowerPlantRepositoryException("failed to update vpp. can not find vpp entity.");
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new VirtualPowerPlantRepositoryException("failed to update vpp. constraint violation occured.");
-        }
     }
 
 }

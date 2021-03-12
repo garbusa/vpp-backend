@@ -8,6 +8,7 @@ import de.uol.vpp.masterdata.domain.services.IVirtualPowerPlantService;
 import de.uol.vpp.masterdata.domain.services.VirtualPowerPlantServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,10 @@ public class VirtualPowerPlantController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -50,6 +55,10 @@ public class VirtualPowerPlantController {
         } catch (VirtualPowerPlantServiceException e) {
             log.error(e);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -61,11 +70,15 @@ public class VirtualPowerPlantController {
             }
             service.save(converter.toDomain(dto));
             return ResponseEntity.ok().body(new ApiResponse(true, false, "" +
-                    "vpp successfully created", converter.toApplication(service.get(dto.getVirtualPowerPlantId()))));
+                    "vpp successfully created", null));
         } catch (VirtualPowerPlantServiceException | VirtualPowerPlantException e) {
             log.error(e);
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -80,6 +93,10 @@ public class VirtualPowerPlantController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -88,10 +105,14 @@ public class VirtualPowerPlantController {
         try {
             service.publish(businessKey);
             return ResponseEntity.ok().body(new ApiResponse(true, false, "vpp successfully published",
-                    converter.toApplication(service.get(businessKey))));
+                    null));
         } catch (VirtualPowerPlantServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
 
@@ -102,10 +123,14 @@ public class VirtualPowerPlantController {
         try {
             service.unpublish(businessKey);
             return ResponseEntity.ok().body(new ApiResponse(true, false, "vpp successfully unpublished",
-                    converter.toApplication(service.get(businessKey))));
+                    null));
         } catch (VirtualPowerPlantServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -114,11 +139,15 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> updateVirtualPowerPlant(@PathVariable String businessKey, @RequestBody VirtualPowerPlantDTO newDto) {
         try {
             service.update(businessKey, converter.toDomain(newDto));
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "consumer successfully updated",
-                    converter.toApplication(service.get(newDto.getVirtualPowerPlantId()))));
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "vpp successfully updated",
+                    null));
         } catch (VirtualPowerPlantServiceException | VirtualPowerPlantException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }

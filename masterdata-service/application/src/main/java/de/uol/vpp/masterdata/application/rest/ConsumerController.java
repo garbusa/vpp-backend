@@ -8,6 +8,7 @@ import de.uol.vpp.masterdata.domain.exceptions.ConsumerException;
 import de.uol.vpp.masterdata.domain.services.ConsumerServiceException;
 import de.uol.vpp.masterdata.domain.services.IConsumerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class ConsumerController {
     private final ApplicationEntityConverter converter;
 
     @GetMapping(path = "/by/household/{" +
-            "businessKey}")
+            "householdBusinessKey}")
     public ResponseEntity<?> getAllConsumersByHousehold(@PathVariable String householdBusinessKey) {
         try {
             return new ResponseEntity<>(
@@ -36,6 +37,10 @@ public class ConsumerController {
                     ), HttpStatus.OK);
         } catch (ConsumerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -50,6 +55,10 @@ public class ConsumerController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -59,12 +68,14 @@ public class ConsumerController {
         try {
             service.save(converter.toDomain(dto), householdBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "consumer successfully created and assigned to household",
-                    converter.toApplication(service.get(dto.getConsumerId()))
-            ));
+                    true, false, "consumer successfully created and assigned to household", null));
         } catch (ConsumerServiceException | ConsumerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -78,6 +89,10 @@ public class ConsumerController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -86,12 +101,14 @@ public class ConsumerController {
         try {
             service.updateStatus(request.getBusinessKey(), request.isRunning(), request.getVppBusinessKey());
             return ResponseEntity.ok(new ApiResponse(
-                    true, false, "consumer status successfully updated",
-                    converter.toApplication(service.get(request.getBusinessKey()))
-            ));
+                    true, false, "consumer status successfully updated", null));
         } catch (ConsumerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -100,11 +117,15 @@ public class ConsumerController {
     public ResponseEntity<?> updateConsumer(@PathVariable String businessKey, @RequestBody ConsumerDTO newDto, @RequestParam String vppBusinessKey) {
         try {
             service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "consumer successfully updated",
-                    converter.toApplication(service.get(newDto.getConsumerId()))));
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    "consumer successfully updated", null));
         } catch (ConsumerServiceException | ConsumerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }

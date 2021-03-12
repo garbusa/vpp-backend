@@ -8,6 +8,7 @@ import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
 import de.uol.vpp.masterdata.domain.services.IProducerService;
 import de.uol.vpp.masterdata.domain.services.ProducerServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,10 @@ public class ProducerController {
                     ), HttpStatus.OK);
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -52,6 +57,10 @@ public class ProducerController {
                     ), HttpStatus.OK);
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -65,20 +74,27 @@ public class ProducerController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
+    //todo wenn vpp schon ein producer hat, aber published => error (selbe für storage)
     @PostMapping("/by/dpp/{dppBusinessKey}")
-    public ResponseEntity<?> saveProducerWithDecentralizedPowerPlant(@RequestBody ProducerDTO dto,
-                                                                     @PathVariable String dppBusinessKey) {
+    public ResponseEntity<?> saveProducerWithDecentralizedPowerPlant(@RequestBody ProducerDTO dto, @PathVariable String dppBusinessKey) {
         try {
             service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), dppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "producer successfully created and assigned to dpp", converter.toApplication(service.get(dto.getProducerId()))
-            ));
+                    true, false, "producer successfully created and assigned to dpp", null));
         } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -89,12 +105,14 @@ public class ProducerController {
         try {
             service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "producer successfully created and assigned to household",
-                    converter.toApplication(service.get(dto.getProducerId()))
-            ));
+                    true, false, "producer successfully created and assigned to household", null));
         } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -103,10 +121,15 @@ public class ProducerController {
     public ResponseEntity<?> deleteProducer(@PathVariable String businessKey, @RequestParam String vppBusinessKey) {
         try {
             service.delete(businessKey, vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "producer successfully deleted", null));
+            return ResponseEntity.ok().body(
+                    new ApiResponse(true, false, "producer successfully deleted", null));
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -121,11 +144,14 @@ public class ProducerController {
                     request.getVppBusinessKey()
             );
             return ResponseEntity.ok(new ApiResponse(
-                    true, false, "consumer status successfully toggled", converter.toApplication(service.get(request.getBusinessKey()))
-            ));
+                    true, false, "consumer status successfully toggled", null));
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -134,11 +160,15 @@ public class ProducerController {
     public ResponseEntity<?> updateProducer(@PathVariable String businessKey, @RequestBody ProducerDTO newDto, @RequestParam String vppBusinessKey) {
         try {
             service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "producer successfully updated",
-                    converter.toApplication(service.get(newDto.getProducerId()))));
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    "producer successfully updated", null));
         } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }

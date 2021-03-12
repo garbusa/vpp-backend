@@ -8,6 +8,7 @@ import de.uol.vpp.masterdata.domain.exceptions.StorageException;
 import de.uol.vpp.masterdata.domain.services.IStorageService;
 import de.uol.vpp.masterdata.domain.services.StorageServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,10 @@ public class StorageController {
                     ), HttpStatus.OK);
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -52,6 +57,10 @@ public class StorageController {
                     ), HttpStatus.OK);
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -65,6 +74,10 @@ public class StorageController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -74,11 +87,14 @@ public class StorageController {
         try {
             service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), dppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "storage successfully created and assigned to dpp", converter.toApplication(service.get(dto.getStorageId()))
-            ));
+                    true, false, "storage successfully created and assigned to dpp", null));
         } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -89,12 +105,14 @@ public class StorageController {
         try {
             service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "storage successfully created and assigned to household",
-                    converter.toApplication(service.get(dto.getStorageId()))
-            ));
+                    true, false, "storage successfully created and assigned to household", null));
         } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -108,6 +126,10 @@ public class StorageController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -116,12 +138,14 @@ public class StorageController {
         try {
             service.updateStatus(request.getBusinessKey(), request.getCapacity(), request.getVppBusinessKey());
             return ResponseEntity.ok(new ApiResponse(
-                    true, false, "storage status successfully updated",
-                    converter.toApplication(service.get(request.getBusinessKey()))
-            ));
+                    true, false, "storage status successfully updated", null));
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -130,11 +154,14 @@ public class StorageController {
     public ResponseEntity<?> updateStorage(@PathVariable String businessKey, @RequestBody StorageDTO newDto, @RequestParam String vppBusinessKey) {
         try {
             service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "storage successfully updated",
-                    converter.toApplication(service.get(newDto.getStorageId()))));
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "storage successfully updated", null));
         } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }

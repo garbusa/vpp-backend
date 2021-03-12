@@ -14,7 +14,6 @@ import de.uol.vpp.masterdata.infrastructure.entities.embeddables.ConsumerStatus;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.ConsumerJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.HouseholdJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,8 +44,6 @@ public class ConsumerRepositoryImpl implements IConsumerRepository {
             } else {
                 throw new ConsumerRepositoryException(String.format("Can not find household %s to get all consumers", householdAggregate.getHouseholdId().getId()));
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to get all consumer. constraint violation occured.");
         } catch (ConsumerException e) {
             throw new ConsumerRepositoryException(e.getMessage(), e);
         }
@@ -61,8 +58,6 @@ public class ConsumerRepositoryImpl implements IConsumerRepository {
             } else {
                 return Optional.empty();
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to get consumer. constraint violation occured.");
         } catch (ConsumerException e) {
             throw new ConsumerRepositoryException(e.getMessage(), e);
         }
@@ -70,106 +65,78 @@ public class ConsumerRepositoryImpl implements IConsumerRepository {
 
     @Override
     public void save(ConsumerEntity consumerEntity) throws ConsumerRepositoryException {
-        try {
-            Consumer jpaEntity = converter.toInfrastructure(consumerEntity);
-            jpaRepository.saveAndFlush(jpaEntity);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to save consumer. constraint violation occured.");
-        }
+        Consumer jpaEntity = converter.toInfrastructure(consumerEntity);
+        jpaRepository.save(jpaEntity);
     }
 
     @Override
     public void assign(ConsumerEntity consumerEntity, HouseholdAggregate householdAggregate) throws ConsumerRepositoryException {
-        try {
-            Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getId());
-            if (household.isPresent()) {
-                Optional<Consumer> consumer = jpaRepository.findOneByBusinessKey(consumerEntity.getConsumerId().getId());
-                if (consumer.isPresent()) {
-                    if (consumer.get().getHousehold() == null) {
-                        consumer.get().setHousehold(household.get());
-                        jpaRepository.saveAndFlush(consumer.get());
-                        household.get().getConsumers().add(consumer.get());
-                        householdJpaRepository.saveAndFlush(household.get());
-                    } else {
-                        throw new ConsumerRepositoryException(
-                                String.format("To assign an entity for consumer %s, the assigments have to be empty", consumerEntity.getConsumerId().getId())
-                        );
-                    }
+        Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getId());
+        if (household.isPresent()) {
+            Optional<Consumer> consumer = jpaRepository.findOneByBusinessKey(consumerEntity.getConsumerId().getId());
+            if (consumer.isPresent()) {
+                if (consumer.get().getHousehold() == null) {
+                    consumer.get().setHousehold(household.get());
+                    jpaRepository.save(consumer.get());
+                    household.get().getConsumers().add(consumer.get());
+                    householdJpaRepository.save(household.get());
                 } else {
                     throw new ConsumerRepositoryException(
-                            String.format("Failed to fetch consumer %s", consumerEntity.getConsumerId().getId())
+                            String.format("To assign an entity for consumer %s, the assigments have to be empty", consumerEntity.getConsumerId().getId())
                     );
                 }
             } else {
                 throw new ConsumerRepositoryException(
-                        String.format("Household %s does not exist. Failed to fetch all consumer", householdAggregate.getHouseholdId().getId())
+                        String.format("Failed to fetch consumer %s", consumerEntity.getConsumerId().getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to assign consumer. constraint violation occured.");
+        } else {
+            throw new ConsumerRepositoryException(
+                    String.format("Household %s does not exist. Failed to fetch all consumer", householdAggregate.getHouseholdId().getId())
+            );
         }
     }
 
     @Override
     public void deleteById(ConsumerIdVO id) throws ConsumerRepositoryException {
-        try {
-            Optional<Consumer> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
-            if (jpaEntity.isPresent()) {
-                try {
-                    jpaRepository.delete(jpaEntity.get());
-                } catch (Exception e) {
-                    throw new ConsumerRepositoryException(e.getMessage(), e);
-                }
-            } else {
-                throw new ConsumerRepositoryException(
-                        String.format("consumer %s can not be found and can not be deleted", id.getId())
-                );
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to delete consumer. constraint violation occured.");
+        Optional<Consumer> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
+        if (jpaEntity.isPresent()) {
+            jpaRepository.delete(jpaEntity.get());
+        } else {
+            throw new ConsumerRepositoryException(
+                    String.format("consumer %s can not be found and can not be deleted", id.getId())
+            );
         }
     }
 
     @Override
     public void updateStatus(ConsumerIdVO id, ConsumerStatusVO status) throws ConsumerRepositoryException {
-        try {
-            Optional<Consumer> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
-            if (jpaEntityOptional.isPresent()) {
-                try {
-                    Consumer jpaEntity = jpaEntityOptional.get();
-                    ConsumerStatus newStatus = new ConsumerStatus();
-                    newStatus.setRunning(status.isRunning());
-                    jpaEntity.setConsumerStatus(newStatus);
-                    jpaRepository.save(jpaEntity);
-                } catch (Exception e) {
-                    throw new ConsumerRepositoryException(e.getMessage(), e);
-                }
-            } else {
-                throw new ConsumerRepositoryException(
-                        String.format("consumer %s can not be found therefore status can not be toggled", id.getId())
-                );
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to update consumer status. constraint violation occured.");
+        Optional<Consumer> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
+        if (jpaEntityOptional.isPresent()) {
+            Consumer jpaEntity = jpaEntityOptional.get();
+            ConsumerStatus newStatus = new ConsumerStatus();
+            newStatus.setRunning(status.isRunning());
+            jpaEntity.setConsumerStatus(newStatus);
+            jpaRepository.save(jpaEntity);
+        } else {
+            throw new ConsumerRepositoryException(
+                    String.format("consumer %s can not be found therefore status can not be toggled", id.getId())
+            );
         }
     }
 
     @Override
     public void update(ConsumerIdVO id, ConsumerEntity domainEntity) throws ConsumerRepositoryException {
-        try {
-            Optional<Consumer> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
-            if (jpaEntityOptional.isPresent()) {
-                Consumer jpaEntity = jpaEntityOptional.get();
-                Consumer updated = converter.toInfrastructure(domainEntity);
-                jpaEntity.setBusinessKey(updated.getBusinessKey());
-                jpaEntity.setConsumerPower(updated.getConsumerPower());
-                jpaEntity.setConsumerStatus(updated.getConsumerStatus());
-                jpaRepository.saveAndFlush(jpaEntity);
-            } else {
-                throw new ConsumerRepositoryException("failed to update consumer. can not find consumer entity.");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new ConsumerRepositoryException("failed to update consumer. constraint violation occured.");
+        Optional<Consumer> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
+        if (jpaEntityOptional.isPresent()) {
+            Consumer jpaEntity = jpaEntityOptional.get();
+            Consumer updated = converter.toInfrastructure(domainEntity);
+            jpaEntity.setBusinessKey(updated.getBusinessKey());
+            jpaEntity.setConsumerPower(updated.getConsumerPower());
+            jpaEntity.setConsumerStatus(updated.getConsumerStatus());
+            jpaRepository.save(jpaEntity);
+        } else {
+            throw new ConsumerRepositoryException("failed to update consumer. can not find consumer entity.");
         }
     }
 

@@ -13,7 +13,6 @@ import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.DecentralizedPowerPlantJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,8 +43,6 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
                         String.format("There is no VPP with id %s", virtualPowerPlantAggregate.getVirtualPowerPlantId().getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new DecentralizedPowerPlantRepositoryException("failed to get all dpp. constraint violation occured.");
         } catch (DecentralizedPowerPlantException | VirtualPowerPlantRepositoryException e) {
             throw new DecentralizedPowerPlantRepositoryException(e.getMessage(), e);
         }
@@ -60,8 +57,6 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
             } else {
                 return Optional.empty();
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new DecentralizedPowerPlantRepositoryException("failed to delete dpp. constraint violation occured.");
         } catch (DecentralizedPowerPlantException e) {
             throw new DecentralizedPowerPlantRepositoryException(e.getMessage(), e);
         }
@@ -69,77 +64,57 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
 
     @Override
     public void save(DecentralizedPowerPlantAggregate domainEntity) throws DecentralizedPowerPlantRepositoryException {
-        try {
-            DecentralizedPowerPlant jpaEntity = converter.toInfrastructure(domainEntity);
-            jpaRepository.saveAndFlush(jpaEntity);
-        } catch (DataIntegrityViolationException e) {
-            throw new DecentralizedPowerPlantRepositoryException("failed to save dpp. constraint violation occured.");
-        }
+        DecentralizedPowerPlant jpaEntity = converter.toInfrastructure(domainEntity);
+        jpaRepository.save(jpaEntity);
     }
 
     @Override
     public void assign(DecentralizedPowerPlantAggregate domainEntity, VirtualPowerPlantAggregate virtualPowerPlant) throws DecentralizedPowerPlantRepositoryException {
-        try {
-            Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(domainEntity.getDecentralizedPowerPlantId().getId());
-            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getId());
-            if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
-                DecentralizedPowerPlant jpaEntity = jpaEntityOptional.get();
-                VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
-                if (jpaEntity.getVirtualPowerPlant() == null) {
-                    jpaEntity.setVirtualPowerPlant(virtualPowerPlantJpaEntity);
-                    jpaRepository.saveAndFlush(jpaEntity);
-                    virtualPowerPlantJpaEntity.getDecentralizedPowerPlants().add(jpaEntity);
-                    virtualPowerPlantJpaRepository.saveAndFlush(virtualPowerPlantJpaEntity);
-                } else {
-                    throw new DecentralizedPowerPlantRepositoryException(
-                            String.format("Dpp %s is already assigned to vpp %s", domainEntity.getDecentralizedPowerPlantId().getId(),
-                                    jpaEntity.getVirtualPowerPlant().getBusinessKey())
-                    );
-                }
+        Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(domainEntity.getDecentralizedPowerPlantId().getId());
+        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getId());
+        if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
+            DecentralizedPowerPlant jpaEntity = jpaEntityOptional.get();
+            VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
+            if (jpaEntity.getVirtualPowerPlant() == null) {
+                jpaEntity.setVirtualPowerPlant(virtualPowerPlantJpaEntity);
+                jpaRepository.save(jpaEntity);
+                virtualPowerPlantJpaEntity.getDecentralizedPowerPlants().add(jpaEntity);
+                virtualPowerPlantJpaRepository.save(virtualPowerPlantJpaEntity);
             } else {
                 throw new DecentralizedPowerPlantRepositoryException(
-                        String.format("An error occured while assigning dpp %s to vpp %s", domainEntity.getDecentralizedPowerPlantId().getId(),
-                                virtualPowerPlant.getVirtualPowerPlantId().getId())
+                        String.format("Dpp %s is already assigned to vpp %s", domainEntity.getDecentralizedPowerPlantId().getId(),
+                                jpaEntity.getVirtualPowerPlant().getBusinessKey())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new DecentralizedPowerPlantRepositoryException("failed to assign dpp. constraint violation occured.");
+        } else {
+            throw new DecentralizedPowerPlantRepositoryException(
+                    String.format("An error occured while assigning dpp %s to vpp %s", domainEntity.getDecentralizedPowerPlantId().getId(),
+                            virtualPowerPlant.getVirtualPowerPlantId().getId())
+            );
         }
     }
 
     @Override
     public void update(DecentralizedPowerPlantIdVO id, DecentralizedPowerPlantAggregate domainEntity) throws DecentralizedPowerPlantRepositoryException {
-        try {
-            Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
-            if (jpaEntityOptional.isPresent()) {
-                DecentralizedPowerPlant jpaEntity = jpaEntityOptional.get();
-                jpaEntity.setBusinessKey(domainEntity.getDecentralizedPowerPlantId().getId());
-                jpaRepository.saveAndFlush(jpaEntity);
-            } else {
-                throw new DecentralizedPowerPlantRepositoryException("failed to update dpp. can not find dpp entity");
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DecentralizedPowerPlantRepositoryException("failed to update dpp. constraint violation occured.");
+        Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
+        if (jpaEntityOptional.isPresent()) {
+            DecentralizedPowerPlant jpaEntity = jpaEntityOptional.get();
+            jpaEntity.setBusinessKey(domainEntity.getDecentralizedPowerPlantId().getId());
+            jpaRepository.save(jpaEntity);
+        } else {
+            throw new DecentralizedPowerPlantRepositoryException("failed to update dpp. can not find dpp entity");
         }
     }
 
     @Override
     public void deleteById(DecentralizedPowerPlantIdVO id) throws DecentralizedPowerPlantRepositoryException {
-        try {
-            Optional<DecentralizedPowerPlant> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
-            if (jpaEntity.isPresent()) {
-                try {
-                    jpaRepository.delete(jpaEntity.get());
-                } catch (Exception e) {
-                    throw new DecentralizedPowerPlantRepositoryException(e.getMessage(), e);
-                }
-            } else {
-                throw new DecentralizedPowerPlantRepositoryException(
-                        String.format("dpp %s can not be found and can not be deleted", id.getId())
-                );
-            }
-        } catch (DataIntegrityViolationException e) {
-            throw new DecentralizedPowerPlantRepositoryException("failed to delete dpp. constraint violation occured.");
+        Optional<DecentralizedPowerPlant> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
+        if (jpaEntity.isPresent()) {
+            jpaRepository.delete(jpaEntity.get());
+        } else {
+            throw new DecentralizedPowerPlantRepositoryException(
+                    String.format("dpp %s can not be found and can not be deleted", id.getId())
+            );
         }
     }
 

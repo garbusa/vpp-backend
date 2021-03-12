@@ -27,7 +27,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     public List<VirtualPowerPlantAggregate> getAll() throws VirtualPowerPlantServiceException {
         try {
             return repository.getAll();
-        } catch (Exception e) {
+        } catch (VirtualPowerPlantRepositoryException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
         }
     }
@@ -40,7 +40,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                         String.format("vpp with id %s already exists", domainEntity.getVirtualPowerPlantId().getId()));
             }
             repository.save(domainEntity);
-        } catch (Exception e) {
+        } catch (VirtualPowerPlantRepositoryException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
         }
 
@@ -57,7 +57,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                 );
             }
 
-        } catch (Exception e) {
+        } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
         }
     }

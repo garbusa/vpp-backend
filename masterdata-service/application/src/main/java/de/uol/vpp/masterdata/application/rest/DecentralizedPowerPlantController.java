@@ -7,6 +7,7 @@ import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
 import de.uol.vpp.masterdata.domain.services.DecentralizedPowerPlantServiceException;
 import de.uol.vpp.masterdata.domain.services.IDecentralizedPowerPlantService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,10 @@ public class DecentralizedPowerPlantController {
                     ), HttpStatus.OK);
         } catch (DecentralizedPowerPlantServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -48,6 +53,10 @@ public class DecentralizedPowerPlantController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -57,12 +66,14 @@ public class DecentralizedPowerPlantController {
         try {
             service.save(converter.toDomain(dto), vppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "dpp successfully created and assigned",
-                    converter.toApplication(service.get(dto.getDecentralizedPowerPlantId()))
-            ));
+                    true, false, "dpp successfully created and assigned", null));
         } catch (DecentralizedPowerPlantServiceException | DecentralizedPowerPlantException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -76,6 +87,10 @@ public class DecentralizedPowerPlantController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -83,11 +98,14 @@ public class DecentralizedPowerPlantController {
     public ResponseEntity<?> updateDecentralizedPowerPlant(@PathVariable String businessKey, @RequestBody DecentralizedPowerPlantDTO newDto, @RequestParam String vppBusinessKey) {
         try {
             service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "dpp successfully updated",
-                    converter.toApplication(service.get(newDto.getDecentralizedPowerPlantId()))));
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "dpp successfully updated", null));
         } catch (DecentralizedPowerPlantServiceException | DecentralizedPowerPlantException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }

@@ -31,6 +31,7 @@ public class ApplicationEntityConverter {
         DecentralizedPowerPlantDTO dto = new DecentralizedPowerPlantDTO();
         dto.setDecentralizedPowerPlantId(domainEntity.getDecentralizedPowerPlantId().getId());
         dto.setProducers(domainEntity.getProducers().stream().map(this::toApplication).collect(Collectors.toList()));
+        dto.setStorages(domainEntity.getStorages().stream().map(this::toApplication).collect(Collectors.toList()));
         return dto;
     }
 

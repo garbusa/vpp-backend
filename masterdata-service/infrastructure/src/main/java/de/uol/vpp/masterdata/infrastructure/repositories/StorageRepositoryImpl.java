@@ -17,7 +17,6 @@ import de.uol.vpp.masterdata.infrastructure.jpaRepositories.DecentralizedPowerPl
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.HouseholdJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.StorageJpaRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -48,8 +47,6 @@ public class StorageRepositoryImpl implements IStorageRepository {
             } else {
                 throw new StorageRepositoryException(String.format("Can not find dpp %s to get all storages", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId()));
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to get all storages. constraint violation occured.");
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
         }
@@ -70,8 +67,6 @@ public class StorageRepositoryImpl implements IStorageRepository {
             } else {
                 throw new StorageRepositoryException(String.format("Can not find household %s to get all storages", householdAggregate.getHouseholdId().getId()));
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to get all storages. constraint violation occured.");
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
         }
@@ -86,8 +81,6 @@ public class StorageRepositoryImpl implements IStorageRepository {
                 return Optional.of(converter.toDomain(result.get()));
             }
             return Optional.empty();
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to get storage. constraint violation occured.");
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
         }
@@ -95,17 +88,12 @@ public class StorageRepositoryImpl implements IStorageRepository {
 
     @Override
     public void save(StorageEntity storageEntity) throws StorageRepositoryException {
-        try {
             Storage jpaEntity = converter.toInfrastructure(storageEntity);
-            jpaRepository.saveAndFlush(jpaEntity);
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to save storage. constraint violation occured.");
-        }
+        jpaRepository.save(jpaEntity);
     }
 
     @Override
     public void assignToDecentralizedPowerPlant(StorageEntity storageEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws StorageRepositoryException {
-        try {
             Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId());
             if (dpp.isPresent()) {
                 Optional<Storage> storage = jpaRepository.findOneByBusinessKey(storageEntity.getStorageId().getId());
@@ -113,9 +101,9 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     if (storage.get().getDecentralizedPowerPlant() == null &&
                             storage.get().getHousehold() == null) {
                         storage.get().setDecentralizedPowerPlant(dpp.get());
-                        jpaRepository.saveAndFlush(storage.get());
+                        jpaRepository.save(storage.get());
                         dpp.get().getStorages().add(storage.get());
-                        decentralizedPowerPlantJpaRepository.saveAndFlush(dpp.get());
+                        decentralizedPowerPlantJpaRepository.save(dpp.get());
                     } else {
                         throw new StorageRepositoryException(
                                 String.format("To assign an entity for storage %s, the assigments have to be empty", storageEntity.getStorageId().getId())
@@ -131,14 +119,10 @@ public class StorageRepositoryImpl implements IStorageRepository {
                         String.format("Dpp %s does not exist. Failed to fetch all storage", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to assign storage. constraint violation occured.");
-        }
     }
 
     @Override
     public void assignToHousehold(StorageEntity storageEntity, HouseholdAggregate householdAggregate) throws StorageRepositoryException {
-        try {
             Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getId());
             if (household.isPresent()) {
                 Optional<Storage> storage = jpaRepository.findOneByBusinessKey(storageEntity.getStorageId().getId());
@@ -146,9 +130,9 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     if (storage.get().getDecentralizedPowerPlant() == null &&
                             storage.get().getHousehold() == null) {
                         storage.get().setHousehold(household.get());
-                        jpaRepository.saveAndFlush(storage.get());
+                        jpaRepository.save(storage.get());
                         household.get().getStorages().add(storage.get());
-                        householdJpaRepository.saveAndFlush(household.get());
+                        householdJpaRepository.save(household.get());
                     } else {
                         throw new StorageRepositoryException(
                                 String.format("To assign an entity for storage %s, the assigments have to be empty", storageEntity.getStorageId().getId())
@@ -164,58 +148,38 @@ public class StorageRepositoryImpl implements IStorageRepository {
                         String.format("Household %s does not exist. Failed to fetch all storage", householdAggregate.getHouseholdId().getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to assign storage. constraint violation occured.");
-        }
     }
 
     @Override
     public void deleteById(StorageIdVO id) throws StorageRepositoryException {
-        try {
             Optional<Storage> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
             if (jpaEntity.isPresent()) {
-                try {
                     jpaRepository.delete(jpaEntity.get());
-                } catch (Exception e) {
-                    throw new StorageRepositoryException(e.getMessage(), e);
-                }
             } else {
                 throw new StorageRepositoryException(
                         String.format("storage %s can not be found and can not be deleted", id.getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to delete storage. constraint violation occured.");
-        }
     }
 
     @Override
     public void updateStatus(StorageIdVO id, StorageStatusVO status) throws StorageRepositoryException {
-        try {
             Optional<Storage> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
             if (jpaEntityOptional.isPresent()) {
-                try {
                     Storage jpaEntity = jpaEntityOptional.get();
                     StorageStatus newStatus = new StorageStatus();
                     newStatus.setCapacity(status.getCapacity());
                     jpaEntity.setStorageStatus(newStatus);
                     jpaRepository.save(jpaEntity);
-                } catch (Exception e) {
-                    throw new StorageRepositoryException(e.getMessage(), e);
-                }
             } else {
                 throw new StorageRepositoryException(
                         String.format("storage %s can not be found and can not be deleted", id.getId())
                 );
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to update storage status. constraint violation occured.");
-        }
     }
 
     @Override
     public void update(StorageIdVO id, StorageEntity domainEntity) throws StorageRepositoryException {
-        try {
             Optional<Storage> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
             if (jpaEntityOptional.isPresent()) {
                 Storage jpaEntity = jpaEntityOptional.get();
@@ -224,12 +188,9 @@ public class StorageRepositoryImpl implements IStorageRepository {
                 jpaEntity.setStoragePower(updated.getStoragePower());
                 jpaEntity.setStorageStatus(updated.getStorageStatus());
                 jpaEntity.setStorageType(updated.getStorageType());
-                jpaRepository.saveAndFlush(jpaEntity);
+                jpaRepository.save(jpaEntity);
             } else {
                 throw new StorageRepositoryException("failed to update storage. can not find storage entity");
             }
-        } catch (DataIntegrityViolationException e) {
-            throw new StorageRepositoryException("failed to update storage. constraint violation occured.");
-        }
     }
 }

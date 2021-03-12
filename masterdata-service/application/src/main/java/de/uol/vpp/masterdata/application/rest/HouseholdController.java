@@ -7,6 +7,7 @@ import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
 import de.uol.vpp.masterdata.domain.services.HouseholdServiceException;
 import de.uol.vpp.masterdata.domain.services.IHouseholdService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,10 @@ public class HouseholdController {
                     ), HttpStatus.OK);
         } catch (HouseholdServiceException e) {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -48,6 +53,10 @@ public class HouseholdController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -57,12 +66,14 @@ public class HouseholdController {
         try {
             service.save(converter.toDomain(dto), vppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "household successfully created and assigned",
-                    service.get(dto.getHouseholdId())
-            ));
+                    true, false, "household successfully created and assigned", null));
         } catch (HouseholdServiceException | HouseholdException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
 
@@ -77,6 +88,10 @@ public class HouseholdController {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
+            ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -84,11 +99,15 @@ public class HouseholdController {
     public ResponseEntity<?> updateHousehold(@PathVariable String businessKey, @RequestBody HouseholdDTO newDto, @RequestParam String vppBusinessKey) {
         try {
             service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "household successfully updated",
-                    converter.toApplication(service.get(newDto.getHouseholdId()))));
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    "household successfully updated", null));
         } catch (HouseholdServiceException | HouseholdException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
+            ), HttpStatus.NOT_FOUND);
+        } catch (DataIntegrityViolationException sqlException) {
+            return new ResponseEntity<>(new ApiResponse(
+                    false, false, "data integrity error occured", null
             ), HttpStatus.NOT_FOUND);
         }
     }

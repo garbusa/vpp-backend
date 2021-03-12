@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class ProducerDTO {
-
     private String producerId;
     private Double ratedPower;
     private String productType;

@@ -45,10 +45,9 @@ public class InfrastructureEntityConverter {
             );
             domainEntity.setPublished(new VirtualPowerPlantPublishedVO(jpaEntity.isPublished()));
             return domainEntity;
-        } catch (Exception e) {
+        } catch (DecentralizedPowerPlantException | HouseholdException e) {
             throw new VirtualPowerPlantException(e.getMessage(), e);
         }
-
     }
 
     public DecentralizedPowerPlantAggregate toDomain(DecentralizedPowerPlant jpaEntity) throws DecentralizedPowerPlantException {
@@ -72,7 +71,7 @@ public class InfrastructureEntityConverter {
                     storages
             );
             return domainEntity;
-        } catch (Exception e) {
+        } catch (StorageException | ProducerException e) {
             throw new DecentralizedPowerPlantException(e.getMessage(), e);
         }
     }
@@ -108,7 +107,7 @@ public class InfrastructureEntityConverter {
                     consumers
             );
             return domainEntity;
-        } catch (Exception e) {
+        } catch (StorageException | ConsumerException | ProducerException e) {
             throw new HouseholdException(e.getMessage(), e);
         }
     }
