@@ -7,7 +7,7 @@ import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryExce
 import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
-import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpaRepository;
+import de.uol.vpp.masterdata.infrastructure.jpaRepositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,13 @@ import java.util.Optional;
 public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantRepository {
 
     private final VirtualPowerPlantJpaRepository jpaRepository;
+
+    private final ConsumerJpaRepository consumerJpaRepository;
+    private final ProducerJpaRepository producerJpaRepository;
+    private final StorageJpaRepository storageJpaRepository;
+    private final DecentralizedPowerPlantJpaRepository decentralizedPowerPlantJpaRepository;
+    private final HouseholdJpaRepository householdJpaRepository;
+
     private final InfrastructureEntityConverter converter;
 
     @Override
@@ -45,6 +52,22 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
     public void deleteById(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
             Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getId());
             if (result.isPresent()) {
+                VirtualPowerPlant vpp = result.get();
+
+                //Delete all children
+                vpp.getHouseholds().forEach((h) -> {
+                    h.getConsumers().forEach(consumerJpaRepository::delete);
+                    h.getProducers().forEach(producerJpaRepository::delete);
+                    h.getStorages().forEach(storageJpaRepository::delete);
+                    householdJpaRepository.delete(h);
+                });
+
+                vpp.getDecentralizedPowerPlants().forEach((dpp) -> {
+                    dpp.getProducers().forEach(producerJpaRepository::delete);
+                    dpp.getStorages().forEach(storageJpaRepository::delete);
+                    decentralizedPowerPlantJpaRepository.delete(dpp);
+                });
+
                 jpaRepository.delete(result.get());
             } else {
                 throw new VirtualPowerPlantRepositoryException(

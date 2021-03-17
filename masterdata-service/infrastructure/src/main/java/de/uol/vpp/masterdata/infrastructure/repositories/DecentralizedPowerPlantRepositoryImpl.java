@@ -11,6 +11,8 @@ import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.DecentralizedPowerPlantJpaRepository;
+import de.uol.vpp.masterdata.infrastructure.jpaRepositories.ProducerJpaRepository;
+import de.uol.vpp.masterdata.infrastructure.jpaRepositories.StorageJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
 
     private final DecentralizedPowerPlantJpaRepository jpaRepository;
     private final VirtualPowerPlantJpaRepository virtualPowerPlantJpaRepository;
+    private final ProducerJpaRepository producerJpaRepository;
+    private final StorageJpaRepository storageJpaRepository;
+
     private final InfrastructureEntityConverter converter;
 
     @Override
@@ -110,7 +115,12 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
     public void deleteById(DecentralizedPowerPlantIdVO id) throws DecentralizedPowerPlantRepositoryException {
         Optional<DecentralizedPowerPlant> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
         if (jpaEntity.isPresent()) {
-            jpaRepository.delete(jpaEntity.get());
+            DecentralizedPowerPlant dpp = jpaEntity.get();
+
+            dpp.getProducers().forEach(producerJpaRepository::delete);
+            dpp.getStorages().forEach(storageJpaRepository::delete);
+
+            jpaRepository.delete(dpp);
         } else {
             throw new DecentralizedPowerPlantRepositoryException(
                     String.format("dpp %s can not be found and can not be deleted", id.getId())

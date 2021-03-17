@@ -9,8 +9,7 @@ import de.uol.vpp.masterdata.domain.valueobjects.HouseholdIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.Household;
 import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
-import de.uol.vpp.masterdata.infrastructure.jpaRepositories.HouseholdJpaRepository;
-import de.uol.vpp.masterdata.infrastructure.jpaRepositories.VirtualPowerPlantJpaRepository;
+import de.uol.vpp.masterdata.infrastructure.jpaRepositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +23,9 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
 
     private final HouseholdJpaRepository jpaRepository;
     private final VirtualPowerPlantJpaRepository virtualPowerPlantJpaRepository;
+    private final StorageJpaRepository storageJpaRepository;
+    private final ProducerJpaRepository producerJpaRepository;
+    private final ConsumerJpaRepository consumerJpaRepository;
     private final InfrastructureEntityConverter converter;
 
     @Override
@@ -69,7 +71,13 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
     public void deleteById(HouseholdIdVO id) throws HouseholdRepositoryException {
         Optional<Household> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
         if (jpaEntity.isPresent()) {
-            jpaRepository.delete(jpaEntity.get());
+            Household household = jpaEntity.get();
+
+            household.getProducers().forEach(producerJpaRepository::delete);
+            household.getStorages().forEach(storageJpaRepository::delete);
+            household.getConsumers().forEach(consumerJpaRepository::delete);
+
+            jpaRepository.delete(household);
         } else {
             throw new HouseholdRepositoryException(
                     String.format("household %s can not be found and can not be deleted", id.getId())
