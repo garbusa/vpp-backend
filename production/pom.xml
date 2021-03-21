@@ -5,15 +5,24 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.uol.vpp</groupId>
-    <artifactId>vpp</artifactId>
+    <artifactId>production</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
-        <module>masterdata</module>
-        <module>load</module>
-        <module>production</module>
-        <module>action</module>
+        <module>production.application</module>
+        <module>production.service</module>
+        <module>production.domain</module>
+        <module>production.infrastructure</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+        </dependency>
+    </dependencies>
+
 
 </project>

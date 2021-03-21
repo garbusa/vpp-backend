@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
-    <file type="web" url="file://$PROJECT_DIR$/action-service" />
-    <file type="web" url="file://$PROJECT_DIR$/forecast-service" />
-    <file type="web" url="file://$PROJECT_DIR$/masterdata-service" />
+    <file type="web" url="file://$PROJECT_DIR$/action" />
+    <file type="web" url="file://$PROJECT_DIR$/forecast" />
+    <file type="web" url="file://$PROJECT_DIR$/masterdata" />
   </component>
   <component name="JavaScriptSettings">
     <option name="languageLevel" value="ES6" />

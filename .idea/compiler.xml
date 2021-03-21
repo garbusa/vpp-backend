@@ -6,13 +6,22 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="infrastructure" />
-        <module name="domain" />
-        <module name="application" />
-        <module name="service" />
+        <module name="production.service" />
+        <module name="masterdata.infrastructure" />
+        <module name="load.domain" />
+        <module name="production.application" />
+        <module name="load.infrastructure" />
+        <module name="production.infrastructure" />
+        <module name="production.domain" />
+        <module name="masterdata.application" />
+        <module name="load.service" />
+        <module name="masterdata.domain" />
+        <module name="masterdata.service" />
+        <module name="load.application" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="application (1) (de.uol.vpp)" target="1.5" />
       <module name="de.uol.vpp.action" target="1.5" />
       <module name="de.uol.vpp.forecast" target="1.5" />
       <module name="de.uol.vpp.masterdata" target="1.5" />
@@ -20,13 +29,17 @@
       <module name="de.uol.vpp.masterdata.domain" target="1.5" />
       <module name="de.uol.vpp.masterdata.infrastructure" target="1.5" />
       <module name="de.uol.vpp.shared-api" target="1.5" />
+      <module name="domain" target="11" />
+      <module name="domain (1)" target="1.5" />
+      <module name="forecast" target="1.5" />
+      <module name="service (1) (de.uol.vpp)" target="1.5" />
       <module name="shared-api" target="1.5" />
       <module name="spring" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="application" options="" />
+      <module name="masterdata.application" options="" />
       <module name="spring" options="" />
     </option>
   </component>
