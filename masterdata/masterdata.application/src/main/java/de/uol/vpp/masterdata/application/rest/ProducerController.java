@@ -45,7 +45,7 @@ public class ProducerController {
     }
 
     @GetMapping(path = "/by/household/{" +
-            "householdBusinessKey}")
+            "householdTimestamp}")
     public ResponseEntity<?> getAllProducersByHousehold(@PathVariable String householdBusinessKey) {
         try {
             return new ResponseEntity<>(

@@ -9,13 +9,12 @@ import java.time.ZonedDateTime;
 
 @Getter
 @Setter
-public class LoadStartTimestampVO {
-
+public class LoadHouseholdStartTimestampVO {
     private ZonedDateTime timestamp;
 
-    public LoadStartTimestampVO(Long ts) throws LoadException {
+    public LoadHouseholdStartTimestampVO(Long ts) throws LoadException {
         if (ts == null) {
-            throw new LoadException("load start startTimestamp validation failed");
+            throw new LoadException("load household startTimestamp validation failed");
         }
 
         try {
@@ -24,9 +23,4 @@ public class LoadStartTimestampVO {
             throw new LoadException("failed to create startTimestamp", e);
         }
     }
-
-    public boolean isGreater(LoadStartTimestampVO obj) {
-        return timestamp.isAfter(obj.getTimestamp());
-    }
-
 }

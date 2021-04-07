@@ -45,7 +45,7 @@ public class StorageController {
     }
 
     @GetMapping(path = "/by/household/{" +
-            "householdBusinessKey}")
+            "householdTimestamp}")
     public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdBusinessKey) {
         try {
             return new ResponseEntity<>(

@@ -1,7 +1,8 @@
 package de.uol.vpp.load.domain.aggregates;
 
-import de.uol.vpp.load.domain.entities.HouseholdLoadEntity;
-import de.uol.vpp.load.domain.valueobjects.LoadEndTimestampVO;
+import de.uol.vpp.load.domain.entities.LoadHouseholdEntity;
+import de.uol.vpp.load.domain.valueobjects.LoadIsForecastedVO;
+import de.uol.vpp.load.domain.valueobjects.LoadIsOutdatedVO;
 import de.uol.vpp.load.domain.valueobjects.LoadStartTimestampVO;
 import de.uol.vpp.load.domain.valueobjects.LoadVirtualPowerPlantIdVO;
 import lombok.Data;
@@ -10,9 +11,10 @@ import java.util.List;
 
 @Data
 public class LoadAggregate {
-    private LoadVirtualPowerPlantIdVO loadVirtualPowerPlantIdVO;
-    private LoadStartTimestampVO loadStartTimestampVO;
+    private LoadVirtualPowerPlantIdVO loadVirtualPowerPlantId;
+    private LoadStartTimestampVO loadStartTimestamp;
 
-    private LoadEndTimestampVO loadEndStartTimestampVO;
-    private List<HouseholdLoadEntity> householdLoads;
+    private LoadIsForecastedVO loadIsForecasted;
+    private LoadIsOutdatedVO loadIsOutdated;
+    private List<LoadHouseholdEntity> loadHouseholdEntities;
 }
