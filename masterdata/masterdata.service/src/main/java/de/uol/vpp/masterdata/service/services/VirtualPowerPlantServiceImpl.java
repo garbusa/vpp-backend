@@ -37,7 +37,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
         try {
             if (repository.getById(domainEntity.getVirtualPowerPlantId()).isPresent()) {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("vpp with id %s already exists", domainEntity.getVirtualPowerPlantId().getId()));
+                        String.format("vpp with actionRequestId %s already exists", domainEntity.getVirtualPowerPlantId().getValue()));
             }
             repository.save(domainEntity);
         } catch (VirtualPowerPlantRepositoryException e) {
@@ -70,13 +70,25 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                 if (vpp.getHouseholds().size() > 0) {
                     AtomicBoolean hasProducer = new AtomicBoolean(false);
                     vpp.getHouseholds().forEach((household) -> {
-                        if (household.getProducers().size() > 0) {
+                        if (household.getWaters().size() > 0) {
+                            hasProducer.set(true);
+                        }
+                        if (household.getSolars().size() > 0) {
+                            hasProducer.set(true);
+                        }
+                        if (household.getWaters().size() > 0) {
                             hasProducer.set(true);
                         }
                     });
                     if (!hasProducer.get() && vpp.getDecentralizedPowerPlants().size() > 0) {
-                        vpp.getDecentralizedPowerPlants().forEach((household) -> {
-                            if (household.getProducers().size() > 0) {
+                        vpp.getDecentralizedPowerPlants().forEach((dpp) -> {
+                            if (dpp.getWaters().size() > 0) {
+                                hasProducer.set(true);
+                            }
+                            if (dpp.getSolars().size() > 0) {
+                                hasProducer.set(true);
+                            }
+                            if (dpp.getWinds().size() > 0) {
                                 hasProducer.set(true);
                             }
                         });
@@ -103,7 +115,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
         try {
             Optional<VirtualPowerPlantAggregate> result = repository.getById(new VirtualPowerPlantIdVO(businessKey));
             return result.orElseThrow(() -> new VirtualPowerPlantServiceException(
-                    String.format("Can not find VPP by id %s", businessKey)
+                    String.format("Can not find VPP by actionRequestId %s", businessKey)
             ));
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
@@ -115,7 +127,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     public void unpublish(String businessKey) throws VirtualPowerPlantServiceException {
         try {
             VirtualPowerPlantAggregate vpp = this.get(businessKey);
-            if (vpp.getPublished().isPublished()) {
+            if (vpp.getPublished().isValue()) {
                 vpp.setPublished(
                         new VirtualPowerPlantPublishedVO(false)
                 );
@@ -132,7 +144,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     public void update(String businessKey, VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantServiceException {
         try {
             VirtualPowerPlantAggregate vpp = this.get(businessKey);
-            if (!vpp.getPublished().isPublished()) {
+            if (!vpp.getPublished().isValue()) {
                 repository.update(new VirtualPowerPlantIdVO(businessKey), domainEntity);
             } else {
                 throw new VirtualPowerPlantServiceException("failed to update vpp. vpp has to be unpublished");

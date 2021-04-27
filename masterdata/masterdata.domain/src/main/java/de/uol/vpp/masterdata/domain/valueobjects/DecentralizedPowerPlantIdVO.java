@@ -1,21 +1,19 @@
 package de.uol.vpp.masterdata.domain.valueobjects;
 
-import de.uol.vpp.masterdata.domain.architecture.ValueObject;
 import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
 import lombok.Getter;
 import lombok.Setter;
 
-@ValueObject
 @Setter
 @Getter
 public class DecentralizedPowerPlantIdVO {
 
-    private final String id;
+    private final String value;
 
-    public DecentralizedPowerPlantIdVO(String id) throws DecentralizedPowerPlantException {
-        if (id == null || id.isEmpty() || id.isBlank()) {
-            throw new DecentralizedPowerPlantException("validation for dpp id failed");
+    public DecentralizedPowerPlantIdVO(String value) throws DecentralizedPowerPlantException {
+        if (value == null || value.isEmpty() || value.isBlank()) {
+            throw new DecentralizedPowerPlantException("validation for dpp householdLoad failed");
         }
-        this.id = id.toUpperCase();
+        this.value = value.toUpperCase();
     }
 }

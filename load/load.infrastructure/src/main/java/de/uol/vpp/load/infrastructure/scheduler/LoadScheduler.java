@@ -13,7 +13,6 @@ import de.uol.vpp.load.infrastructure.rest.MasterdataRestClient;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
@@ -22,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,62 +160,40 @@ public class LoadScheduler {
     }
 
 
-    @Scheduled(cron = "0 0/15 * 1/1 * *")
-    public void createLoad() {
-        List<String> ids = masterdataRestClient.getAllActiveVppIds();
+    public void createLoad(String actionRequestId, String vppId) {
+        //@todo check if actionrequestid exists
         ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
+        ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
+                currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
+                currentZDT.getMinute() - (currentZDT.getMinute() % 15),
+                0, 0, ZoneId.of("GMT+2")
+        );
+        if (masterdataRestClient.isActiveVpp(vppId)) {
 
-        List<Thread> threads = new ArrayList<>();
-        ids.forEach(id -> threads.add(new Thread(() -> {
-            ZonedDateTime threadCurrentZDT = ZonedDateTime.of(
-                    currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(), currentZDT.getMinute(),
-                    0, 0, ZoneId.of("GMT+2")
-            );
-            this.outdateLoads(id, threadCurrentZDT);
-            this.saveLoad(threadCurrentZDT, id, false);
-            for (int forecastIndex = 0; forecastIndex < LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
-                threadCurrentZDT = threadCurrentZDT.plusMinutes(15L);
-                this.saveLoad(threadCurrentZDT, id, true);
+            for (int forecastIndex = 0; forecastIndex <= LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
+                this.saveLoad(currentWithoutSeconds, actionRequestId, vppId);
+                currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15L);
             }
-
-        }, id)));
-
-        for (Thread thread : threads) {
-            thread.start();
+            //@todo
+            rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
+        } else {
+            //Send error
+            rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
         }
-
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                log.info("failed to wait for thread {}", thread.getName());
-            }
-        }
-
-        rabbitMQSender.send("loads generated successfully");
-
 
     }
 
-    private void outdateLoads(String id, ZonedDateTime currentZDT) {
-        try {
-            loadRepository.outdateLoad(new LoadVirtualPowerPlantIdVO(id), currentZDT);
-        } catch (LoadRepositoryException | LoadException e) {
-            log.info("outdate loads failed");
-        }
-    }
 
-    private void saveLoad(ZonedDateTime currentZDT, String id, boolean forecast) {
+    private void saveLoad(ZonedDateTime currentZDT, String actionRequestId, String vppId) {
         try {
             int rowIndex = getRowIndex(currentZDT);
             int columnIndex = getColumnIndex(currentZDT);
             LoadAggregate loadAggregate = new LoadAggregate();
-            loadAggregate.setLoadVirtualPowerPlantId(new LoadVirtualPowerPlantIdVO(id));
+            loadAggregate.setLoadActionRequestId(new LoadActionRequestIdVO(actionRequestId));
+            loadAggregate.setLoadVirtualPowerPlantId(new LoadVirtualPowerPlantIdVO(vppId));
             loadAggregate.setLoadStartTimestamp(new LoadStartTimestampVO(currentZDT.toEpochSecond()));
-            loadAggregate.setLoadIsForecasted(new LoadIsForecastedVO(forecast));
-            loadAggregate.setLoadIsOutdated(new LoadIsOutdatedVO(false));
             loadRepository.saveLoad(loadAggregate);
-            List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(id);
+            List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(vppId);
             householdIds.forEach(householdId -> {
                 try {
                     LoadHouseholdEntity householdEntity = new LoadHouseholdEntity();
@@ -231,21 +207,19 @@ public class LoadScheduler {
                                     sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue() * householdEntity.getLoadHouseholdMemberAmount().getAmount()
                             )
                     );
-                    loadHouseholdRepository.saveLoadHousehold(householdEntity);
-                    loadHouseholdRepository.assign(householdEntity, loadAggregate);
-                    log.info("household saved with value {}", householdEntity.getLoadHouseholdValueVO().getValue());
+                    Long internalId = loadHouseholdRepository.saveLoadHousehold(householdEntity);
+                    loadHouseholdRepository.assign(internalId, loadAggregate);
                 } catch (LoadException | LoadHouseholdRepositoryException e) {
-                    log.info("lol");
+                    log.info(e);
                 }
             });
         } catch (LoadException | LoadRepositoryException e) {
-            log.info("lol");
+            log.info(e);
         }
     }
 
     private int getRowIndex(ZonedDateTime date) {
         int key = (date.getHour() * 100) + date.getMinute();
-        log.info("current key for searching index: {}", key);
         return timeRowMap.get(key);
     }
 

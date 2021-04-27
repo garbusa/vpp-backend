@@ -6,9 +6,8 @@ import java.util.List;
 
 @Data
 public class LoadDTO {
+    private String actionRequestId;
     private String virtualPowerPlantId;
     private Long startTimestamp;
-    private boolean forecasted;
-    private boolean outdated;
     private List<LoadHouseholdDTO> households;
 }

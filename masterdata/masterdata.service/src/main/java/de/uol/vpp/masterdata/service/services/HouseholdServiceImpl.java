@@ -51,7 +51,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
     public HouseholdAggregate get(String businessKey) throws HouseholdServiceException {
         try {
             return repository.getById(new HouseholdIdVO(businessKey))
-                    .orElseThrow(() -> new HouseholdServiceException(String.format("Can't find household by id %s", businessKey)));
+                    .orElseThrow(() -> new HouseholdServiceException(String.format("Can't find household by actionRequestId %s", businessKey)));
         } catch (HouseholdException | HouseholdRepositoryException e) {
             throw new HouseholdServiceException(e.getMessage(), e);
         }
@@ -63,7 +63,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
         try {
             if (repository.getById(domainEntity.getHouseholdId()).isPresent()) {
                 throw new HouseholdServiceException(
-                        String.format("household with id %s already exists", domainEntity.getHouseholdId().getId()));
+                        String.format("household with actionRequestId %s already exists", domainEntity.getHouseholdId().getValue()));
             }
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional = virtualPowerPlantRepository.getById(
                     new VirtualPowerPlantIdVO(virtualPowerPlantBusinessKey)
@@ -75,7 +75,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
                 repository.assign(domainEntity, virtualPowerPlant);
             } else {
                 throw new HouseholdServiceException(
-                        String.format("Failed to assign household %s to vpp %s", domainEntity.getHouseholdId().getId(),
+                        String.format("Failed to assign household %s to vpp %s", domainEntity.getHouseholdId().getValue(),
                                 virtualPowerPlantBusinessKey)
                 );
             }

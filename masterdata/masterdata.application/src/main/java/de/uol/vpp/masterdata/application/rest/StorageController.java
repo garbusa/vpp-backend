@@ -1,9 +1,8 @@
 package de.uol.vpp.masterdata.application.rest;
 
-import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
+import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.StorageDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
-import de.uol.vpp.masterdata.application.payload.StorageStatusUpdateRequest;
 import de.uol.vpp.masterdata.domain.exceptions.StorageException;
 import de.uol.vpp.masterdata.domain.services.IStorageService;
 import de.uol.vpp.masterdata.domain.services.StorageServiceException;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class StorageController {
 
     private final IStorageService service;
-    private final ApplicationEntityConverter converter;
+    private final ApplicationDomainConverter converter;
 
     @GetMapping(path = "/by/dpp/{" +
             "dppBusinessKey}")
@@ -45,7 +44,7 @@ public class StorageController {
     }
 
     @GetMapping(path = "/by/household/{" +
-            "householdTimestamp}")
+            "householdBusinessKey}")
     public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdBusinessKey) {
         try {
             return new ResponseEntity<>(
@@ -122,23 +121,6 @@ public class StorageController {
         try {
             service.delete(businessKey, vppBusinessKey);
             return ResponseEntity.ok().body(new ApiResponse(true, false, "Storage successfully deleted", null));
-        } catch (StorageServiceException e) {
-            return new ResponseEntity<>(new ApiResponse(
-                    false, false, e.getMessage(), null
-            ), HttpStatus.NOT_FOUND);
-        } catch (DataIntegrityViolationException sqlException) {
-            return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
-            ), HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PutMapping(path = "/status")
-    public ResponseEntity<?> updateStatus(@RequestBody StorageStatusUpdateRequest request) {
-        try {
-            service.updateStatus(request.getBusinessKey(), request.getCapacity(), request.getVppBusinessKey());
-            return ResponseEntity.ok(new ApiResponse(
-                    true, false, "storage status successfully updated", null));
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null

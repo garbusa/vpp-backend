@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface LoadHouseholdJpaRepository extends JpaRepository<ELoadHousehold, ELoadHousehold.HouseholdTimestamp> {
+public interface LoadHouseholdJpaRepository extends JpaRepository<ELoadHousehold, Long> {
     List<ELoadHousehold> findAllByLoad(ELoad load);
 
     void deleteAllByLoad(ELoad load);

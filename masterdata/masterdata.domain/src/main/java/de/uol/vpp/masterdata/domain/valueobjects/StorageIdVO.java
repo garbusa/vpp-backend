@@ -1,19 +1,17 @@
 package de.uol.vpp.masterdata.domain.valueobjects;
 
-import de.uol.vpp.masterdata.domain.architecture.ValueObject;
 import de.uol.vpp.masterdata.domain.exceptions.StorageException;
 import lombok.Getter;
 
-@ValueObject
 @Getter
 public class StorageIdVO {
 
-    private final String id;
+    private final String value;
 
-    public StorageIdVO(String id) throws StorageException {
-        if (id == null || id.isBlank() || id.isEmpty()) {
-            throw new StorageException("validation for storage id failed");
+    public StorageIdVO(String value) throws StorageException {
+        if (value == null || value.isBlank() || value.isEmpty()) {
+            throw new StorageException("validation for storage householdLoad failed");
         }
-        this.id = id.toUpperCase();
+        this.value = value.toUpperCase();
     }
 }

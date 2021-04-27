@@ -1,8 +1,5 @@
 package de.uol.vpp.masterdata.infrastructure.entities;
 
-import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StoragePower;
-import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StorageStatus;
-import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StorageType;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,14 +15,14 @@ public class Storage {
     @Column(unique = true, nullable = false)
     private String businessKey;
 
-    @Embedded
-    private StoragePower storagePower;
+    @Column(nullable = false)
+    private Double ratedPower;
 
-    @Embedded
-    private StorageType storageType;
+    @Column(nullable = false)
+    private Double capacity;
 
-    @Embedded
-    private StorageStatus storageStatus;
+    @Column(nullable = false)
+    private Double loadTimeHour;
 
     @ManyToOne
     @JoinColumn(name = "household_id")

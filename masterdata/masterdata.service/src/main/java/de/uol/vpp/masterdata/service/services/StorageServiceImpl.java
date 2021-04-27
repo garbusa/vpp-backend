@@ -12,7 +12,10 @@ import de.uol.vpp.masterdata.domain.services.IStorageService;
 import de.uol.vpp.masterdata.domain.services.StorageServiceException;
 import de.uol.vpp.masterdata.domain.utils.IPublishUtil;
 import de.uol.vpp.masterdata.domain.utils.PublishException;
-import de.uol.vpp.masterdata.domain.valueobjects.*;
+import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.HouseholdIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.StorageIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantIdVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,9 +68,9 @@ public class StorageServiceImpl implements IStorageService {
     public StorageEntity get(String businessKey) throws StorageServiceException {
         try {
             return repository.getById(new StorageIdVO(businessKey))
-                    .orElseThrow(() -> new StorageServiceException(String.format("Can't find storage by id %s", businessKey)));
+                    .orElseThrow(() -> new StorageServiceException(String.format("Can't find storage by actionRequestId %s", businessKey)));
         } catch (StorageException | StorageRepositoryException e) {
-            throw new StorageServiceException(String.format("Can't find storage by id %s", businessKey));
+            throw new StorageServiceException(String.format("Can't find storage by actionRequestId %s", businessKey));
         }
 
     }
@@ -77,7 +80,7 @@ public class StorageServiceImpl implements IStorageService {
         try {
             if (repository.getById(domainEntity.getStorageId()).isPresent()) {
                 throw new StorageServiceException(
-                        String.format("storage with id %s already exists", domainEntity.getStorageId().getId()));
+                        String.format("storage with actionRequestId %s already exists", domainEntity.getStorageId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
                     new DecentralizedPowerPlantIdVO(dppBusinessKey)
@@ -88,7 +91,7 @@ public class StorageServiceImpl implements IStorageService {
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new StorageServiceException(
-                        String.format("Failed to assign Storage %s to dpp %s", domainEntity.getStorageId().getId(),
+                        String.format("Failed to assign Storage %s to dpp %s", domainEntity.getStorageId().getValue(),
                                 dppBusinessKey)
                 );
             }
@@ -102,7 +105,7 @@ public class StorageServiceImpl implements IStorageService {
         try {
             if (repository.getById(domainEntity.getStorageId()).isPresent()) {
                 throw new StorageServiceException(
-                        String.format("storage with id %s already exists", domainEntity.getStorageId().getId()));
+                        String.format("storage with actionRequestId %s already exists", domainEntity.getStorageId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
                     new HouseholdIdVO(householdBusinessKey)
@@ -113,7 +116,7 @@ public class StorageServiceImpl implements IStorageService {
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new StorageServiceException(
-                        String.format("Failed to assign Storage %s to household %s", domainEntity.getStorageId().getId(),
+                        String.format("Failed to assign Storage %s to household %s", domainEntity.getStorageId().getValue(),
                                 householdBusinessKey)
                 );
             }
@@ -129,20 +132,6 @@ public class StorageServiceImpl implements IStorageService {
                 repository.deleteById(new StorageIdVO(businessKey));
             } else {
                 throw new StorageServiceException("failed to delete storage. vpp has to be unpublished");
-            }
-
-        } catch (StorageRepositoryException | StorageException | VirtualPowerPlantException | PublishException e) {
-            throw new StorageServiceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void updateStatus(String businessKey, Double capacity, String vppBusinessKey) throws StorageServiceException {
-        try {
-            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(vppBusinessKey), new StorageIdVO(businessKey))) {
-                repository.updateStatus(new StorageIdVO(businessKey), new StorageStatusVO(capacity));
-            } else {
-                throw new StorageServiceException("failed to update storage status. vpp has to be unpublished");
             }
 
         } catch (StorageRepositoryException | StorageException | VirtualPowerPlantException | PublishException e) {

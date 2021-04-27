@@ -1,6 +1,6 @@
 package de.uol.vpp.masterdata.application.rest;
 
-import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
+import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.DecentralizedPowerPlantDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class DecentralizedPowerPlantController {
 
     private final IDecentralizedPowerPlantService service;
-    private final ApplicationEntityConverter converter;
+    private final ApplicationDomainConverter converter;
 
     @GetMapping(path = "/by/vpp/{vppBusinessKey}")
     public ResponseEntity<?> getAllDecentralizedPowerPlantsByVirtualPowerPlantId(@PathVariable String vppBusinessKey) {

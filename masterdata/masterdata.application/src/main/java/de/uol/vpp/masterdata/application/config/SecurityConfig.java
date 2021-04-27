@@ -42,9 +42,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/vpp/**").permitAll()
                 .antMatchers("/dpp/**").permitAll()
                 .antMatchers("/household/**").permitAll()
-                .antMatchers("/producer/**").permitAll()
+                .antMatchers("/solar/**").permitAll()
+                .antMatchers("/water/**").permitAll()
+                .antMatchers("/wind/**").permitAll()
+                .antMatchers("/other/**").permitAll()
                 .antMatchers("/storage/**").permitAll()
-                .antMatchers("/consumer/**").permitAll()
                 .anyRequest()
                 .authenticated();
 

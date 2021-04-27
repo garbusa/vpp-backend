@@ -17,7 +17,5 @@ public interface IStorageService {
 
     void delete(String businessKey, String vppBusinessKey) throws StorageServiceException;
 
-    void updateStatus(String businessKey, Double capacity, String vppBusinessKey) throws StorageServiceException;
-
     void update(String businessKey, StorageEntity toDomain, String vppBusinessKey) throws StorageServiceException;
 }

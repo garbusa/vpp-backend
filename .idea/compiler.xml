@@ -6,17 +6,21 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="production.service" />
-        <module name="masterdata.infrastructure" />
         <module name="load.domain" />
-        <module name="production.application" />
-        <module name="load.infrastructure" />
-        <module name="production.infrastructure" />
-        <module name="production.domain" />
+        <module name="action.application" />
+        <module name="masterdata.infrastructure" />
         <module name="masterdata.application" />
-        <module name="load.service" />
+        <module name="action.infrastructure" />
+        <module name="load.infrastructure" />
         <module name="masterdata.domain" />
+        <module name="production.service" />
+        <module name="load.service" />
         <module name="masterdata.service" />
+        <module name="production.domain" />
+        <module name="production.application" />
+        <module name="production.infrastructure" />
+        <module name="action.domain" />
+        <module name="action.service" />
         <module name="load.application" />
       </profile>
     </annotationProcessing>

@@ -1,6 +1,6 @@
 package de.uol.vpp.masterdata.application.rest;
 
-import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
+import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.VirtualPowerPlantDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class VirtualPowerPlantController {
 
     private final IVirtualPowerPlantService service;
-    private final ApplicationEntityConverter converter;
+    private final ApplicationDomainConverter converter;
 
     @GetMapping
     public ResponseEntity<?> getAllVirtualPowerPlants() {

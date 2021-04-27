@@ -12,14 +12,36 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${vpp.rabbitmq.queue}")
-    String queueName;
+    @Value("${vpp.rabbitmq.exchange.actionRequest}")
+    String actionRequestExchange;
 
-    @Value("${vpp.rabbitmq.exchange}")
-    String exchange;
+    @Value("${vpp.rabbitmq.exchange.forecastGeneration}")
+    String forecastGenerationExchange;
 
-    @Value("${vpp.rabbitmq.routingkey}")
-    private String routingkey;
+
+    @Value("${vpp.rabbitmq.queue.load.to.action}")
+    String loadToActionQueue;
+
+    @Value("${vpp.rabbitmq.key.load.to.action}")
+    String loadToActionKey;
+
+    @Value("${vpp.rabbitmq.queue.production.to.action}")
+    String productionToActionQueue;
+
+    @Value("${vpp.rabbitmq.key.production.to.action}")
+    String productionToActionKey;
+
+    @Value("${vpp.rabbitmq.queue.action.to.load}")
+    String actionToLoadQueue;
+
+    @Value("${vpp.rabbitmq.key.action.to.load}")
+    String actionToLoadKey;
+
+    @Value("${vpp.rabbitmq.queue.action.to.production}")
+    String actionToProductionQueue;
+
+    @Value("${vpp.rabbitmq.key.action.to.production}")
+    String actionToProductionKey;
 
     @Bean
     public AmqpTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
@@ -34,17 +56,54 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    Queue queue() {
-        return new Queue(queueName, false);
+    Queue loadToActionQueue() {
+        return new Queue(loadToActionQueue, false);
     }
 
     @Bean
-    DirectExchange exchange() {
-        return new DirectExchange(exchange);
+    Queue productionToActionQueue() {
+        return new Queue(productionToActionQueue, false);
     }
 
     @Bean
-    Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingkey);
+    Queue actionToLoadQueue() {
+        return new Queue(actionToLoadQueue, false);
     }
+
+    @Bean
+    Queue actionToProductionQueue() {
+        return new Queue(actionToProductionQueue, false);
+    }
+
+    @Bean
+    DirectExchange actionRequestExchange() {
+        return new DirectExchange(actionRequestExchange);
+    }
+
+    @Bean
+    DirectExchange forecastGenerationExchange() {
+        return new DirectExchange(forecastGenerationExchange);
+    }
+
+
+    @Bean
+    Binding bindingLoadToAction(Queue loadToActionQueue, DirectExchange forecastGenerationExchange) {
+        return BindingBuilder.bind(loadToActionQueue).to(forecastGenerationExchange).with(loadToActionKey);
+    }
+
+    @Bean
+    Binding bindingProductionToAction(Queue productionToActionQueue, DirectExchange forecastGenerationExchange) {
+        return BindingBuilder.bind(productionToActionQueue).to(forecastGenerationExchange).with(productionToActionKey);
+    }
+
+    @Bean
+    Binding bindingActionToProduction(Queue actionToProductionQueue, DirectExchange actionRequestExchange) {
+        return BindingBuilder.bind(actionToProductionQueue).to(actionRequestExchange).with(actionToProductionKey);
+    }
+
+    @Bean
+    Binding bindingActionToLoad(Queue actionToLoadQueue, DirectExchange actionRequestExchange) {
+        return BindingBuilder.bind(actionToLoadQueue).to(actionRequestExchange).with(actionToLoadKey);
+    }
+
 }

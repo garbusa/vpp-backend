@@ -17,13 +17,19 @@ public class Household {
     private String businessKey;
 
     @OneToMany(mappedBy = "household")
-    private List<Producer> producers;
+    private List<WindEnergy> winds;
+
+    @OneToMany(mappedBy = "household")
+    private List<WaterEnergy> waters;
+
+    @OneToMany(mappedBy = "household")
+    private List<SolarEnergy> solars;
+
+    @OneToMany(mappedBy = "household")
+    private List<OtherEnergy> others;
 
     @OneToMany(mappedBy = "household")
     private List<Storage> storages;
-
-    @OneToMany(mappedBy = "household")
-    private List<Consumer> consumers;
 
     @Column(nullable = false)
     private Integer memberAmount;

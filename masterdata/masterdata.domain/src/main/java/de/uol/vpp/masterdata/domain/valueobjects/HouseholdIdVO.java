@@ -1,21 +1,19 @@
 package de.uol.vpp.masterdata.domain.valueobjects;
 
-import de.uol.vpp.masterdata.domain.architecture.ValueObject;
 import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
 import lombok.Getter;
 import lombok.Setter;
 
-@ValueObject
 @Setter
 @Getter
 public class HouseholdIdVO {
 
-    private final String id;
+    private final String value;
 
-    public HouseholdIdVO(String id) throws HouseholdException {
-        if (id == null || id.isBlank() || id.isEmpty()) {
-            throw new HouseholdException("validation for household id failed");
+    public HouseholdIdVO(String value) throws HouseholdException {
+        if (value == null || value.isBlank() || value.isEmpty()) {
+            throw new HouseholdException("validation for household householdLoad failed");
         }
-        this.id = id.toUpperCase();
+        this.value = value.toUpperCase();
     }
 }

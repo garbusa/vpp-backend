@@ -23,4 +23,8 @@ public class LoadHouseholdStartTimestampVO {
             throw new LoadException("failed to create startTimestamp", e);
         }
     }
+
+    public boolean isGreater(LoadHouseholdStartTimestampVO obj) {
+        return timestamp.isAfter(obj.getTimestamp());
+    }
 }

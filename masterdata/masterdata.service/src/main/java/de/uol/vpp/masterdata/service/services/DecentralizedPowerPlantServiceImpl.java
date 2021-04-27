@@ -53,7 +53,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
             if (dpp.isPresent()) {
                 return dpp.get();
             } else {
-                throw new DecentralizedPowerPlantServiceException(String.format("Can't find DPP by id %s", businessKey));
+                throw new DecentralizedPowerPlantServiceException(String.format("Can't find DPP by actionRequestId %s", businessKey));
             }
         } catch (DecentralizedPowerPlantRepositoryException | DecentralizedPowerPlantException e) {
             throw new DecentralizedPowerPlantServiceException(e.getMessage(), e);
@@ -65,7 +65,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
         try {
             if (repository.getById(domainEntity.getDecentralizedPowerPlantId()).isPresent()) {
                 throw new DecentralizedPowerPlantServiceException(
-                        String.format("dpp with id %s already exists", domainEntity.getDecentralizedPowerPlantId().getId()));
+                        String.format("dpp with actionRequestId %s already exists", domainEntity.getDecentralizedPowerPlantId().getValue()));
             }
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional = virtualPowerPlantRepository.getById(
                     new VirtualPowerPlantIdVO(virtualPowerPlantBusinessKey)
@@ -76,7 +76,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
                 repository.assign(domainEntity, virtualPowerPlant);
             } else {
                 throw new DecentralizedPowerPlantServiceException(
-                        String.format("Failed to assign dpp %s to vpp %s", domainEntity.getDecentralizedPowerPlantId().getId(),
+                        String.format("Failed to assign dpp %s to vpp %s", domainEntity.getDecentralizedPowerPlantId().getValue(),
                                 virtualPowerPlantBusinessKey)
                 );
             }

@@ -1,6 +1,6 @@
 package de.uol.vpp.masterdata.application.rest;
 
-import de.uol.vpp.masterdata.application.ApplicationEntityConverter;
+import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.HouseholdDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class HouseholdController {
 
     private final IHouseholdService service;
-    private final ApplicationEntityConverter converter;
+    private final ApplicationDomainConverter converter;
 
     @GetMapping(path = "/by/vpp/{vppBusinessKey}")
     public ResponseEntity<?> getAllHouseholdsByVirtualPowerPlantId(@PathVariable String vppBusinessKey) {

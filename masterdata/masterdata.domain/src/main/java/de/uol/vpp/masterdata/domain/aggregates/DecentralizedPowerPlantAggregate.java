@@ -1,18 +1,18 @@
 package de.uol.vpp.masterdata.domain.aggregates;
 
-import de.uol.vpp.masterdata.domain.architecture.Aggregate;
-import de.uol.vpp.masterdata.domain.entities.ProducerEntity;
-import de.uol.vpp.masterdata.domain.entities.StorageEntity;
+import de.uol.vpp.masterdata.domain.entities.*;
 import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Aggregate
 @Data
 public class DecentralizedPowerPlantAggregate {
     private DecentralizedPowerPlantIdVO decentralizedPowerPlantId;
-    private List<ProducerEntity> producers = new ArrayList<>();
+    private List<SolarEnergyEntity> solars = new ArrayList<>();
+    private List<WindEnergyEntity> winds = new ArrayList<>();
+    private List<WaterEnergyEntity> waters = new ArrayList<>();
+    private List<OtherEnergyEntity> others = new ArrayList<>();
     private List<StorageEntity> storages = new ArrayList<>();
 }

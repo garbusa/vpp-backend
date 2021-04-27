@@ -13,10 +13,9 @@ public class ApplicationDomainConverter {
 
     public LoadDTO toApplication(LoadAggregate domainEntity) {
         LoadDTO dto = new LoadDTO();
+        dto.setActionRequestId(domainEntity.getLoadActionRequestId().getId());
         dto.setVirtualPowerPlantId(domainEntity.getLoadVirtualPowerPlantId().getId());
         dto.setStartTimestamp(domainEntity.getLoadStartTimestamp().getTimestamp().toEpochSecond());
-        dto.setForecasted(domainEntity.getLoadIsForecasted().isForecasted());
-        dto.setOutdated(domainEntity.getLoadIsOutdated().isOutdated());
         dto.setHouseholds(domainEntity.getLoadHouseholdEntities().stream().map(this::toApplication).collect(Collectors.toList()));
         return dto;
     }

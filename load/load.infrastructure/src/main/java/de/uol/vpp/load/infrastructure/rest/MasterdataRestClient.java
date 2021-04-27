@@ -16,6 +16,27 @@ import java.util.List;
 @Log4j2
 public class MasterdataRestClient {
 
+    public boolean isActiveVpp(String vppId) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl
+                    = "http://localhost:8081/masterdata/api/vpp/" + vppId;
+            ResponseEntity<String> response
+                    = restTemplate.getForEntity(fooResourceUrl, String.class);
+            if (response != null && response.getBody() != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                if (root.has("success") && root.get("success").booleanValue() && root.has("data")) {
+                    JsonNode vpp = root.get("data");
+                    return vpp.has("published") && vpp.get("published").booleanValue();
+                }
+
+            }
+        } catch (JsonProcessingException e) {
+            log.info(e);
+        }
+        return false;
+    }
 
     public List<String> getAllActiveVppIds() {
         List<String> ids = new ArrayList<>();
@@ -32,7 +53,7 @@ public class MasterdataRestClient {
                     ArrayNode name = (ArrayNode) root.get("data");
                     name.forEach((node) -> {
                         if (node.has("published") && node.get("published").booleanValue()) {
-                            ids.add(node.get("virtualPowerPlantId").asText());
+                            ids.add(node.get("actionRequestId").asText());
                         }
                     });
                 }

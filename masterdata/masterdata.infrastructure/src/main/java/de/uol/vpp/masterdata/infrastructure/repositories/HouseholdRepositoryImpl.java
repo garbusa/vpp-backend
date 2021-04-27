@@ -24,14 +24,16 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
     private final HouseholdJpaRepository jpaRepository;
     private final VirtualPowerPlantJpaRepository virtualPowerPlantJpaRepository;
     private final StorageJpaRepository storageJpaRepository;
-    private final ProducerJpaRepository producerJpaRepository;
-    private final ConsumerJpaRepository consumerJpaRepository;
+    private final SolarEnergyJpaRepository solarJpaRepository;
+    private final WindEnergyJpaRepository windJpaRepository;
+    private final WaterEnergyJpaRepository waterJpaRepository;
+    private final OtherEnergyJpaRepository otherJpaRepository;
     private final InfrastructureEntityConverter converter;
 
     @Override
     public List<HouseholdAggregate> getAllByVirtualPowerPlant(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException {
         try {
-            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getId());
+            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue());
             if (virtualPowerPlantOptional.isPresent()) {
                 List<HouseholdAggregate> result = new ArrayList<>();
                 for (Household household : jpaRepository.findAllByVirtualPowerPlant(virtualPowerPlantOptional.get())) {
@@ -40,7 +42,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
                 return result;
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("There is no VPP with id %s to get all households", virtualPowerPlantAggregate.getVirtualPowerPlantId().getId())
+                        String.format("There is no VPP with actionRequestId %s to get all households", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
                 );
             }
         } catch (HouseholdException e) {
@@ -51,7 +53,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
     @Override
     public Optional<HouseholdAggregate> getById(HouseholdIdVO id) throws HouseholdRepositoryException {
         try {
-            Optional<Household> result = jpaRepository.findOneByBusinessKey(id.getId());
+            Optional<Household> result = jpaRepository.findOneByBusinessKey(id.getValue());
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             }
@@ -69,26 +71,28 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
 
     @Override
     public void deleteById(HouseholdIdVO id) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
+        Optional<Household> jpaEntity = jpaRepository.findOneByBusinessKey(id.getValue());
         if (jpaEntity.isPresent()) {
             Household household = jpaEntity.get();
 
-            household.getProducers().forEach(producerJpaRepository::delete);
+            household.getSolars().forEach(solarJpaRepository::delete);
+            household.getWaters().forEach(waterJpaRepository::delete);
+            household.getWinds().forEach(windJpaRepository::delete);
+            household.getOthers().forEach(otherJpaRepository::delete);
             household.getStorages().forEach(storageJpaRepository::delete);
-            household.getConsumers().forEach(consumerJpaRepository::delete);
 
             jpaRepository.delete(household);
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("household %s can not be found and can not be deleted", id.getId())
+                    String.format("household %s can not be found and can not be deleted", id.getValue())
             );
         }
     }
 
     @Override
     public void assign(HouseholdAggregate entity, VirtualPowerPlantAggregate virtualPowerPlant) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(entity.getHouseholdId().getId());
-        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getId());
+        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(entity.getHouseholdId().getValue());
+        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getValue());
         if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
             Household jpaEntity = jpaEntityOptional.get();
             VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
@@ -99,21 +103,21 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
                 virtualPowerPlantJpaRepository.save(virtualPowerPlantJpaEntity);
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("Dpp %s is already assigned to vpp %s", entity.getHouseholdId().getId(),
+                        String.format("Dpp %s is already assigned to vpp %s", entity.getHouseholdId().getValue(),
                                 jpaEntity.getVirtualPowerPlant().getBusinessKey())
                 );
             }
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("An error occured while assigning dpp %s to vpp %s", entity.getHouseholdId().getId(),
-                            virtualPowerPlant.getVirtualPowerPlantId().getId())
+                    String.format("An error occured while assigning dpp %s to vpp %s", entity.getHouseholdId().getValue(),
+                            virtualPowerPlant.getVirtualPowerPlantId().getValue())
             );
         }
     }
 
     @Override
     public void update(HouseholdIdVO id, HouseholdAggregate domainEntity) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
+        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             Household jpaEntity = jpaEntityOptional.get();
             Household updated = converter.toInfrastructure(domainEntity);

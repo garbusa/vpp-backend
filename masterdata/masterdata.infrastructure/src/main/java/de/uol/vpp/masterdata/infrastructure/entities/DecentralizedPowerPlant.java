@@ -17,7 +17,17 @@ public class DecentralizedPowerPlant {
     private String businessKey;
 
     @OneToMany(mappedBy = "decentralizedPowerPlant")
-    private List<Producer> producers;
+    private List<WindEnergy> winds;
+
+    @OneToMany(mappedBy = "decentralizedPowerPlant")
+    private List<WaterEnergy> waters;
+
+    @OneToMany(mappedBy = "decentralizedPowerPlant")
+    private List<SolarEnergy> solars;
+
+    @OneToMany(mappedBy = "decentralizedPowerPlant")
+    private List<OtherEnergy> others;
+
 
     @OneToMany(mappedBy = "decentralizedPowerPlant")
     private List<Storage> storages;

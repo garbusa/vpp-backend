@@ -3,9 +3,7 @@ package de.uol.vpp.masterdata.service.utils;
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
-import de.uol.vpp.masterdata.domain.entities.ConsumerEntity;
-import de.uol.vpp.masterdata.domain.entities.ProducerEntity;
-import de.uol.vpp.masterdata.domain.entities.StorageEntity;
+import de.uol.vpp.masterdata.domain.entities.*;
 import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
 import de.uol.vpp.masterdata.domain.utils.IPublishUtil;
 import de.uol.vpp.masterdata.domain.utils.PublishException;
@@ -30,12 +28,12 @@ public class PublishUtilImpl implements IPublishUtil {
                 VirtualPowerPlantAggregate vpp = vppOptional.get();
                 boolean hasDpp = false;
                 for (DecentralizedPowerPlantAggregate dpp : vpp.getDecentralizedPowerPlants()) {
-                    if (dpp.getDecentralizedPowerPlantId().getId().equals(dppBusinessKey.getId())) {
+                    if (dpp.getDecentralizedPowerPlantId().getValue().equals(dppBusinessKey.getValue())) {
                         hasDpp = true;
                     }
                 }
                 if (hasDpp) {
-                    return !vpp.getPublished().isPublished();
+                    return !vpp.getPublished().isValue();
                 } else {
                     throw new PublishException("checking publish status failed. dpp does not belong to vpp");
                 }
@@ -56,12 +54,12 @@ public class PublishUtilImpl implements IPublishUtil {
                 VirtualPowerPlantAggregate vpp = vppOptional.get();
                 boolean hasHousehold = false;
                 for (HouseholdAggregate household : vpp.getHouseholds()) {
-                    if (household.getHouseholdId().getId().equals(householdBusinessKey.getId())) {
+                    if (household.getHouseholdId().getValue().equals(householdBusinessKey.getValue())) {
                         hasHousehold = true;
                     }
                 }
                 if (hasHousehold) {
-                    return !vpp.getPublished().isPublished();
+                    return !vpp.getPublished().isValue();
                 } else {
                     throw new PublishException("checking publish status failed. household does not belong to vpp");
                 }
@@ -74,28 +72,28 @@ public class PublishUtilImpl implements IPublishUtil {
     }
 
     @Override
-    public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, ProducerIdVO producerBusinessKey) throws PublishException {
+    public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, SolarEnergyIdVO solarEnergyBusinessKey) throws PublishException {
         try {
             Optional<VirtualPowerPlantAggregate> vppOptional = virtualPowerPlantRepository.getById(vppBusinessKey);
             if (vppOptional.isPresent()) {
                 VirtualPowerPlantAggregate vpp = vppOptional.get();
-                boolean hasProducer = false;
+                boolean hasSolar = false;
                 for (HouseholdAggregate household : vpp.getHouseholds()) {
-                    for (ProducerEntity producer : household.getProducers()) {
-                        if (producer.getProducerId().getId().equals(producerBusinessKey.getId())) {
-                            hasProducer = true;
+                    for (SolarEnergyEntity producer : household.getSolars()) {
+                        if (producer.getId().getValue().equals(solarEnergyBusinessKey.getValue())) {
+                            hasSolar = true;
                         }
                     }
                 }
                 for (DecentralizedPowerPlantAggregate dpp : vpp.getDecentralizedPowerPlants()) {
-                    for (ProducerEntity producer : dpp.getProducers()) {
-                        if (producer.getProducerId().getId().equals(producerBusinessKey.getId())) {
-                            hasProducer = true;
+                    for (SolarEnergyEntity producer : dpp.getSolars()) {
+                        if (producer.getId().getValue().equals(solarEnergyBusinessKey.getValue())) {
+                            hasSolar = true;
                         }
                     }
                 }
-                if (hasProducer) {
-                    return !vpp.getPublished().isPublished();
+                if (hasSolar) {
+                    return !vpp.getPublished().isValue();
                 } else {
                     throw new PublishException("checking publish status failed. producer does not belong to vpp");
                 }
@@ -108,6 +106,111 @@ public class PublishUtilImpl implements IPublishUtil {
     }
 
     @Override
+    public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, OtherEnergyIdVO otherEnergyBusinessKey) throws PublishException {
+        try {
+            Optional<VirtualPowerPlantAggregate> vppOptional = virtualPowerPlantRepository.getById(vppBusinessKey);
+            if (vppOptional.isPresent()) {
+                VirtualPowerPlantAggregate vpp = vppOptional.get();
+                boolean hasOther = false;
+                for (HouseholdAggregate household : vpp.getHouseholds()) {
+                    for (OtherEnergyEntity producer : household.getOthers()) {
+                        if (producer.getId().getValue().equals(otherEnergyBusinessKey.getValue())) {
+                            hasOther = true;
+                        }
+                    }
+                }
+                for (DecentralizedPowerPlantAggregate dpp : vpp.getDecentralizedPowerPlants()) {
+                    for (OtherEnergyEntity producer : dpp.getOthers()) {
+                        if (producer.getId().getValue().equals(otherEnergyBusinessKey.getValue())) {
+                            hasOther = true;
+                        }
+                    }
+                }
+                if (hasOther) {
+                    return !vpp.getPublished().isValue();
+                } else {
+                    throw new PublishException("checking publish status failed. producer does not belong to vpp");
+                }
+            } else {
+                throw new PublishException("checking publish status failed. vpp does not exist");
+            }
+        } catch (VirtualPowerPlantRepositoryException e) {
+            throw new PublishException("checking publish status failed. fetching vpp failed");
+        }
+    }
+
+
+    @Override
+    public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, WindEnergyIdVO windEnergyBusinessKey) throws PublishException {
+        try {
+            Optional<VirtualPowerPlantAggregate> vppOptional = virtualPowerPlantRepository.getById(vppBusinessKey);
+            if (vppOptional.isPresent()) {
+                VirtualPowerPlantAggregate vpp = vppOptional.get();
+                boolean hasWind = false;
+                for (HouseholdAggregate household : vpp.getHouseholds()) {
+                    for (WindEnergyEntity producer : household.getWinds()) {
+                        if (producer.getId().getValue().equals(windEnergyBusinessKey.getValue())) {
+                            hasWind = true;
+                        }
+                    }
+                }
+                for (DecentralizedPowerPlantAggregate dpp : vpp.getDecentralizedPowerPlants()) {
+                    for (WindEnergyEntity producer : dpp.getWinds()) {
+                        if (producer.getId().getValue().equals(windEnergyBusinessKey.getValue())) {
+                            hasWind = true;
+                        }
+                    }
+                }
+                if (hasWind) {
+                    return !vpp.getPublished().isValue();
+                } else {
+                    throw new PublishException("checking publish status failed. producer does not belong to vpp");
+                }
+            } else {
+                throw new PublishException("checking publish status failed. vpp does not exist");
+            }
+        } catch (VirtualPowerPlantRepositoryException e) {
+            throw new PublishException("checking publish status failed. fetching vpp failed");
+        }
+    }
+
+
+    @Override
+    public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, WaterEnergyIdVO waterEnergyBusinessKey) throws PublishException {
+        try {
+            Optional<VirtualPowerPlantAggregate> vppOptional = virtualPowerPlantRepository.getById(vppBusinessKey);
+            if (vppOptional.isPresent()) {
+                VirtualPowerPlantAggregate vpp = vppOptional.get();
+                boolean hasWater = false;
+                for (HouseholdAggregate household : vpp.getHouseholds()) {
+                    for (WaterEnergyEntity producer : household.getWaters()) {
+                        if (producer.getId().getValue().equals(waterEnergyBusinessKey.getValue())) {
+                            hasWater = true;
+                        }
+                    }
+                }
+                for (DecentralizedPowerPlantAggregate dpp : vpp.getDecentralizedPowerPlants()) {
+                    for (WaterEnergyEntity producer : dpp.getWaters()) {
+                        if (producer.getId().getValue().equals(waterEnergyBusinessKey.getValue())) {
+                            hasWater = true;
+                        }
+                    }
+                }
+                if (hasWater) {
+                    return !vpp.getPublished().isValue();
+                } else {
+                    throw new PublishException("checking publish status failed. producer does not belong to vpp");
+                }
+            } else {
+                throw new PublishException("checking publish status failed. vpp does not exist");
+            }
+        } catch (VirtualPowerPlantRepositoryException e) {
+            throw new PublishException("checking publish status failed. fetching vpp failed");
+        }
+    }
+
+
+    @Override
     public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, StorageIdVO storageBusinessKey) throws PublishException {
         try {
             Optional<VirtualPowerPlantAggregate> vppOptional = virtualPowerPlantRepository.getById(vppBusinessKey);
@@ -116,20 +219,20 @@ public class PublishUtilImpl implements IPublishUtil {
                 boolean hasStorage = false;
                 for (HouseholdAggregate household : vpp.getHouseholds()) {
                     for (StorageEntity storage : household.getStorages()) {
-                        if (storage.getStorageId().getId().equals(storageBusinessKey.getId())) {
+                        if (storage.getStorageId().getValue().equals(storageBusinessKey.getValue())) {
                             hasStorage = true;
                         }
                     }
                 }
                 for (DecentralizedPowerPlantAggregate dpp : vpp.getDecentralizedPowerPlants()) {
                     for (StorageEntity storage : dpp.getStorages()) {
-                        if (storage.getStorageId().getId().equals(storageBusinessKey.getId())) {
+                        if (storage.getStorageId().getValue().equals(storageBusinessKey.getValue())) {
                             hasStorage = true;
                         }
                     }
                 }
                 if (hasStorage) {
-                    return !vpp.getPublished().isPublished();
+                    return !vpp.getPublished().isValue();
                 } else {
                     throw new PublishException("checking publish status failed. storage does not belong to vpp");
                 }
@@ -141,30 +244,4 @@ public class PublishUtilImpl implements IPublishUtil {
         }
     }
 
-    @Override
-    public boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, ConsumerIdVO consumerBusinessKey) throws PublishException {
-        try {
-            Optional<VirtualPowerPlantAggregate> vppOptional = virtualPowerPlantRepository.getById(vppBusinessKey);
-            if (vppOptional.isPresent()) {
-                VirtualPowerPlantAggregate vpp = vppOptional.get();
-                boolean hasConsumer = false;
-                for (HouseholdAggregate household : vpp.getHouseholds()) {
-                    for (ConsumerEntity storage : household.getConsumers()) {
-                        if (storage.getConsumerId().getId().equals(consumerBusinessKey.getId())) {
-                            hasConsumer = true;
-                        }
-                    }
-                }
-                if (hasConsumer) {
-                    return !vpp.getPublished().isPublished();
-                } else {
-                    throw new PublishException("checking publish status failed. consumer does not belong to vpp");
-                }
-            } else {
-                throw new PublishException("checking publish status failed. vpp does not exist");
-            }
-        } catch (VirtualPowerPlantRepositoryException e) {
-            throw new PublishException("checking publish status failed. fetching vpp failed");
-        }
-    }
 }

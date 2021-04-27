@@ -6,34 +6,24 @@ import de.uol.vpp.load.domain.exceptions.LoadRepositoryException;
 import de.uol.vpp.load.domain.exceptions.LoadServiceException;
 import de.uol.vpp.load.domain.repositories.ILoadRepository;
 import de.uol.vpp.load.domain.services.ILoadService;
-import de.uol.vpp.load.domain.valueobjects.LoadStartTimestampVO;
-import de.uol.vpp.load.domain.valueobjects.LoadVirtualPowerPlantIdVO;
+import de.uol.vpp.load.domain.valueobjects.LoadActionRequestIdVO;
+import de.uol.vpp.load.infrastructure.scheduler.LoadScheduler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class LoadServiceImpl implements ILoadService {
 
     private final ILoadRepository repository;
+    private final LoadScheduler scheduler;
 
     @Override
-    public List<LoadAggregate> getVppLoad(String vppBusinessKey, ZonedDateTime startTs) throws LoadServiceException {
+    public List<LoadAggregate> getLoadsByActionRequestId(String actionRequestBusinessKey) throws LoadServiceException {
         try {
-            List<LoadAggregate> loads = repository.getCurrentVppLoads(new LoadVirtualPowerPlantIdVO(vppBusinessKey));
-            return loads.stream().filter(loadAggregate -> {
-                try {
-                    return loadAggregate.getLoadStartTimestamp().isGreater(
-                            new LoadStartTimestampVO(startTs.toEpochSecond())
-                    );
-                } catch (LoadException e) {
-                    return false;
-                }
-            }).collect(Collectors.toList());
+            return repository.getLoadsByActionRequestId(new LoadActionRequestIdVO(actionRequestBusinessKey));
         } catch (LoadRepositoryException | LoadException e) {
             throw new LoadServiceException(e.getMessage(), e);
         }

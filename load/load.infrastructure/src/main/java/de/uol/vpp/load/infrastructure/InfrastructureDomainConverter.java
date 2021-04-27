@@ -17,12 +17,11 @@ public class InfrastructureDomainConverter {
 
     public LoadAggregate toDomain(ELoad jpaEntity) throws LoadException {
         LoadAggregate domainEntity = new LoadAggregate();
-        domainEntity.setLoadVirtualPowerPlantId(
-                new LoadVirtualPowerPlantIdVO(jpaEntity.getVppTimestamp().getVppBusinessKey())
+        domainEntity.setLoadActionRequestId(
+                new LoadActionRequestIdVO(jpaEntity.getActionRequestTimestamp().getActionRequestId())
         );
-        domainEntity.setLoadStartTimestamp(new LoadStartTimestampVO(jpaEntity.getVppTimestamp().getStartTimestamp().toEpochSecond()));
-        domainEntity.setLoadIsForecasted(new LoadIsForecastedVO(jpaEntity.isForecasted()));
-        domainEntity.setLoadIsOutdated(new LoadIsOutdatedVO(jpaEntity.isOutdated()));
+        domainEntity.setLoadVirtualPowerPlantId(new LoadVirtualPowerPlantIdVO(jpaEntity.getVirtualPowerPlantId()));
+        domainEntity.setLoadStartTimestamp(new LoadStartTimestampVO(jpaEntity.getActionRequestTimestamp().getTimestamp().toEpochSecond()));
         List<LoadHouseholdEntity> loadHouseholds = new ArrayList<>();
         for (ELoadHousehold eLoadHousehold : jpaEntity.getHouseholds()) {
             loadHouseholds.add(this.toDomain(eLoadHousehold));
@@ -33,21 +32,20 @@ public class InfrastructureDomainConverter {
 
     public LoadHouseholdEntity toDomain(ELoadHousehold jpaEntity) throws LoadException {
         LoadHouseholdEntity domainEntity = new LoadHouseholdEntity();
-        domainEntity.setLoadHouseholdId(new LoadHouseholdIdVO(jpaEntity.getHouseholdTimestamp().getHouseholdBusinessKey()));
-        domainEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(jpaEntity.getHouseholdTimestamp().getStartTimestamp().toEpochSecond()));
-        domainEntity.setLoadHouseholdValueVO(new LoadHouseholdValueVO(jpaEntity.getLoadValue()));
+        domainEntity.setLoadHouseholdId(new LoadHouseholdIdVO(jpaEntity.getHouseholdId()));
+        domainEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(jpaEntity.getTimestamp().toEpochSecond()));
+        domainEntity.setLoadHouseholdValueVO(new LoadHouseholdValueVO(jpaEntity.getHouseholdLoad()));
         domainEntity.setLoadHouseholdMemberAmount(new LoadHouseholdMemberAmountVO(jpaEntity.getHouseholdMemberAmount()));
         return domainEntity;
     }
 
     public ELoad toInfrastructure(LoadAggregate domainEntity) {
         ELoad jpaEntity = new ELoad();
-        jpaEntity.setVppTimestamp(new ELoad.VppTimestamp(
-                domainEntity.getLoadVirtualPowerPlantId().getId(),
+        jpaEntity.setActionRequestTimestamp(new ELoad.ActionRequestTimestamp(
+                domainEntity.getLoadActionRequestId().getId(),
                 domainEntity.getLoadStartTimestamp().getTimestamp()
         ));
-        jpaEntity.setForecasted(domainEntity.getLoadIsForecasted().isForecasted());
-        jpaEntity.setOutdated(domainEntity.getLoadIsOutdated().isOutdated());
+        jpaEntity.setVirtualPowerPlantId(domainEntity.getLoadVirtualPowerPlantId().getId());
         if (domainEntity.getLoadHouseholdEntities() != null && !domainEntity.getLoadHouseholdEntities().isEmpty()) {
             jpaEntity.setHouseholds(
                     domainEntity.getLoadHouseholdEntities().stream().map(this::toInfrastructure)
@@ -63,12 +61,10 @@ public class InfrastructureDomainConverter {
 
     public ELoadHousehold toInfrastructure(LoadHouseholdEntity domainEntity) {
         ELoadHousehold jpaEntity = new ELoadHousehold();
-        jpaEntity.setHouseholdTimestamp(new ELoadHousehold.HouseholdTimestamp(
-                domainEntity.getLoadHouseholdId().getId(),
-                domainEntity.getLoadHouseholdStartTimestamp().getTimestamp()
-        ));
+        jpaEntity.setHouseholdId(domainEntity.getLoadHouseholdId().getId());
         jpaEntity.setHouseholdMemberAmount(domainEntity.getLoadHouseholdMemberAmount().getAmount());
-        jpaEntity.setLoadValue(domainEntity.getLoadHouseholdValueVO().getValue());
+        jpaEntity.setHouseholdLoad(domainEntity.getLoadHouseholdValueVO().getValue());
+        jpaEntity.setTimestamp(domainEntity.getLoadHouseholdStartTimestamp().getTimestamp());
         return jpaEntity;
     }
 }

@@ -7,12 +7,10 @@ import de.uol.vpp.masterdata.domain.exceptions.StorageException;
 import de.uol.vpp.masterdata.domain.repositories.IStorageRepository;
 import de.uol.vpp.masterdata.domain.repositories.StorageRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.StorageIdVO;
-import de.uol.vpp.masterdata.domain.valueobjects.StorageStatusVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.entities.Household;
 import de.uol.vpp.masterdata.infrastructure.entities.Storage;
-import de.uol.vpp.masterdata.infrastructure.entities.embeddables.StorageStatus;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.DecentralizedPowerPlantJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.HouseholdJpaRepository;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.StorageJpaRepository;
@@ -36,7 +34,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
     public List<StorageEntity> getAllByDecentralizedPowerPlant(DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws StorageRepositoryException {
         try {
             Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository
-                    .findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId());
+                    .findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
 
             if (dpp.isPresent()) {
                 List<StorageEntity> result = new ArrayList<>();
@@ -45,7 +43,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
                 }
                 return result;
             } else {
-                throw new StorageRepositoryException(String.format("Can not find dpp %s to get all storages", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId()));
+                throw new StorageRepositoryException(String.format("Can not find dpp %s to get all storages", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
@@ -56,7 +54,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
     public List<StorageEntity> getAllByHousehold(HouseholdAggregate householdAggregate) throws StorageRepositoryException {
         try {
             Optional<Household> household = householdJpaRepository
-                    .findOneByBusinessKey(householdAggregate.getHouseholdId().getId());
+                    .findOneByBusinessKey(householdAggregate.getHouseholdId().getValue());
 
             if (household.isPresent()) {
                 List<StorageEntity> result = new ArrayList<>();
@@ -65,7 +63,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
                 }
                 return result;
             } else {
-                throw new StorageRepositoryException(String.format("Can not find household %s to get all storages", householdAggregate.getHouseholdId().getId()));
+                throw new StorageRepositoryException(String.format("Can not find household %s to get all storages", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
@@ -76,7 +74,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
     @Override
     public Optional<StorageEntity> getById(StorageIdVO id) throws StorageRepositoryException {
         try {
-            Optional<Storage> result = jpaRepository.findOneByBusinessKey(id.getId());
+            Optional<Storage> result = jpaRepository.findOneByBusinessKey(id.getValue());
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             }
@@ -94,9 +92,9 @@ public class StorageRepositoryImpl implements IStorageRepository {
 
     @Override
     public void assignToDecentralizedPowerPlant(StorageEntity storageEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws StorageRepositoryException {
-        Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId());
+        Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<Storage> storage = jpaRepository.findOneByBusinessKey(storageEntity.getStorageId().getId());
+            Optional<Storage> storage = jpaRepository.findOneByBusinessKey(storageEntity.getStorageId().getValue());
             if (storage.isPresent()) {
                 if (storage.get().getDecentralizedPowerPlant() == null &&
                         storage.get().getHousehold() == null) {
@@ -106,26 +104,26 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new StorageRepositoryException(
-                            String.format("To assign an entity for storage %s, the assigments have to be empty", storageEntity.getStorageId().getId())
+                            String.format("To assign an entity for storage %s, the assigments have to be empty", storageEntity.getStorageId().getValue())
                     );
                 }
             } else {
                 throw new StorageRepositoryException(
-                        String.format("Failed to fetch storage %s", storageEntity.getStorageId().getId())
+                        String.format("Failed to fetch storage %s", storageEntity.getStorageId().getValue())
                 );
             }
         } else {
             throw new StorageRepositoryException(
-                    String.format("Dpp %s does not exist. Failed to fetch all storage", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getId())
+                    String.format("Dpp %s does not exist. Failed to fetch all storage", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
 
     @Override
     public void assignToHousehold(StorageEntity storageEntity, HouseholdAggregate householdAggregate) throws StorageRepositoryException {
-        Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getId());
+        Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<Storage> storage = jpaRepository.findOneByBusinessKey(storageEntity.getStorageId().getId());
+            Optional<Storage> storage = jpaRepository.findOneByBusinessKey(storageEntity.getStorageId().getValue());
             if (storage.isPresent()) {
                 if (storage.get().getDecentralizedPowerPlant() == null &&
                         storage.get().getHousehold() == null) {
@@ -135,59 +133,44 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new StorageRepositoryException(
-                            String.format("To assign an entity for storage %s, the assigments have to be empty", storageEntity.getStorageId().getId())
+                            String.format("To assign an entity for storage %s, the assigments have to be empty", storageEntity.getStorageId().getValue())
                     );
                 }
             } else {
                 throw new StorageRepositoryException(
-                        String.format("Failed to fetch storage %s", storageEntity.getStorageId().getId())
+                        String.format("Failed to fetch storage %s", storageEntity.getStorageId().getValue())
                 );
             }
         } else {
             throw new StorageRepositoryException(
-                    String.format("Household %s does not exist. Failed to fetch all storage", householdAggregate.getHouseholdId().getId())
+                    String.format("Household %s does not exist. Failed to fetch all storage", householdAggregate.getHouseholdId().getValue())
             );
         }
     }
 
     @Override
     public void deleteById(StorageIdVO id) throws StorageRepositoryException {
-        Optional<Storage> jpaEntity = jpaRepository.findOneByBusinessKey(id.getId());
+        Optional<Storage> jpaEntity = jpaRepository.findOneByBusinessKey(id.getValue());
         if (jpaEntity.isPresent()) {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new StorageRepositoryException(
-                    String.format("storage %s can not be found and can not be deleted", id.getId())
+                    String.format("storage %s can not be found and can not be deleted", id.getValue())
             );
         }
     }
 
-    @Override
-    public void updateStatus(StorageIdVO id, StorageStatusVO status) throws StorageRepositoryException {
-        Optional<Storage> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
-        if (jpaEntityOptional.isPresent()) {
-            Storage jpaEntity = jpaEntityOptional.get();
-            StorageStatus newStatus = new StorageStatus();
-            newStatus.setCapacity(status.getCapacity());
-            jpaEntity.setStorageStatus(newStatus);
-            jpaRepository.save(jpaEntity);
-        } else {
-            throw new StorageRepositoryException(
-                    String.format("storage %s can not be found and can not be deleted", id.getId())
-            );
-        }
-    }
 
     @Override
     public void update(StorageIdVO id, StorageEntity domainEntity) throws StorageRepositoryException {
-        Optional<Storage> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getId());
+        Optional<Storage> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             Storage jpaEntity = jpaEntityOptional.get();
             Storage updated = converter.toInfrastructure(domainEntity);
             jpaEntity.setBusinessKey(updated.getBusinessKey());
-            jpaEntity.setStoragePower(updated.getStoragePower());
-            jpaEntity.setStorageStatus(updated.getStorageStatus());
-            jpaEntity.setStorageType(updated.getStorageType());
+            jpaEntity.setRatedPower(updated.getRatedPower());
+            jpaEntity.setCapacity(updated.getCapacity());
+            jpaEntity.setLoadTimeHour(updated.getLoadTimeHour());
             jpaRepository.save(jpaEntity);
         } else {
             throw new StorageRepositoryException("failed to update storage. can not find storage entity");

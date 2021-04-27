@@ -12,7 +12,7 @@ public class LoadVirtualPowerPlantIdVO {
 
     public LoadVirtualPowerPlantIdVO(String id) throws LoadException {
         if (id == null || id.isEmpty() || id.isBlank()) {
-            throw new LoadException("validation for vppId failed");
+            throw new LoadException("validation for vpp id failed");
         }
         this.id = id.toUpperCase();
     }

@@ -13,59 +13,56 @@ import java.util.Objects;
 public class ELoad {
 
     @EmbeddedId
-    private VppTimestamp vppTimestamp;
+    private ActionRequestTimestamp actionRequestTimestamp;
 
     @Column(nullable = false)
-    private boolean forecasted;
-
-    @Column(nullable = false)
-    private boolean outdated;
+    private String virtualPowerPlantId;
 
     @OneToMany(mappedBy = "load", fetch = FetchType.EAGER)
     private List<ELoadHousehold> households;
 
     @Embeddable
-    public static class VppTimestamp implements Serializable {
-        private String vppBusinessKey;
-        private ZonedDateTime startTimestamp;
+    public static class ActionRequestTimestamp implements Serializable {
+        private String actionRequestId;
+        private ZonedDateTime timestamp;
 
-        public VppTimestamp() {
+        public ActionRequestTimestamp() {
             super();
         }
 
-        public VppTimestamp(String vppBusinessKey, ZonedDateTime startTimestamp) {
-            this.vppBusinessKey = vppBusinessKey;
-            this.startTimestamp = startTimestamp;
+        public ActionRequestTimestamp(String actionRequestId, ZonedDateTime timestamp) {
+            this.actionRequestId = actionRequestId;
+            this.timestamp = timestamp;
         }
 
-        public String getVppBusinessKey() {
-            return vppBusinessKey;
+        public String getActionRequestId() {
+            return actionRequestId;
         }
 
 
-        public ZonedDateTime getStartTimestamp() {
-            return startTimestamp;
+        public ZonedDateTime getTimestamp() {
+            return timestamp;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            VppTimestamp that = (VppTimestamp) o;
-            return vppBusinessKey.equals(that.vppBusinessKey) &&
-                    startTimestamp.equals(that.startTimestamp);
+            ActionRequestTimestamp that = (ActionRequestTimestamp) o;
+            return actionRequestId.equals(that.actionRequestId) &&
+                    timestamp.equals(that.timestamp);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(vppBusinessKey, startTimestamp);
+            return Objects.hash(actionRequestId, timestamp);
         }
 
         @Override
         public String toString() {
-            return "VppTimestamp{" +
-                    "vppBusinessKey='" + vppBusinessKey + '\'' +
-                    ", startTimestamp=" + startTimestamp +
+            return "ActionRequestTimestamp{" +
+                    "actionRequestId='" + actionRequestId + '\'' +
+                    ", timestamp=" + timestamp +
                     '}';
         }
     }
