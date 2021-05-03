@@ -28,7 +28,6 @@ public class DecentralizedPowerPlant {
     @OneToMany(mappedBy = "decentralizedPowerPlant")
     private List<OtherEnergy> others;
 
-
     @OneToMany(mappedBy = "decentralizedPowerPlant")
     private List<Storage> storages;
 

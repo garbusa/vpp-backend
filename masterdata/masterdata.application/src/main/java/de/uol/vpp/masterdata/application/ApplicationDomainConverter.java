@@ -121,6 +121,7 @@ public class ApplicationDomainConverter {
         dto.setWaters(domainEntity.getWaters().stream().map(this::toApplication).collect(Collectors.toList()));
         dto.setWinds(domainEntity.getWinds().stream().map(this::toApplication).collect(Collectors.toList()));
         dto.setOthers(domainEntity.getOthers().stream().map(this::toApplication).collect(Collectors.toList()));
+        dto.setStorages(domainEntity.getStorages().stream().map(this::toApplication).collect(Collectors.toList()));
     }
 
     public DecentralizedPowerPlantAggregate toDomain(DecentralizedPowerPlantDTO dto) throws DecentralizedPowerPlantException {
