@@ -5,6 +5,7 @@ import de.uol.vpp.action.domain.entities.ActionCatalogEntity;
 import de.uol.vpp.action.domain.entities.ActionEntity;
 import de.uol.vpp.action.domain.enums.ActionTypeEnum;
 import de.uol.vpp.action.domain.enums.ProblemTypeEnum;
+import de.uol.vpp.action.domain.enums.StatusEnum;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ActionRepositoryException;
 import de.uol.vpp.action.domain.repositories.IActionRequestRepository;
@@ -13,6 +14,9 @@ import de.uol.vpp.action.infrastructure.rest.LoadRestClient;
 import de.uol.vpp.action.infrastructure.rest.MasterdataRestClient;
 import de.uol.vpp.action.infrastructure.rest.ProductionRestClient;
 import de.uol.vpp.action.infrastructure.rest.dto.*;
+import de.uol.vpp.action.infrastructure.rest.exceptions.LoadRestClientException;
+import de.uol.vpp.action.infrastructure.rest.exceptions.MasterdataRestClientException;
+import de.uol.vpp.action.infrastructure.rest.exceptions.ProductionRestClientException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.util.Pair;
@@ -23,15 +27,14 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class ActionAlgorithmService {
+public class ActionInfrastructureService {
 
     private final IActionRequestRepository actionRequestRepository;
     private final MasterdataRestClient masterdataRestClient;
     private final LoadRestClient loadRestClient;
     private final ProductionRestClient productionRestClient;
 
-    public void actionAlgorithm(String actionRequestId, Long timestamp) throws ActionException, ActionRepositoryException {
-        log.info("crazy algorithm mit {}, {}", actionRequestId, timestamp);
+    public void actionAlgorithm(String actionRequestId) throws ActionException, ActionRepositoryException, MasterdataRestClientException, LoadRestClientException, ProductionRestClientException {
         //Hole alle Loads und Productions by actionRequestId
         Optional<ActionRequestAggregate> actionRequest = actionRequestRepository.getActionRequest(new ActionRequestIdVO(actionRequestId));
 
@@ -209,10 +212,9 @@ public class ActionAlgorithmService {
 
                 }
 
-                //@todo persist catalogs
-                log.info("creating action catalogs finished. persisting...");
+                log.info("creating action catalogs status. persisting...");
                 actionRequest.get().setCatalogs(catalogs);
-                actionRequest.get().setFinished(new ActionFinishedVO(true));
+                actionRequest.get().setStatus(new ActionRequestStatusVO(StatusEnum.FINISHED));
                 actionRequestRepository.saveActionRequest(actionRequest.get(), false);
             }
         }
@@ -249,6 +251,69 @@ public class ActionAlgorithmService {
         }
         return result;
     }
+
+    private List<ActionTimeseries> createActionTimeseriesList(String actionRequestId, VirtualPowerPlantDTO virtualPowerPlant, Map<Long, Pair<Double, Double>> comparisonMap) {
+        List<ActionTimeseries> actionTimeseries = new ArrayList<>();
+        boolean isShortage = false;
+        boolean isOverflow = false;
+        int timestampCounter = 0;
+        for (Map.Entry<Long, Pair<Double, Double>> timestampLoadProduction : comparisonMap.entrySet()) {
+            Double load = timestampLoadProduction.getValue().getFirst() / 1000; //convert W into kW
+            Double production = timestampLoadProduction.getValue().getSecond();
+            if (!isShortage && !isOverflow && aboveShortageThreshold(virtualPowerPlant, load, production)) {
+                isShortage = true;
+                ActionTimeseries pTs = createActionTimeseries(
+                        timestampLoadProduction, load, production, ProblemTypeEnum.SHORTAGE, actionRequestId,
+                        virtualPowerPlant.getVirtualPowerPlantId());
+                actionTimeseries.add(pTs);
+            } else if (!isOverflow && !isShortage && aboveOverflowThreshold(virtualPowerPlant, load, production)) {
+                isOverflow = true;
+                ActionTimeseries pTs = createActionTimeseries(timestampLoadProduction, load, production,
+                        ProblemTypeEnum.OVERFLOW, actionRequestId, virtualPowerPlant.getVirtualPowerPlantId());
+                actionTimeseries.add(pTs);
+            } else if ((isShortage && aboveShortageThreshold(virtualPowerPlant, load, production)) ||
+                    (isOverflow && aboveOverflowThreshold(virtualPowerPlant, load, production))) {
+                //Add to existing Timeseries
+                if (actionTimeseries.size() > 0) {
+                    ActionTimeseries last = actionTimeseries.get(actionTimeseries.size() - 1);
+                    Double gap = 0.;
+                    if (last.getProblemType().equals(ProblemTypeEnum.OVERFLOW)) {
+                        gap = production - load;
+                    } else if (last.getProblemType().equals(ProblemTypeEnum.SHORTAGE)) {
+                        gap = load - production;
+                    }
+                    last.getTimestamps().add(timestampLoadProduction.getKey());
+                    Double newGap = last.getAverageGap() + gap;
+                    last.setAverageGap(newGap);
+                }
+            }
+
+            if ((isShortage && !aboveShortageThreshold(virtualPowerPlant, load, production)) ||
+                    (isOverflow && !aboveOverflowThreshold(virtualPowerPlant, load, production)) ||
+                    timestampCounter == comparisonMap.size() - 1) {
+                // remove timeseries with only 1 or less timestamp
+                if (actionTimeseries.size() > 0 && actionTimeseries.get(actionTimeseries.size() - 1).getAverageGap() < 0.) {
+                    ActionTimeseries last = actionTimeseries.get(actionTimeseries.size() - 1);
+                    actionTimeseries.remove(last);
+                } else if (actionTimeseries.size() > 0 && actionTimeseries.get(actionTimeseries.size() - 1).getAverageGap() > 0.) {
+                    ActionTimeseries last = actionTimeseries.get(actionTimeseries.size() - 1);
+                    Double oldGap = last.getAverageGap();
+                    Double length = Integer.valueOf(last.getTimestamps().size()).doubleValue();
+                    if (oldGap > 0. && length > 0. && oldGap / length > 0.) {
+                        Double newGap = oldGap / length;
+                        last.setAverageGap(newGap);
+                    } else {
+                        actionTimeseries.remove(last);
+                    }
+                }
+                isShortage = false;
+                isOverflow = false;
+            }
+            timestampCounter++;
+        }
+
+        return actionTimeseries;
+    }
 //
 //    private List<Long> checkLocalMaxima(Map<Long, Pair<Double, Double>> comparisonMap) {
 //        // Empty vector to store points of
@@ -283,65 +348,6 @@ public class ActionAlgorithmService {
 //
 //        return maxima;
 //    }
-
-    private List<ActionTimeseries> createActionTimeseriesList(String actionRequestId, VirtualPowerPlantDTO virtualPowerPlant, Map<Long, Pair<Double, Double>> comparisonMap) {
-        List<ActionTimeseries> actionTimeseries = new ArrayList<>();
-        boolean isShortage = false;
-        boolean isOverflow = false;
-        for (Map.Entry<Long, Pair<Double, Double>> timestampLoadProduction : comparisonMap.entrySet()) {
-            Double load = timestampLoadProduction.getValue().getFirst() / 1000; //convert W into kW
-            Double production = timestampLoadProduction.getValue().getSecond();
-            if (!isShortage && aboveShortageThreshold(virtualPowerPlant, load, production)) {
-                isOverflow = false;
-                isShortage = true;
-                ActionTimeseries pTs = createActionTimeseries(
-                        timestampLoadProduction, load, production, ProblemTypeEnum.SHORTAGE, actionRequestId,
-                        virtualPowerPlant.getVirtualPowerPlantId());
-                actionTimeseries.add(pTs);
-            } else if (!isOverflow && aboveOverflowThreshold(virtualPowerPlant, load, production)) {
-                isShortage = false;
-                isOverflow = true;
-                ActionTimeseries pTs = createActionTimeseries(timestampLoadProduction, load, production,
-                        ProblemTypeEnum.OVERFLOW, actionRequestId, virtualPowerPlant.getVirtualPowerPlantId());
-                actionTimeseries.add(pTs);
-            } else if ((isShortage && aboveShortageThreshold(virtualPowerPlant, load, production)) ||
-                    (isOverflow && aboveOverflowThreshold(virtualPowerPlant, load, production))) {
-                //Add to existing Timeseries
-                if (actionTimeseries.size() > 0) {
-                    ActionTimeseries last = actionTimeseries.get(actionTimeseries.size() - 1);
-                    Double gap = 0.;
-                    if (last.getProblemType().equals(ProblemTypeEnum.OVERFLOW)) {
-                        gap = production - load;
-                    } else if (last.getProblemType().equals(ProblemTypeEnum.SHORTAGE)) {
-                        gap = load - production;
-                    }
-                    last.getTimestamps().add(timestampLoadProduction.getKey());
-                    Double newGap = last.getAverageGap() + gap;
-                    last.setAverageGap(newGap);
-                }
-            } else if (isShortage || isOverflow) {
-                // remove timeseries with only 1 or less timestamp
-                if (actionTimeseries.size() > 0 && actionTimeseries.get(actionTimeseries.size() - 1).getAverageGap() < 0.) {
-                    ActionTimeseries last = actionTimeseries.get(actionTimeseries.size() - 1);
-                    actionTimeseries.remove(last);
-                } else if (actionTimeseries.size() > 0 && actionTimeseries.get(actionTimeseries.size() - 1).getAverageGap() > 0.) {
-                    ActionTimeseries last = actionTimeseries.get(actionTimeseries.size() - 1);
-                    Double oldGap = last.getAverageGap();
-                    Double length = Integer.valueOf(last.getTimestamps().size()).doubleValue();
-                    if (oldGap > 0. && length > 0. && oldGap / length > 0.) {
-                        Double newGap = oldGap / length;
-                        last.setAverageGap(newGap);
-                    } else {
-                        actionTimeseries.remove(last);
-                    }
-                }
-                isShortage = false;
-                isOverflow = false;
-            }
-        }
-
-        return actionTimeseries;
-    }
 
     private ActionEntity createAction(ActionCatalogEntity catalog, String producerOrStorageId, boolean isStorage, Double ratedPower, Double loadTimeHour, Double capacity, ActionTypeEnum actionType) throws ActionException {
         ActionEntity actionEntity = new ActionEntity();
@@ -425,6 +431,22 @@ public class ActionAlgorithmService {
 
     private boolean aboveOverflowThreshold(VirtualPowerPlantDTO virtualPowerPlant, Double load, Double production) {
         return (production / load * 100) - 100 > virtualPowerPlant.getOverflowThreshold();
+    }
+
+    public void actionFailed(String actionRequestId) {
+        try {
+            Optional<ActionRequestAggregate> actionRequestOptional = actionRequestRepository.getActionRequest(new ActionRequestIdVO(actionRequestId));
+            if (actionRequestOptional.isPresent()) {
+                ActionRequestAggregate actionRequest = actionRequestOptional.get();
+                actionRequest.setStatus(new ActionRequestStatusVO(StatusEnum.FAILED));
+                actionRequestRepository.saveActionRequest(actionRequest, false);
+            } else {
+                log.error("Set action status failed. ActionRequest does not exist?");
+            }
+
+        } catch (ActionRepositoryException | ActionException e) {
+            log.error(e);
+        }
     }
 
     

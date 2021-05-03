@@ -11,7 +11,7 @@ public class ProductionVirtualPowerPlantIdVO {
 
     public ProductionVirtualPowerPlantIdVO(String value) throws ProductionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ProductionException("validation for actionRequestId failed");
+            throw new ProductionException("virtualPowerPlantId", "Production");
         }
         this.value = value;
     }

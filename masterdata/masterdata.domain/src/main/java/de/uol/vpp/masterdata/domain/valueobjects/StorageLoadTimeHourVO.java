@@ -9,8 +9,8 @@ public class StorageLoadTimeHourVO {
 
     public StorageLoadTimeHourVO(Double value) throws StorageException {
         if (value < 0) {
-            throw new StorageException("validation for storage load time in hours failed");
+            throw new StorageException("loadTimeHour");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

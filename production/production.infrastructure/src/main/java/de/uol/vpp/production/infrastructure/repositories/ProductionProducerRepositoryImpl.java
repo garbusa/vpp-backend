@@ -28,10 +28,10 @@ public class ProductionProducerRepositoryImpl implements IProductionProducerRepo
     private final InfrastructureDomainConverter converter;
 
     @Override
-    public List<ProductionProducerEntity> getProductionProducersByVppTimestamp(ProductionVirtualPowerPlantIdVO vppBusinessKey, ProductionStartTimestampVO timestamp) throws ProductionProducerRepositoryException {
+    public List<ProductionProducerEntity> getProductionProducersByVppTimestamp(ProductionVirtualPowerPlantIdVO virtualPowerPlantId, ProductionStartTimestampVO timestamp) throws ProductionProducerRepositoryException {
         try {
             List<ProductionProducerEntity> result = new ArrayList<>();
-            Production production = productionJpaRepository.findById(new Production.ActionRequestTimestamp(vppBusinessKey.getValue(),
+            Production production = productionJpaRepository.findById(new Production.ActionRequestTimestamp(virtualPowerPlantId.getValue(),
                     timestamp.getTimestamp())).orElse(null);
             if (production != null) {
                 for (ProductionProducer productionProducer : productionProducerJpaRepository
@@ -47,7 +47,7 @@ public class ProductionProducerRepositoryImpl implements IProductionProducerRepo
     }
 
     @Override
-    public void assign(Long producerInternalId, ProductionAggregate production) throws ProductionProducerRepositoryException {
+    public void assignToInternal(Long producerInternalId, ProductionAggregate production) throws ProductionProducerRepositoryException {
         Optional<Production> productionJpa = productionJpaRepository.findById(new Production.ActionRequestTimestamp(production.getProductionActionRequestId().getValue(),
                 production.getProductionStartTimestamp().getTimestamp()));
         if (productionJpa.isPresent()) {
@@ -60,37 +60,38 @@ public class ProductionProducerRepositoryImpl implements IProductionProducerRepo
                     productionJpaRepository.save(productionJpa.get());
                 } else {
                     throw new ProductionProducerRepositoryException(
-                            "Failed to assign an entity for producer %s, the assigments have to be empty"
+                            String.format("Erzeugungsanlage konnte Erzeugungsaggregat %s nicht zugewiesen werden, da Erzeugungsanlage bereits zugewiesen ist",
+                                    production.getProductionActionRequestId().getValue())
                     );
                 }
             } else {
-                throw new ProductionProducerRepositoryException(
-                        "Failed to fetch producer by actionRequestId %s"
-                );
+                throw new ProductionProducerRepositoryException("Erzeugungsanlage konnte nicht gefunden werden");
             }
         } else {
             throw new ProductionProducerRepositoryException(
-                    String.format("Production for actionRequestId %s does not exist. Failed to fetch all producers", production.getProductionActionRequestId().getValue())
+                    String.format("Erzeugungsaggregat %s (Zeitstempel %s) konnte nicht gefunden werden", production.getProductionActionRequestId().getValue(),
+                            production.getProductionStartTimestamp().getTimestamp().toEpochSecond())
             );
         }
     }
 
     @Override
-    public Long saveProductionProducer(ProductionProducerEntity producer) throws ProductionProducerRepositoryException {
+    public Long saveProductionProducerInternal(ProductionProducerEntity producer) throws ProductionProducerRepositoryException {
         ProductionProducer jpaEntity = converter.toInfrastructure(producer);
         ProductionProducer saved = productionProducerJpaRepository.save(jpaEntity);
         return saved.getInternalId();
     }
 
     @Override
-    public void deleteProductionProducersByVppTimestamp(ProductionVirtualPowerPlantIdVO vppBusinessKey, ProductionStartTimestampVO timestamp) throws ProductionProducerRepositoryException {
-        Optional<Production> jpaEntity = productionJpaRepository.findById(new Production.ActionRequestTimestamp(vppBusinessKey.getValue(),
+    public void deleteProductionProducersByVppTimestamp(ProductionVirtualPowerPlantIdVO virtualPowerPlantId, ProductionStartTimestampVO timestamp) throws ProductionProducerRepositoryException {
+        Optional<Production> jpaEntity = productionJpaRepository.findById(new Production.ActionRequestTimestamp(virtualPowerPlantId.getValue(),
                 timestamp.getTimestamp()));
         if (jpaEntity.isPresent()) {
             productionProducerJpaRepository.deleteAllByProduction(jpaEntity.get());
         } else {
             throw new ProductionProducerRepositoryException(
-                    String.format("failed to delete producers by vpp actionRequestId %s", vppBusinessKey.getValue())
+                    String.format("Erzeugung der Erzeugungsanlagen konnte nicht gelöscht werden, da Erzeugungsaggregat %s (Zeitstempel %s) nicht gefunden werden konnte",
+                            virtualPowerPlantId.getValue(), timestamp.getTimestamp().toEpochSecond())
             );
         }
     }

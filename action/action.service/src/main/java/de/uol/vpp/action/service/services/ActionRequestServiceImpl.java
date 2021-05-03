@@ -1,14 +1,15 @@
 package de.uol.vpp.action.service.services;
 
 import de.uol.vpp.action.domain.aggregates.ActionRequestAggregate;
+import de.uol.vpp.action.domain.enums.StatusEnum;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ActionRepositoryException;
 import de.uol.vpp.action.domain.exceptions.ActionServiceException;
 import de.uol.vpp.action.domain.repositories.IActionRequestRepository;
 import de.uol.vpp.action.domain.services.IActionRequestService;
 import de.uol.vpp.action.domain.utils.SecureRandomString;
-import de.uol.vpp.action.domain.valueobjects.ActionFinishedVO;
 import de.uol.vpp.action.domain.valueobjects.ActionRequestIdVO;
+import de.uol.vpp.action.domain.valueobjects.ActionRequestStatusVO;
 import de.uol.vpp.action.domain.valueobjects.ActionRequestVirtualPowerPlantIdVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,9 @@ public class ActionRequestServiceImpl implements IActionRequestService {
     private final IActionRequestRepository actionRequestRepository;
 
     @Override
-    public List<ActionRequestAggregate> getAllActionRequestByVppId(String vppBusinessKey) throws ActionServiceException {
+    public List<ActionRequestAggregate> getAllActionRequestByVppId(String virtualPowerPlantId) throws ActionServiceException {
         try {
-            return actionRequestRepository.getAllActionRequestsByVppId(new ActionRequestVirtualPowerPlantIdVO(vppBusinessKey));
+            return actionRequestRepository.getAllActionRequestsByVppId(new ActionRequestVirtualPowerPlantIdVO(virtualPowerPlantId));
         } catch (ActionRepositoryException | ActionException e) {
             throw new ActionServiceException(e.getMessage(), e);
         }
@@ -41,7 +42,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                 return actionRequest.get();
             } else {
                 throw new ActionServiceException(
-                        String.format("Failed to find action request by actionRequestId %s", actionRequestId)
+                        String.format("ActionRequest mit der ID %s konnte nicht gefunden werden", actionRequestId)
                 );
             }
         } catch (ActionRepositoryException | ActionException e) {
@@ -55,7 +56,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
             while (actionRequestRepository.getActionRequest(domainEntity.getActionRequestId()).isPresent()) {
                 domainEntity.setActionRequestId(new ActionRequestIdVO(SecureRandomString.generate()));
             }
-            domainEntity.setFinished(new ActionFinishedVO(false)); //initial false
+            domainEntity.setStatus(new ActionRequestStatusVO(StatusEnum.STARTED)); //initial started
             actionRequestRepository.saveActionRequest(domainEntity, true);
         } catch (ActionRepositoryException | ActionException e) {
             throw new ActionServiceException(e.getMessage(), e);

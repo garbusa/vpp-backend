@@ -11,8 +11,8 @@ public class WaterEnergyGravityVO {
 
     public WaterEnergyGravityVO(Double value) throws ProducerException {
         if (value == null || value < 0) {
-            throw new ProducerException("validation for water gravity speed failed");
+            throw new ProducerException("gravity", "WaterEnergy");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

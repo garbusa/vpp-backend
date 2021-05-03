@@ -10,7 +10,7 @@ public class ActionTypeVO {
 
     public ActionTypeVO(ActionTypeEnum value) throws ActionException {
         if (value == null) {
-            throw new ActionException("validation for action type failed");
+            throw new ActionException("actionType", "Action");
         }
         this.value = value;
     }

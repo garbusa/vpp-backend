@@ -9,11 +9,11 @@ import de.uol.vpp.load.domain.valueobjects.LoadStartTimestampVO;
 import java.util.List;
 
 public interface ILoadHouseholdRepository {
-    List<LoadHouseholdEntity> getLoadHouseholdsByVppTimestamp(LoadActionRequestIdVO vppBusinessKey, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException;
+    List<LoadHouseholdEntity> getLoadHouseholdByActionRequestId(LoadActionRequestIdVO actionRequestId, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException;
 
-    void assign(Long loadHouseholdInternalId, LoadAggregate load) throws LoadHouseholdRepositoryException;
+    void assignToInternal(Long loadHouseholdInternalId, LoadAggregate load) throws LoadHouseholdRepositoryException;
 
-    Long saveLoadHousehold(LoadHouseholdEntity load) throws LoadHouseholdRepositoryException;
+    Long saveLoadHouseholdInternal(LoadHouseholdEntity load) throws LoadHouseholdRepositoryException;
 
-    void deleteHouseholdsByVppTimestamp(LoadActionRequestIdVO vppBusinessKey, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException;
+    void deleteHouseholdsByActionRequestId(LoadActionRequestIdVO actionRequestId, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException;
 }

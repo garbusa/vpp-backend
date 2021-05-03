@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DecentralizedPowerPlantJpaRepository extends JpaRepository<DecentralizedPowerPlant, Long> {
-    Optional<DecentralizedPowerPlant> findOneByBusinessKey(String businessKey);
+    Optional<DecentralizedPowerPlant> findOneById(String decentralizedPowerPlantId);
 
     List<DecentralizedPowerPlant> findAllByVirtualPowerPlant(VirtualPowerPlant virtualPowerPlant);
 }

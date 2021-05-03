@@ -11,8 +11,8 @@ public class ProductionProducerCurrentValueVO {
 
     public ProductionProducerCurrentValueVO(Double value) throws ProductionException {
         if (value == null || value < 0) {
-            throw new ProductionException("validation for producer householdLoad failed.");
+            throw new ProductionException("currentValue", "ProductionProducer");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

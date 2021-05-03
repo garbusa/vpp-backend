@@ -11,8 +11,8 @@ public class LoadHouseholdValueVO {
 
     public LoadHouseholdValueVO(Double value) throws LoadException {
         if (value == null || value < 0) {
-            throw new LoadException("validation for load loadValueSum failed.");
+            throw new LoadException("value", "LoadHousehold");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

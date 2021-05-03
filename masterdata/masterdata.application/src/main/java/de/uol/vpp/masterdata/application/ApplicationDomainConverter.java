@@ -1,9 +1,11 @@
 package de.uol.vpp.masterdata.application;
 
 import de.uol.vpp.masterdata.application.dto.*;
+import de.uol.vpp.masterdata.application.dto.abstracts.DtoHasProducersAndStorages;
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
+import de.uol.vpp.masterdata.domain.aggregates.abstracts.DomainHasProducersAndStorages;
 import de.uol.vpp.masterdata.domain.entities.*;
 import de.uol.vpp.masterdata.domain.exceptions.*;
 import de.uol.vpp.masterdata.domain.valueobjects.*;
@@ -30,11 +32,7 @@ public class ApplicationDomainConverter {
     public DecentralizedPowerPlantDTO toApplication(DecentralizedPowerPlantAggregate domainEntity) {
         DecentralizedPowerPlantDTO dto = new DecentralizedPowerPlantDTO();
         dto.setDecentralizedPowerPlantId(domainEntity.getDecentralizedPowerPlantId().getValue());
-        dto.setSolars(domainEntity.getSolars().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setWaters(domainEntity.getWaters().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setWinds(domainEntity.getWinds().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setOthers(domainEntity.getOthers().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setStorages(domainEntity.getStorages().stream().map(this::toApplication).collect(Collectors.toList()));
+        this.setProducersAndStoragesFromDomainToApplication(dto, domainEntity);
         return dto;
     }
 
@@ -118,38 +116,18 @@ public class ApplicationDomainConverter {
 
     }
 
+    private void setProducersAndStoragesFromDomainToApplication(DtoHasProducersAndStorages dto, DomainHasProducersAndStorages domainEntity) {
+        dto.setSolars(domainEntity.getSolars().stream().map(this::toApplication).collect(Collectors.toList()));
+        dto.setWaters(domainEntity.getWaters().stream().map(this::toApplication).collect(Collectors.toList()));
+        dto.setWinds(domainEntity.getWinds().stream().map(this::toApplication).collect(Collectors.toList()));
+        dto.setOthers(domainEntity.getOthers().stream().map(this::toApplication).collect(Collectors.toList()));
+    }
+
     public DecentralizedPowerPlantAggregate toDomain(DecentralizedPowerPlantDTO dto) throws DecentralizedPowerPlantException {
         try {
             DecentralizedPowerPlantAggregate domainEntity = new DecentralizedPowerPlantAggregate();
             domainEntity.setDecentralizedPowerPlantId(new DecentralizedPowerPlantIdVO(dto.getDecentralizedPowerPlantId()));
-
-            List<SolarEnergyEntity> solars = new ArrayList<>();
-            for (SolarEnergyDTO producer : dto.getSolars()) {
-                solars.add(this.toDomain(producer));
-            }
-            domainEntity.setSolars(solars);
-            List<WindEnergyEntity> winds = new ArrayList<>();
-            for (WindEnergyDTO producer : dto.getWinds()) {
-                winds.add(this.toDomain(producer));
-            }
-            domainEntity.setWinds(winds);
-            List<WaterEnergyEntity> waters = new ArrayList<>();
-            for (WaterEnergyDTO producer : dto.getWaters()) {
-                waters.add(this.toDomain(producer));
-            }
-            domainEntity.setWaters(waters);
-            List<OtherEnergyEntity> others = new ArrayList<>();
-            for (OtherEnergyDTO other : dto.getOthers()) {
-                others.add(this.toDomain(other));
-            }
-            domainEntity.setOthers(others);
-
-
-            List<StorageEntity> storages = new ArrayList<>();
-            for (StorageDTO producer : dto.getStorages()) {
-                storages.add(this.toDomain(producer));
-            }
-            domainEntity.setStorages(storages);
+            this.setProducersAndStoragesFromApplicationToDomain(dto, domainEntity);
             return domainEntity;
         } catch (StorageException | ProducerException e) {
             throw new DecentralizedPowerPlantException(e.getMessage(), e);
@@ -157,43 +135,33 @@ public class ApplicationDomainConverter {
 
     }
 
-    public HouseholdAggregate toDomain(HouseholdDTO dto) throws HouseholdException {
-        try {
-            HouseholdAggregate domainEntity = new HouseholdAggregate();
-            domainEntity.setHouseholdId(new HouseholdIdVO(dto.getHouseholdId()));
-            domainEntity.setHouseholdMemberAmount(new HouseholdMemberAmountVO(dto.getHouseholdMemberAmount()));
-
-            List<SolarEnergyEntity> solars = new ArrayList<>();
-            for (SolarEnergyDTO producer : dto.getSolars()) {
-                solars.add(this.toDomain(producer));
-            }
-            domainEntity.setSolars(solars);
-            List<WindEnergyEntity> winds = new ArrayList<>();
-            for (WindEnergyDTO producer : dto.getWinds()) {
-                winds.add(this.toDomain(producer));
-            }
-            domainEntity.setWinds(winds);
-            List<WaterEnergyEntity> waters = new ArrayList<>();
-            for (WaterEnergyDTO producer : dto.getWaters()) {
-                waters.add(this.toDomain(producer));
-            }
-            domainEntity.setWaters(waters);
-            List<OtherEnergyEntity> others = new ArrayList<>();
-            for (OtherEnergyDTO other : dto.getOthers()) {
-                others.add(this.toDomain(other));
-            }
-            domainEntity.setOthers(others);
-
-            List<StorageEntity> storages = new ArrayList<>();
-            for (StorageDTO producer : dto.getStorages()) {
-                storages.add(this.toDomain(producer));
-            }
-            domainEntity.setStorages(storages);
-
-            return domainEntity;
-        } catch (ProducerException | StorageException e) {
-            throw new HouseholdException(e.getMessage(), e);
+    private void setProducersAndStoragesFromApplicationToDomain(DtoHasProducersAndStorages dto, DomainHasProducersAndStorages domainEntity) throws ProducerException, StorageException {
+        List<SolarEnergyEntity> solars = new ArrayList<>();
+        for (SolarEnergyDTO producer : dto.getSolars()) {
+            solars.add(this.toDomain(producer));
         }
+        domainEntity.setSolars(solars);
+        List<WindEnergyEntity> winds = new ArrayList<>();
+        for (WindEnergyDTO producer : dto.getWinds()) {
+            winds.add(this.toDomain(producer));
+        }
+        domainEntity.setWinds(winds);
+        List<WaterEnergyEntity> waters = new ArrayList<>();
+        for (WaterEnergyDTO producer : dto.getWaters()) {
+            waters.add(this.toDomain(producer));
+        }
+        domainEntity.setWaters(waters);
+        List<OtherEnergyEntity> others = new ArrayList<>();
+        for (OtherEnergyDTO other : dto.getOthers()) {
+            others.add(this.toDomain(other));
+        }
+        domainEntity.setOthers(others);
+
+        List<StorageEntity> storages = new ArrayList<>();
+        for (StorageDTO producer : dto.getStorages()) {
+            storages.add(this.toDomain(producer));
+        }
+        domainEntity.setStorages(storages);
     }
 
     public SolarEnergyEntity toDomain(SolarEnergyDTO dto) throws ProducerException {
@@ -262,17 +230,24 @@ public class ApplicationDomainConverter {
         return domainEntity;
     }
 
+    public HouseholdAggregate toDomain(HouseholdDTO dto) throws HouseholdException {
+        try {
+            HouseholdAggregate domainEntity = new HouseholdAggregate();
+            domainEntity.setHouseholdId(new HouseholdIdVO(dto.getHouseholdId()));
+            domainEntity.setHouseholdMemberAmount(new HouseholdMemberAmountVO(dto.getHouseholdMemberAmount()));
+            this.setProducersAndStoragesFromApplicationToDomain(dto, domainEntity);
+            return domainEntity;
+        } catch (ProducerException | StorageException e) {
+            throw new HouseholdException(e.getMessage(), e);
+        }
+    }
+
     public HouseholdDTO toApplication(HouseholdAggregate domainEntity) {
         HouseholdDTO dto = new HouseholdDTO();
         dto.setHouseholdId(domainEntity.getHouseholdId().getValue());
         dto.setHouseholdMemberAmount(domainEntity.getHouseholdMemberAmount().getValue());
-        dto.setStorages(domainEntity.getStorages().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setSolars(domainEntity.getSolars().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setWaters(domainEntity.getWaters().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setWinds(domainEntity.getWinds().stream().map(this::toApplication).collect(Collectors.toList()));
-        dto.setOthers(domainEntity.getOthers().stream().map(this::toApplication).collect(Collectors.toList()));
+        this.setProducersAndStoragesFromDomainToApplication(dto, domainEntity);
         return dto;
     }
-
 
 }

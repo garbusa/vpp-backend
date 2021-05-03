@@ -28,12 +28,12 @@ public class ActionRequestController {
     private final IActionRequestService actionRequestService;
     private final ApplicationDomainConverter converter;
 
-    @GetMapping(path = "/by/vpp/{vppBusinessKey}")
-    public ResponseEntity<?> getAllActionRequestsByVppId(@PathVariable String vppBusinessKey) {
+    @GetMapping(path = "/by/vpp/{virtualPowerPlantId}")
+    public ResponseEntity<?> getAllActionRequestsByVppId(@PathVariable String virtualPowerPlantId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "action requests successfully fetched.",
-                            actionRequestService.getAllActionRequestByVppId(vppBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Maßnahmenanfragen war erfolgreich",
+                            actionRequestService.getAllActionRequestByVppId(virtualPowerPlantId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -44,7 +44,7 @@ public class ActionRequestController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -53,7 +53,7 @@ public class ActionRequestController {
     public ResponseEntity<?> getActionRequestById(@PathVariable String actionRequestId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "action requests successfully fetched.",
+                    new ApiResponse(true, false, "Abfrage einer Maßnahmenanfrage war erfolgreich",
                             converter.toApplication(actionRequestService.get(actionRequestId))), HttpStatus.OK);
         } catch (ActionServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -61,28 +61,28 @@ public class ActionRequestController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping("/schedule/{vppBusinessKey}")
-    public ResponseEntity<?> scheduleActionRequest(@PathVariable String vppBusinessKey) {
+    @GetMapping("/schedule/{virtualPowerPlantId}")
+    public ResponseEntity<?> scheduleActionRequest(@PathVariable String virtualPowerPlantId) {
         try {
             ActionRequestDTO dto = new ActionRequestDTO();
             dto.setActionRequestId(SecureRandomString.generate());
             dto.setTimestamp(Instant.now().getEpochSecond());
-            dto.setVirtualPowerPlantId(vppBusinessKey);
+            dto.setVirtualPowerPlantId(virtualPowerPlantId);
             actionRequestService.save(converter.toDomain(dto));
             return ResponseEntity.ok().body(new ApiResponse(true, false, "" +
-                    "action request successfully created", null));
+                    "Maßnahmenanfrage wurde erfolgreich angelegt", null));
         } catch (ActionServiceException | ActionException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }

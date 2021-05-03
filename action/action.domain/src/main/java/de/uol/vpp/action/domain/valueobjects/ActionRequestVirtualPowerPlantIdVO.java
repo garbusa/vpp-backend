@@ -9,7 +9,7 @@ public class ActionRequestVirtualPowerPlantIdVO {
 
     public ActionRequestVirtualPowerPlantIdVO(String value) throws ActionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ActionException("validation for vpp Id failed");
+            throw new ActionException("virtualPowerPlantId", "ActionRequest");
         }
         this.value = value;
     }

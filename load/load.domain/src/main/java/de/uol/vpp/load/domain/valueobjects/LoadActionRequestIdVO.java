@@ -12,7 +12,7 @@ public class LoadActionRequestIdVO {
 
     public LoadActionRequestIdVO(String id) throws LoadException {
         if (id == null || id.isEmpty() || id.isBlank()) {
-            throw new LoadException("validation for action request id failed");
+            throw new LoadException("actionRequestId", "Load");
         }
         this.id = id.toUpperCase();
     }

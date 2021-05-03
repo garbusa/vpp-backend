@@ -12,13 +12,13 @@ public class ActionRequestTimestampVO {
 
     public ActionRequestTimestampVO(Long ts) throws ActionException {
         if (ts == null) {
-            throw new ActionException("validation for action request timestamp failed");
+            throw new ActionException("timestamp", "ActionRequest");
         }
 
         try {
             this.value = TimestampUtils.toBerlinTimestamp(ts);
         } catch (Exception e) {
-            throw new ActionException("failed to create startTimestamp", e);
+            throw new ActionException("timestamp", "ActionRequest", e);
         }
     }
 

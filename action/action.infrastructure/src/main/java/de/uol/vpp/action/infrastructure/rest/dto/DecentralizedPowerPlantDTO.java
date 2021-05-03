@@ -1,16 +1,12 @@
 package de.uol.vpp.action.infrastructure.rest.dto;
 
+import de.uol.vpp.action.infrastructure.rest.dto.abstracts.DtoHasProducersAndStorages;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class DecentralizedPowerPlantDTO {
+public class DecentralizedPowerPlantDTO extends DtoHasProducersAndStorages {
     private String decentralizedPowerPlantId;
-    private List<SolarEnergyDTO> solars = new ArrayList<>();
-    private List<WindEnergyDTO> winds = new ArrayList<>();
-    private List<WaterEnergyDTO> waters = new ArrayList<>();
-    private List<OtherEnergyDTO> others = new ArrayList<>();
-    private List<StorageDTO> storages = new ArrayList<>();
 }
+

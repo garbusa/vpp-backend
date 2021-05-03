@@ -12,8 +12,8 @@ public class StoragePowerVO {
 
     public StoragePowerVO(Double value) throws StorageException {
         if (value == null || value < 0) {
-            throw new StorageException("validation for storage rated power failed");
+            throw new StorageException("ratedPower");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IActionRequestRepository {
-    List<ActionRequestAggregate> getAllActionRequestsByVppId(ActionRequestVirtualPowerPlantIdVO vppBusinessKey) throws ActionRepositoryException;
+    List<ActionRequestAggregate> getAllActionRequestsByVppId(ActionRequestVirtualPowerPlantIdVO virtualPowerPlantId) throws ActionRepositoryException;
 
-    Optional<ActionRequestAggregate> getActionRequest(ActionRequestIdVO actionRequestBusinessKey) throws ActionRepositoryException;
+    Optional<ActionRequestAggregate> getActionRequest(ActionRequestIdVO actionRequestId) throws ActionRepositoryException;
 
     void saveActionRequest(ActionRequestAggregate actionRequest, boolean isInitialSave) throws ActionRepositoryException;
 }

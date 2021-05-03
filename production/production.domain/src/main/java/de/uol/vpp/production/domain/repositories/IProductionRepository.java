@@ -7,11 +7,11 @@ import de.uol.vpp.production.domain.valueobjects.ProductionActionRequestIdVO;
 import java.util.List;
 
 public interface IProductionRepository {
-    List<ProductionAggregate> getProductions(ProductionActionRequestIdVO actionRequestBusinessKey) throws ProductionRepositoryException;
+    List<ProductionAggregate> getProductions(ProductionActionRequestIdVO actionRequestId) throws ProductionRepositoryException;
 
     void saveProduction(ProductionAggregate production) throws ProductionRepositoryException;
 
-    void deleteProductionsByActionRequestId(ProductionActionRequestIdVO actionRequestBusinessKey) throws ProductionRepositoryException;
+    void deleteProductionsByActionRequestId(ProductionActionRequestIdVO actionRequestId) throws ProductionRepositoryException;
 
     void updateProduction(ProductionAggregate production) throws ProductionRepositoryException;
 }

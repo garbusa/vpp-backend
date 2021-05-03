@@ -12,7 +12,7 @@ public class HouseholdMemberAmountVO {
 
     public HouseholdMemberAmountVO(Integer value) throws HouseholdException {
         if (value == null || value < 0) {
-            throw new HouseholdException("validation for household member householdLoad failed");
+            throw new HouseholdException("householdMemberAmount");
         }
         this.value = value;
     }

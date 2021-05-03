@@ -34,7 +34,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
     public List<WaterEnergyEntity> getAllByDecentralizedPowerPlant(DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
         try {
             Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository
-                    .findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
+                    .findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
             if (dpp.isPresent()) {
                 List<WaterEnergyEntity> result = new ArrayList<>();
                 for (WaterEnergy WaterEnergy : jpaRepository.findAllByDecentralizedPowerPlant(dpp.get())) {
@@ -42,7 +42,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Can not find dpp %s to get all WaterEnergys", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
+                throw new ProducerRepositoryException(String.format("DK %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -53,7 +53,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
     public List<WaterEnergyEntity> getAllByHousehold(HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
         try {
             Optional<Household> household = householdJpaRepository
-                    .findOneByBusinessKey(householdAggregate.getHouseholdId().getValue());
+                    .findOneById(householdAggregate.getHouseholdId().getValue());
             if (household.isPresent()) {
                 List<WaterEnergyEntity> result = new ArrayList<>();
                 for (WaterEnergy WaterEnergy : jpaRepository.findAllByHousehold(household.get())) {
@@ -61,7 +61,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Can not find household %s to get all WaterEnergys", householdAggregate.getHouseholdId().getValue()));
+                throw new ProducerRepositoryException(String.format("Haushalt %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -72,7 +72,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
     @Override
     public Optional<WaterEnergyEntity> getById(WaterEnergyIdVO id) throws ProducerRepositoryException {
         try {
-            Optional<WaterEnergy> result = jpaRepository.findOneByBusinessKey(id.getValue());
+            Optional<WaterEnergy> result = jpaRepository.findOneById(id.getValue());
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             }
@@ -90,9 +90,9 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
 
     @Override
     public void assignToDecentralizedPowerPlant(WaterEnergyEntity WaterEnergyEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
-        Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
+        Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<WaterEnergy> Water = jpaRepository.findOneByBusinessKey(WaterEnergyEntity.getId().getValue());
+            Optional<WaterEnergy> Water = jpaRepository.findOneById(WaterEnergyEntity.getId().getValue());
             if (Water.isPresent()) {
                 if (Water.get().getDecentralizedPowerPlant() == null &&
                         Water.get().getHousehold() == null) {
@@ -102,26 +102,26 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("To assign an entity for WaterEnergy %s, the assigments have to be empty", WaterEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", WaterEnergyEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Failed to fetch WaterEnergy %s", WaterEnergyEntity.getId().getValue())
+                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", WaterEnergyEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Dpp %s does not exist. Failed to fetch all WaterEnergy", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("DK %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
 
     @Override
     public void assignToHousehold(WaterEnergyEntity WaterEnergyEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
-        Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getValue());
+        Optional<Household> household = householdJpaRepository.findOneById(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<WaterEnergy> WaterEnergy = jpaRepository.findOneByBusinessKey(WaterEnergyEntity.getId().getValue());
+            Optional<WaterEnergy> WaterEnergy = jpaRepository.findOneById(WaterEnergyEntity.getId().getValue());
             if (WaterEnergy.isPresent()) {
                 if (WaterEnergy.get().getDecentralizedPowerPlant() == null &&
                         WaterEnergy.get().getHousehold() == null) {
@@ -131,40 +131,40 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("To assign an entity for WaterEnergy %s, the assigments have to be empty", WaterEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", WaterEnergyEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Failed to fetch WaterEnergy %s", WaterEnergyEntity.getId().getValue())
+                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", WaterEnergyEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Household %s does not exist. Failed to fetch all WaterEnergy", householdAggregate.getHouseholdId().getValue())
+                    String.format("Haushalt %s konnte nicht gefunden werden um Wasserkraftanlage abzufragen", householdAggregate.getHouseholdId().getValue())
             );
         }
     }
 
     @Override
     public void deleteById(WaterEnergyIdVO id) throws ProducerRepositoryException {
-        Optional<WaterEnergy> jpaEntity = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<WaterEnergy> jpaEntity = jpaRepository.findOneById(id.getValue());
         if (jpaEntity.isPresent()) {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new ProducerRepositoryException(
-                    String.format("WaterEnergy %s can not be found and can not be deleted", id.getValue())
+                    String.format("Wasserkraftanlage %s konnte nicht gelöscht werden, da Wasserkraftanlage nicht gefunden werden konnte", id.getValue())
             );
         }
     }
 
     @Override
     public void update(WaterEnergyIdVO id, WaterEnergyEntity domainEntity) throws ProducerRepositoryException {
-        Optional<WaterEnergy> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<WaterEnergy> jpaEntityOptional = jpaRepository.findOneById(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             WaterEnergy jpaEntity = jpaEntityOptional.get();
             WaterEnergy updated = converter.toInfrastructure(domainEntity);
-            jpaEntity.setBusinessKey(updated.getBusinessKey());
+            jpaEntity.setId(updated.getId());
             jpaEntity.setCapacity(updated.getCapacity());
             jpaEntity.setEfficiency(updated.getEfficiency());
             jpaEntity.setHeight(updated.getHeight());
@@ -173,7 +173,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
             jpaEntity.setVolumeFlow(updated.getVolumeFlow());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new ProducerRepositoryException("failed to update WaterEnergy. can not find WaterEnergy entity.");
+            throw new ProducerRepositoryException("Wasserkraftanlage %s konnte nicht aktualisiert werden, da Wasserkraftanlage nicht gefunden wurde");
         }
     }
 

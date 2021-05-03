@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface HouseholdJpaRepository extends JpaRepository<Household, Long> {
-    Optional<Household> findOneByBusinessKey(String businessKey);
+    Optional<Household> findOneById(String householdId);
 
     List<Household> findAllByVirtualPowerPlant(VirtualPowerPlant virtualPowerPlant);
 }

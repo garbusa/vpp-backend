@@ -26,11 +26,11 @@ public class LoadRepositoryImpl implements ILoadRepository {
     private final MasterdataRestClient masterdataRestClient;
 
     @Override
-    public List<LoadAggregate> getLoadsByActionRequestId(LoadActionRequestIdVO actionRequestBusinessKey) throws LoadRepositoryException {
+    public List<LoadAggregate> getLoadsByActionRequestId(LoadActionRequestIdVO actionRequestId) throws LoadRepositoryException {
         try {
             List<LoadAggregate> result = new ArrayList<>();
             for (ELoad load : loadJpaRepository
-                    .findAllByActionRequestTimestamp_ActionRequestId(actionRequestBusinessKey.getId())) {
+                    .findAllByActionRequestTimestamp_ActionRequestId(actionRequestId.getId())) {
                 result.add(converter.toDomain(load));
             }
             return result;
@@ -48,9 +48,9 @@ public class LoadRepositoryImpl implements ILoadRepository {
 
 
     @Override
-    public void deleteLoadsByActionRequestId(LoadActionRequestIdVO actionRequestBusinessKey) throws LoadRepositoryException {
+    public void deleteLoadsByActionRequestId(LoadActionRequestIdVO actionRequestId) throws LoadRepositoryException {
         List<ELoad> loads = loadJpaRepository.findAllByActionRequestTimestamp_ActionRequestId(
-                actionRequestBusinessKey.getId());
+                actionRequestId.getId());
         for (ELoad load : loads) {
             loadJpaRepository.delete(load);
         }
@@ -64,7 +64,9 @@ public class LoadRepositoryImpl implements ILoadRepository {
         )).isPresent()) {
             loadJpaRepository.save(converter.toInfrastructure(load));
         } else {
-            throw new LoadRepositoryException("failed to update load. not able to find.");
+            throw new LoadRepositoryException(
+                    String.format("Lastaggregat %s konnte nicht aktualisiert werden, da Lastaggregat nicht gefunden wurde", load.getLoadActionRequestId().getId())
+            );
         }
     }
 

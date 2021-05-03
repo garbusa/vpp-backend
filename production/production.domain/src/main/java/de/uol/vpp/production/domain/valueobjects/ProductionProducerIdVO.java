@@ -11,7 +11,7 @@ public class ProductionProducerIdVO {
 
     public ProductionProducerIdVO(String value) throws ProductionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ProductionException("validation for producer failed");
+            throw new ProductionException("producerId", "ProductionProducer");
         }
         this.value = value;
     }

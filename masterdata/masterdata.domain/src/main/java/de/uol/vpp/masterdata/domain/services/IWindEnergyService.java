@@ -5,17 +5,17 @@ import de.uol.vpp.masterdata.domain.entities.WindEnergyEntity;
 import java.util.List;
 
 public interface IWindEnergyService {
-    List<WindEnergyEntity> getAllByDecentralizedPowerPlantId(String dppBusinessKey) throws ProducerServiceException;
+    List<WindEnergyEntity> getAllByDecentralizedPowerPlantId(String decentralizedPowerPlantId) throws ProducerServiceException;
 
-    List<WindEnergyEntity> getAllByHouseholdId(String householdBusinessKey) throws ProducerServiceException;
+    List<WindEnergyEntity> getAllByHouseholdId(String householdId) throws ProducerServiceException;
 
-    WindEnergyEntity get(String businessKey) throws ProducerServiceException;
+    WindEnergyEntity get(String windEnergyId) throws ProducerServiceException;
 
-    void saveWithDecentralizedPowerPlant(WindEnergyEntity domainEntity, String dppBusinessKey) throws ProducerServiceException;
+    void saveWithDecentralizedPowerPlant(WindEnergyEntity domainEntity, String decentralizedPowerPlantId) throws ProducerServiceException;
 
-    void saveWithHousehold(WindEnergyEntity domainEntity, String householdBusinessKey) throws ProducerServiceException;
+    void saveWithHousehold(WindEnergyEntity domainEntity, String householdId) throws ProducerServiceException;
 
-    void delete(String businessKey, String vppBusinessKey) throws ProducerServiceException;
+    void delete(String windEnergyId, String virtualPowerPlantId) throws ProducerServiceException;
 
-    void update(String businessKey, WindEnergyEntity toDomain, String vppBusinessKey) throws ProducerServiceException;
+    void update(String windEnergyId, WindEnergyEntity domainEntity, String virtualPowerPlantId) throws ProducerServiceException;
 }

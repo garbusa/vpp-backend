@@ -9,7 +9,7 @@ public class ActionIsStorageVO {
 
     public ActionIsStorageVO(Boolean value) throws ActionException {
         if (value == null) {
-            throw new ActionException("validation for action currentValue failed");
+            throw new ActionException("isStorage", "Action");
         }
         this.value = value;
     }

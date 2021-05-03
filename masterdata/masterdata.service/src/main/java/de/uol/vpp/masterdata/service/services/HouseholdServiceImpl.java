@@ -31,15 +31,15 @@ public class HouseholdServiceImpl implements IHouseholdService {
     private final IPublishUtil publishUtil;
 
     @Override
-    public List<HouseholdAggregate> getAllByVppId(String vppBusinessKey) throws HouseholdServiceException {
+    public List<HouseholdAggregate> getAllByVppId(String virtualPowerPlantId) throws HouseholdServiceException {
         try {
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional;
-            virtualPowerPlantOptional = virtualPowerPlantRepository.getById(new VirtualPowerPlantIdVO(vppBusinessKey));
+            virtualPowerPlantOptional = virtualPowerPlantRepository.getById(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             if (virtualPowerPlantOptional.isPresent()) {
                 return repository.getAllByVirtualPowerPlant(virtualPowerPlantOptional.get());
             }
             throw new HouseholdServiceException(
-                    String.format("There is no vpp %s to find any households", vppBusinessKey)
+                    String.format("VK %s konnte nicht gefunden werden um Haushalte abzufragen", virtualPowerPlantId)
             );
         } catch (HouseholdRepositoryException | VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new HouseholdServiceException(e.getMessage(), e);
@@ -48,10 +48,10 @@ public class HouseholdServiceImpl implements IHouseholdService {
     }
 
     @Override
-    public HouseholdAggregate get(String businessKey) throws HouseholdServiceException {
+    public HouseholdAggregate get(String householdId) throws HouseholdServiceException {
         try {
-            return repository.getById(new HouseholdIdVO(businessKey))
-                    .orElseThrow(() -> new HouseholdServiceException(String.format("Can't find household by actionRequestId %s", businessKey)));
+            return repository.getById(new HouseholdIdVO(householdId))
+                    .orElseThrow(() -> new HouseholdServiceException(String.format("Haushalt %s konnte nicht gefunden werden", householdId)));
         } catch (HouseholdException | HouseholdRepositoryException e) {
             throw new HouseholdServiceException(e.getMessage(), e);
         }
@@ -59,38 +59,49 @@ public class HouseholdServiceImpl implements IHouseholdService {
     }
 
     @Override
-    public void save(HouseholdAggregate domainEntity, String virtualPowerPlantBusinessKey) throws HouseholdServiceException {
+    public void save(HouseholdAggregate domainEntity, String virtualPowerPlantId) throws HouseholdServiceException {
         try {
             if (repository.getById(domainEntity.getHouseholdId()).isPresent()) {
                 throw new HouseholdServiceException(
-                        String.format("household with actionRequestId %s already exists", domainEntity.getHouseholdId().getValue()));
+                        String.format("Haushalt %s existiert bereits", domainEntity.getHouseholdId().getValue()));
             }
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional = virtualPowerPlantRepository.getById(
-                    new VirtualPowerPlantIdVO(virtualPowerPlantBusinessKey)
+                    new VirtualPowerPlantIdVO(virtualPowerPlantId)
             );
 
             if (virtualPowerPlantOptional.isPresent()) {
+
+                if (!publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId),
+                        domainEntity.getHouseholdId())) {
+                    throw new HouseholdServiceException(
+                            String.format("Haushalt %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getHouseholdId().getValue(),
+                                    virtualPowerPlantId)
+                    );
+                }
+
                 VirtualPowerPlantAggregate virtualPowerPlant = virtualPowerPlantOptional.get();
                 repository.save(domainEntity);
                 repository.assign(domainEntity, virtualPowerPlant);
             } else {
                 throw new HouseholdServiceException(
-                        String.format("Failed to assign household %s to vpp %s", domainEntity.getHouseholdId().getValue(),
-                                virtualPowerPlantBusinessKey)
+                        String.format("Haushalt %s konnte VK %s nicht zugewiesen werden, da Haushalt bereits zugewiesen wurde", domainEntity.getHouseholdId().getValue(),
+                                virtualPowerPlantId)
                 );
             }
-        } catch (HouseholdRepositoryException | VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
+        } catch (HouseholdRepositoryException | VirtualPowerPlantRepositoryException | VirtualPowerPlantException | PublishException e) {
             throw new HouseholdServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void delete(String businessKey, String vppBusinessKey) throws HouseholdServiceException {
+    public void delete(String householdId, String virtualPowerPlantId) throws HouseholdServiceException {
         try {
-            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(vppBusinessKey), new HouseholdIdVO(businessKey))) {
-                repository.deleteById(new HouseholdIdVO(businessKey));
+            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new HouseholdIdVO(householdId))) {
+                repository.deleteById(new HouseholdIdVO(householdId));
             } else {
-                throw new HouseholdServiceException("failed to delete household. vpp has to be unpublished.");
+                throw new HouseholdServiceException(
+                        String.format("Haushalt %s konnte nicht gelöscht werden, da VK veröffentlicht ist", householdId)
+                );
             }
 
         } catch (HouseholdRepositoryException | HouseholdException | VirtualPowerPlantException | PublishException e) {
@@ -99,10 +110,14 @@ public class HouseholdServiceImpl implements IHouseholdService {
     }
 
     @Override
-    public void update(String businessKey, HouseholdAggregate domainEntity, String vppBusinessKey) throws HouseholdServiceException {
+    public void update(String householdId, HouseholdAggregate domainEntity, String virtualPowerPlantId) throws HouseholdServiceException {
         try {
-            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(vppBusinessKey), new HouseholdIdVO(businessKey))) {
-                repository.update(new HouseholdIdVO(businessKey), domainEntity);
+            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new HouseholdIdVO(householdId))) {
+                repository.update(new HouseholdIdVO(householdId), domainEntity);
+            } else {
+                throw new HouseholdServiceException(
+                        String.format("Haushalt %s konnte nicht bearbeitet werden, da VK veröffentlicht ist", householdId)
+                );
             }
         } catch (PublishException | VirtualPowerPlantException | HouseholdException | HouseholdRepositoryException e) {
             throw new HouseholdServiceException(e.getMessage(), e);

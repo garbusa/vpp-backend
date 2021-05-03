@@ -2,11 +2,11 @@ package de.uol.vpp.masterdata.domain.exceptions;
 
 public class ConsumerException extends Exception {
 
-    public ConsumerException(String message) {
-        super(message);
+    public ConsumerException(String attribute) {
+        super("Validierung des " + attribute + "-Attributs der Entität Consumer fehlgeschlagen");
     }
 
-    public ConsumerException(String message, Throwable cause) {
-        super(message, cause);
+    public ConsumerException(String attribute, Throwable cause) {
+        super("Validierung des " + attribute + "-Attributs der Entität Consumer fehlgeschlagen", cause);
     }
 }

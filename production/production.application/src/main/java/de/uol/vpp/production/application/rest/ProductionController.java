@@ -26,12 +26,12 @@ public class ProductionController {
     private final IProductionService productionService;
     private final ApplicationDomainConverter converter;
 
-    @GetMapping(path = "/{actionRequestBusinessKey}")
-    public ResponseEntity<?> getAllProductionsByVirtualPowerPlantIdAndTimestamp(@PathVariable String actionRequestBusinessKey) {
+    @GetMapping(path = "/{actionRequestId}")
+    public ResponseEntity<?> getAllProductionsByVirtualPowerPlantIdAndTimestamp(@PathVariable String actionRequestId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "productions successfully fetched.",
-                            productionService.getProductionsByActionRequestId(actionRequestBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Stromerzeugungen war erfolgreich",
+                            productionService.getProductionsByActionRequestId(actionRequestId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -42,7 +42,7 @@ public class ProductionController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }

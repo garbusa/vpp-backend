@@ -9,10 +9,10 @@ import javax.persistence.*;
 public class WaterEnergy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long internalId;
 
     @Column(unique = true, nullable = false)
-    private String businessKey;
+    private String id;
 
     @Column(nullable = false)
     private Double efficiency;

@@ -10,7 +10,7 @@ public class ProductionActionRequestIdVO {
 
     public ProductionActionRequestIdVO(String value) throws ProductionException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new ProductionException("validation for production action request id failed");
+            throw new ProductionException("actionRequestId", "Production");
         }
         this.value = value;
     }

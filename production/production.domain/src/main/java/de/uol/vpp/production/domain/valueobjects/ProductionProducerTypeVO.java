@@ -13,7 +13,7 @@ public class ProductionProducerTypeVO {
         if (value == null || value.isBlank() || value.isEmpty() || (!value.equals("WIND") && !value.equals("WATER") &&
                 !value.equals("SOLAR") &&
                 !value.equals("OTHER"))) {
-            throw new ProductionException("validation for producer actiontype failed");
+            throw new ProductionException("producerType", "ProductionProducer");
         }
         this.value = value;
     }

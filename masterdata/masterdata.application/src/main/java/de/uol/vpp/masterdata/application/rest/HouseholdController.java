@@ -23,12 +23,12 @@ public class HouseholdController {
     private final IHouseholdService service;
     private final ApplicationDomainConverter converter;
 
-    @GetMapping(path = "/by/vpp/{vppBusinessKey}")
-    public ResponseEntity<?> getAllHouseholdsByVirtualPowerPlantId(@PathVariable String vppBusinessKey) {
+    @GetMapping(path = "/by/vpp/{virtualPowerPlantId}")
+    public ResponseEntity<?> getAllHouseholdsByVirtualPowerPlantId(@PathVariable String virtualPowerPlantId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "households successfully fetched.",
-                            service.getAllByVppId(vppBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Haushalte war erfolgreich",
+                            service.getAllByVppId(virtualPowerPlantId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -37,17 +37,17 @@ public class HouseholdController {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping(path = "/{businessKey}")
-    public ResponseEntity<?> getOneHousehold(@PathVariable String businessKey) {
+    @GetMapping(path = "/{householdId}")
+    public ResponseEntity<?> getOneHousehold(@PathVariable String householdId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "household successfully fetched",
-                            converter.toApplication(service.get(businessKey)))
+                    new ApiResponse(true, false, "Abfrage eines Haushaltes war erfolgreich",
+                            converter.toApplication(service.get(householdId)))
                     , HttpStatus.OK);
         } catch (HouseholdServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -55,59 +55,59 @@ public class HouseholdController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/by/vpp/{vppBusinessKey}")
+    @PostMapping("/by/vpp/{virtualPowerPlantId}")
     public ResponseEntity<?> saveHousehold(@RequestBody HouseholdDTO dto,
-                                           @PathVariable String vppBusinessKey) {
+                                           @PathVariable String virtualPowerPlantId) {
         try {
-            service.save(converter.toDomain(dto), vppBusinessKey);
+            service.save(converter.toDomain(dto), virtualPowerPlantId);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "household successfully created and assigned", null));
+                    true, false, "Haushalt wurde erfolgreich angelegt und einem VK zugewiesen", null));
         } catch (HouseholdServiceException | HouseholdException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
 
     }
 
-    @DeleteMapping(path = "/{businessKey}")
-    public ResponseEntity<?> deleteHousehold(@PathVariable String businessKey, String vppBusinessKey) {
+    @DeleteMapping(path = "/{householdId}")
+    public ResponseEntity<?> deleteHousehold(@PathVariable String householdId, String virtualPowerPlantId) {
         try {
-            service.delete(businessKey, vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "household successfully deleted", null));
+            service.delete(householdId, virtualPowerPlantId);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "Haushalt wurde erfolgreich gelöscht", null));
         } catch (HouseholdServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PutMapping(path = "/{businessKey}")
-    public ResponseEntity<?> updateHousehold(@PathVariable String businessKey, @RequestBody HouseholdDTO newDto, @RequestParam String vppBusinessKey) {
+    @PutMapping(path = "/{householdId}")
+    public ResponseEntity<?> updateHousehold(@PathVariable String householdId, @RequestBody HouseholdDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {
-            service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
+            service.update(householdId, converter.toDomain(newDto), virtualPowerPlantId);
             return ResponseEntity.ok().body(new ApiResponse(true, false,
-                    "household successfully updated", null));
+                    "Haushalt wurde erfolgreich aktualisiert", null));
         } catch (HouseholdServiceException | HouseholdException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }

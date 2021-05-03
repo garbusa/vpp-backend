@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SolarEnergyJpaRepository extends JpaRepository<SolarEnergy, Long> {
-    Optional<SolarEnergy> findOneByBusinessKey(String businessKey);
+    Optional<SolarEnergy> findOneById(String solarEnergyId);
 
     List<SolarEnergy> findAllByDecentralizedPowerPlant(DecentralizedPowerPlant decentralizedPowerPlant);
 

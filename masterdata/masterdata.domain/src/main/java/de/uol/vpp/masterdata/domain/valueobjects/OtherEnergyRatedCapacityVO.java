@@ -8,9 +8,9 @@ public class OtherEnergyRatedCapacityVO {
     private Double value;
 
     public OtherEnergyRatedCapacityVO(Double value) throws ProducerException {
-        if (value != null && value < 0.) {
-            throw new ProducerException("validation for otherEnergy rated capacity failed");
+        if (value == null || value < 0.) {
+            throw new ProducerException("ratedCapacity", "OtherEnergy");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

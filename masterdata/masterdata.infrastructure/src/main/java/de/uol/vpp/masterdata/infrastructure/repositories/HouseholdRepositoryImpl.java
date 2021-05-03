@@ -33,7 +33,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
     @Override
     public List<HouseholdAggregate> getAllByVirtualPowerPlant(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws HouseholdRepositoryException {
         try {
-            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue());
+            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneById(virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue());
             if (virtualPowerPlantOptional.isPresent()) {
                 List<HouseholdAggregate> result = new ArrayList<>();
                 for (Household household : jpaRepository.findAllByVirtualPowerPlant(virtualPowerPlantOptional.get())) {
@@ -42,7 +42,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
                 return result;
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("There is no VPP with actionRequestId %s to get all households", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
+                        String.format("VK %s konnte nicht gefunden werden um Haushälte abzufragen", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
                 );
             }
         } catch (HouseholdException e) {
@@ -53,7 +53,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
     @Override
     public Optional<HouseholdAggregate> getById(HouseholdIdVO id) throws HouseholdRepositoryException {
         try {
-            Optional<Household> result = jpaRepository.findOneByBusinessKey(id.getValue());
+            Optional<Household> result = jpaRepository.findOneById(id.getValue());
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             }
@@ -71,7 +71,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
 
     @Override
     public void deleteById(HouseholdIdVO id) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntity = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<Household> jpaEntity = jpaRepository.findOneById(id.getValue());
         if (jpaEntity.isPresent()) {
             Household household = jpaEntity.get();
 
@@ -84,15 +84,15 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
             jpaRepository.delete(household);
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("household %s can not be found and can not be deleted", id.getValue())
+                    String.format("Haushalt %s konnte nicht gelöscht werden, da Haushalt nicht gefunden wurde", id.getValue())
             );
         }
     }
 
     @Override
     public void assign(HouseholdAggregate entity, VirtualPowerPlantAggregate virtualPowerPlant) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(entity.getHouseholdId().getValue());
-        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getValue());
+        Optional<Household> jpaEntityOptional = jpaRepository.findOneById(entity.getHouseholdId().getValue());
+        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneById(virtualPowerPlant.getVirtualPowerPlantId().getValue());
         if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
             Household jpaEntity = jpaEntityOptional.get();
             VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
@@ -103,13 +103,13 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
                 virtualPowerPlantJpaRepository.save(virtualPowerPlantJpaEntity);
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("Dpp %s is already assigned to vpp %s", entity.getHouseholdId().getValue(),
-                                jpaEntity.getVirtualPowerPlant().getBusinessKey())
+                        String.format("Haushalt %s konnte VK %s nicht zu gewiesen werden, da Haushalt bereits zugewiesen wurde", entity.getHouseholdId().getValue(),
+                                jpaEntity.getVirtualPowerPlant().getId())
                 );
             }
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("An error occured while assigning dpp %s to vpp %s", entity.getHouseholdId().getValue(),
+                    String.format("Haushalt %s konnte VK %s nicht zugewiesen werden", entity.getHouseholdId().getValue(),
                             virtualPowerPlant.getVirtualPowerPlantId().getValue())
             );
         }
@@ -117,15 +117,17 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
 
     @Override
     public void update(HouseholdIdVO id, HouseholdAggregate domainEntity) throws HouseholdRepositoryException {
-        Optional<Household> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<Household> jpaEntityOptional = jpaRepository.findOneById(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             Household jpaEntity = jpaEntityOptional.get();
             Household updated = converter.toInfrastructure(domainEntity);
-            jpaEntity.setBusinessKey(updated.getBusinessKey());
+            jpaEntity.setId(updated.getId());
             jpaEntity.setMemberAmount(updated.getMemberAmount());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new HouseholdRepositoryException("failed to update household. can not find household entity.");
+            throw new HouseholdRepositoryException(
+                    String.format("Haushalt %s konnte nicht aktualisiert werden, da Haushalt nicht gefunden wurde", id.getValue())
+            );
         }
     }
 

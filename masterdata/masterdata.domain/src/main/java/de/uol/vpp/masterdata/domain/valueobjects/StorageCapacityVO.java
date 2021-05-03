@@ -12,8 +12,8 @@ public class StorageCapacityVO {
 
     public StorageCapacityVO(Double value) throws StorageException {
         if (value == null || value < 0 || value > 100) {
-            throw new StorageException("validation for storage capacity failed");
+            throw new StorageException("capacity");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

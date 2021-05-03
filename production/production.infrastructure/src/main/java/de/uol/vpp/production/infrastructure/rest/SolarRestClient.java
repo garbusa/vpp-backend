@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.uol.vpp.production.infrastructure.rest.dto.SolarEnergyDTO;
 import de.uol.vpp.production.infrastructure.rest.dto.SolarForecastDTO;
+import de.uol.vpp.production.infrastructure.rest.exceptions.SolarRestClientException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -26,7 +28,7 @@ public class SolarRestClient {
 
     private final String authHeader = "Basic Y2FybHZvbm9zc2lldHpreXVuaXZlcnNpdGFldG9sZGVuYnVyZ19nYXJidXNhOmh4Y3MwNFk1V0lQdlg=";
 
-    public List<SolarForecastDTO> getSolarForecast(ZonedDateTime dateTime, SolarEnergyDTO dto) {
+    public List<SolarForecastDTO> getSolarForecast(ZonedDateTime dateTime, SolarEnergyDTO dto) throws SolarRestClientException {
         dto.setRatedCapacity(dto.getRatedCapacity() / 1000); //kW to MW
         String url = this.getBaseUrl(dateTime.toInstant().toString(), dto.getAlignment(), dto.getSlope(), dto.getRatedCapacity(), dto.getLatitude(), dto.getLongitude());
         try {
@@ -46,19 +48,19 @@ public class SolarRestClient {
                             forecastDTO.setTimestamp(
                                     ZonedDateTime.ofInstant(Instant.parse(forecast.get("date").asText()), ZoneId.of("GMT+2"))
                             );
-                            forecastDTO.setValue(forecast.get("householdLoad").asDouble());
+                            forecastDTO.setValue(forecast.get("value").asDouble());
                             result.add(forecastDTO);
                         });
                         return result;
                     }
                 } else {
-                    log.info("something went wrong weather men");
+                    throw new SolarRestClientException("json response has no data field or is no array");
                 }
             } else {
-                log.info("something went wrong weather men");
+                throw new SolarRestClientException("solar rest api response is unequal to 200");
             }
-        } catch (JsonProcessingException e) {
-            log.info(e);
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new SolarRestClientException("solar rest client exception while executing request", e);
         }
 
         return null;

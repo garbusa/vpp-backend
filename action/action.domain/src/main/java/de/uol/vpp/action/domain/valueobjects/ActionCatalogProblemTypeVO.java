@@ -10,7 +10,7 @@ public class ActionCatalogProblemTypeVO {
 
     public ActionCatalogProblemTypeVO(ProblemTypeEnum value) throws ActionException {
         if (value == null) {
-            throw new ActionException("validation for action catalog problemType failed");
+            throw new ActionException("problemType", "ActionCatalog");
         }
         this.value = value;
     }

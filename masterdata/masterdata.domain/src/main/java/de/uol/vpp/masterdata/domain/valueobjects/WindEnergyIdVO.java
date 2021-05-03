@@ -13,7 +13,7 @@ public class WindEnergyIdVO {
 
     public WindEnergyIdVO(String value) throws ProducerException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new ProducerException("validation for wind actionRequestId failed");
+            throw new ProducerException("windEnergyId", "WindEnergy");
         }
         this.value = value.toUpperCase();
     }

@@ -28,10 +28,10 @@ public class LoadHouseholdRepositoryImpl implements ILoadHouseholdRepository {
     private final InfrastructureDomainConverter converter;
 
     @Override
-    public List<LoadHouseholdEntity> getLoadHouseholdsByVppTimestamp(LoadActionRequestIdVO vppBusinessKey, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException {
+    public List<LoadHouseholdEntity> getLoadHouseholdByActionRequestId(LoadActionRequestIdVO actionRequestId, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException {
         try {
             List<LoadHouseholdEntity> result = new ArrayList<>();
-            ELoad load = loadJpaRepository.findById(new ELoad.ActionRequestTimestamp(vppBusinessKey.getId(),
+            ELoad load = loadJpaRepository.findById(new ELoad.ActionRequestTimestamp(actionRequestId.getId(),
                     timestamp.getTimestamp())).orElse(null);
             if (load != null) {
                 for (ELoadHousehold loadHousehold : jpaRepository
@@ -40,14 +40,13 @@ public class LoadHouseholdRepositoryImpl implements ILoadHouseholdRepository {
                 }
             }
             return result;
-
         } catch (LoadException e) {
             throw new LoadHouseholdRepositoryException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void assign(Long loadHouseholdInternalId, LoadAggregate load) throws LoadHouseholdRepositoryException {
+    public void assignToInternal(Long loadHouseholdInternalId, LoadAggregate load) throws LoadHouseholdRepositoryException {
         Optional<ELoad> loadJpa = loadJpaRepository.findById(new ELoad.ActionRequestTimestamp(load.getLoadActionRequestId().getId(),
                 load.getLoadStartTimestamp().getTimestamp()));
         if (loadJpa.isPresent()) {
@@ -60,37 +59,37 @@ public class LoadHouseholdRepositoryImpl implements ILoadHouseholdRepository {
                     loadJpaRepository.save(loadJpa.get());
                 } else {
                     throw new LoadHouseholdRepositoryException(
-                            "Failed to assign an entity for household load, the assigments have to be empty"
+                            String.format("Haushaltslast konnte dem Lastaggregat %s nicht zugewiesen werden, da die Haushaltslast bereits zugewiesen wurde", load.getLoadActionRequestId().getId())
                     );
                 }
             } else {
                 throw new LoadHouseholdRepositoryException(
-                        "Failed to fetch load household"
+                        String.format("Haushaltslast %s (Zeistempel: %s) konnte nicht gefunden werden", load.getLoadActionRequestId(), load.getLoadStartTimestamp().getTimestamp().toEpochSecond())
                 );
             }
         } else {
             throw new LoadHouseholdRepositoryException(
-                    String.format("Load %s does not exist. Failed to fetch all household loads", load.getLoadActionRequestId().getId())
+                    String.format("Haushaltslast konnte dem Lastaggregat %s nicht zugeiwesen werden, da Last nicht gefunden wurde", load.getLoadActionRequestId().getId())
             );
         }
     }
 
     @Override
-    public Long saveLoadHousehold(LoadHouseholdEntity load) throws LoadHouseholdRepositoryException {
+    public Long saveLoadHouseholdInternal(LoadHouseholdEntity load) throws LoadHouseholdRepositoryException {
         ELoadHousehold jpaEntity = converter.toInfrastructure(load);
         ELoadHousehold saved = jpaRepository.save(jpaEntity);
         return saved.getInternalId();
     }
 
     @Override
-    public void deleteHouseholdsByVppTimestamp(LoadActionRequestIdVO vppBusinessKey, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException {
-        Optional<ELoad> jpaEntity = loadJpaRepository.findById(new ELoad.ActionRequestTimestamp(vppBusinessKey.getId(),
+    public void deleteHouseholdsByActionRequestId(LoadActionRequestIdVO actionRequestId, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException {
+        Optional<ELoad> jpaEntity = loadJpaRepository.findById(new ELoad.ActionRequestTimestamp(actionRequestId.getId(),
                 timestamp.getTimestamp()));
         if (jpaEntity.isPresent()) {
             jpaRepository.deleteAllByLoad(jpaEntity.get());
         } else {
             throw new LoadHouseholdRepositoryException(
-                    String.format("failed to delete households by vpp actionRequestId %s", vppBusinessKey.getId())
+                    String.format("Haushaltslaste konnten nicht gelöscht werden, da ActionRequest-Lastaggregat %s nicht gefunden wurde", actionRequestId.getId())
             );
         }
     }

@@ -7,11 +7,11 @@ import de.uol.vpp.load.domain.valueobjects.LoadActionRequestIdVO;
 import java.util.List;
 
 public interface ILoadRepository {
-    List<LoadAggregate> getLoadsByActionRequestId(LoadActionRequestIdVO actionRequestBusinessKey) throws LoadRepositoryException;
+    List<LoadAggregate> getLoadsByActionRequestId(LoadActionRequestIdVO actionRequestId) throws LoadRepositoryException;
 
     void saveLoad(LoadAggregate load) throws LoadRepositoryException;
 
-    void deleteLoadsByActionRequestId(LoadActionRequestIdVO actionRequestBusinessKey) throws LoadRepositoryException;
+    void deleteLoadsByActionRequestId(LoadActionRequestIdVO actionRequestId) throws LoadRepositoryException;
 
     void updateLoad(LoadAggregate load) throws LoadRepositoryException;
 }

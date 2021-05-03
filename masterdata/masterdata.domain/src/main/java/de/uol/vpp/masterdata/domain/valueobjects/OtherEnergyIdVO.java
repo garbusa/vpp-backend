@@ -9,7 +9,7 @@ public class OtherEnergyIdVO {
 
     public OtherEnergyIdVO(String value) throws ProducerException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ProducerException("validation for otherEnergy actionRequestId failed");
+            throw new ProducerException("otherEnergyId", "OtherEnergy");
         }
         this.value = value.toUpperCase();
     }

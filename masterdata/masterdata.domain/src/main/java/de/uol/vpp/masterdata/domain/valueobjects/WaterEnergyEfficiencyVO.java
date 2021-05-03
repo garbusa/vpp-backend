@@ -12,8 +12,8 @@ public class WaterEnergyEfficiencyVO {
 
     public WaterEnergyEfficiencyVO(Double value) throws ProducerException {
         if (value == null || value < 0. || value > 100.) {
-            throw new ProducerException("validation for water ratedCapacity failed");
+            throw new ProducerException("efficiency", "WaterEnergy");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

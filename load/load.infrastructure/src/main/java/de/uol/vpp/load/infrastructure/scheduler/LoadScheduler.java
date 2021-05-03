@@ -1,5 +1,6 @@
 package de.uol.vpp.load.infrastructure.scheduler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import de.uol.vpp.load.domain.aggregates.LoadAggregate;
 import de.uol.vpp.load.domain.entities.LoadHouseholdEntity;
 import de.uol.vpp.load.domain.exceptions.LoadException;
@@ -10,6 +11,7 @@ import de.uol.vpp.load.domain.repositories.ILoadRepository;
 import de.uol.vpp.load.domain.valueobjects.*;
 import de.uol.vpp.load.infrastructure.rabbitmq.RabbitMQSender;
 import de.uol.vpp.load.infrastructure.rest.MasterdataRestClient;
+import de.uol.vpp.load.infrastructure.rest.exceptions.MasterdataRestClientException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -161,31 +163,32 @@ public class LoadScheduler {
 
 
     public void createLoad(String actionRequestId, String vppId) {
-        //@todo check if actionrequestid exists
-        ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
-        ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
-                currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
-                currentZDT.getMinute() - (currentZDT.getMinute() % 15),
-                0, 0, ZoneId.of("GMT+2")
-        );
-        if (masterdataRestClient.isActiveVpp(vppId)) {
-
-            for (int forecastIndex = 0; forecastIndex <= LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
-                this.saveLoad(currentWithoutSeconds, actionRequestId, vppId);
-                currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15L);
+        try {
+            ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
+            ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
+                    currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
+                    currentZDT.getMinute() - (currentZDT.getMinute() % 15),
+                    0, 0, ZoneId.of("GMT+2")
+            );
+            if (masterdataRestClient.isActiveVpp(vppId)) {
+                for (int forecastIndex = 0; forecastIndex <= LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
+                    this.saveLoad(currentWithoutSeconds, actionRequestId, vppId);
+                    currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15L);
+                }
+                rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
+            } else {
+                //Send error
+                rabbitMQSender.sendFailed(actionRequestId);
             }
-            //@todo
-            rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
-        } else {
-            //Send error
-            rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
+        } catch (Exception e) {
+            log.error(e);
+            rabbitMQSender.sendFailed(actionRequestId);
         }
 
     }
 
 
-    private void saveLoad(ZonedDateTime currentZDT, String actionRequestId, String vppId) {
-        try {
+    private void saveLoad(ZonedDateTime currentZDT, String actionRequestId, String vppId) throws LoadException, LoadRepositoryException, JsonProcessingException, MasterdataRestClientException, LoadHouseholdRepositoryException {
             int rowIndex = getRowIndex(currentZDT);
             int columnIndex = getColumnIndex(currentZDT);
             LoadAggregate loadAggregate = new LoadAggregate();
@@ -194,28 +197,23 @@ public class LoadScheduler {
             loadAggregate.setLoadStartTimestamp(new LoadStartTimestampVO(currentZDT.toEpochSecond()));
             loadRepository.saveLoad(loadAggregate);
             List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(vppId);
-            householdIds.forEach(householdId -> {
-                try {
-                    LoadHouseholdEntity householdEntity = new LoadHouseholdEntity();
-                    householdEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(currentZDT.toEpochSecond()));
-                    householdEntity.setLoadHouseholdId(new LoadHouseholdIdVO(householdId));
-                    householdEntity.setLoadHouseholdMemberAmount(
-                            new LoadHouseholdMemberAmountVO(masterdataRestClient.getHouseholdMemberAmountById(householdId))
-                    );
-                    householdEntity.setLoadHouseholdValueVO(
-                            new LoadHouseholdValueVO(
-                                    sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue() * householdEntity.getLoadHouseholdMemberAmount().getAmount()
-                            )
-                    );
-                    Long internalId = loadHouseholdRepository.saveLoadHousehold(householdEntity);
-                    loadHouseholdRepository.assign(internalId, loadAggregate);
-                } catch (LoadException | LoadHouseholdRepositoryException e) {
-                    log.info(e);
-                }
-            });
-        } catch (LoadException | LoadRepositoryException e) {
-            log.info(e);
+
+        for (String householdId : householdIds) {
+            LoadHouseholdEntity householdEntity = new LoadHouseholdEntity();
+            householdEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(currentZDT.toEpochSecond()));
+            householdEntity.setLoadHouseholdId(new LoadHouseholdIdVO(householdId));
+            householdEntity.setLoadHouseholdMemberAmount(
+                    new LoadHouseholdMemberAmountVO(masterdataRestClient.getHouseholdMemberAmountById(householdId))
+            );
+            householdEntity.setLoadHouseholdValueVO(
+                    new LoadHouseholdValueVO(
+                            sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue() * householdEntity.getLoadHouseholdMemberAmount().getAmount()
+                    )
+            );
+            Long internalId = loadHouseholdRepository.saveLoadHouseholdInternal(householdEntity);
+            loadHouseholdRepository.assignToInternal(internalId, loadAggregate);
         }
+
     }
 
     private int getRowIndex(ZonedDateTime date) {

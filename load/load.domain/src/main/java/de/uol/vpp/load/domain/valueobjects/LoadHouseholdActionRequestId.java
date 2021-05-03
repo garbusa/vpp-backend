@@ -9,7 +9,7 @@ public class LoadHouseholdActionRequestId {
 
     public LoadHouseholdActionRequestId(String id) throws LoadException {
         if (id == null || id.isBlank() || id.isEmpty()) {
-            throw new LoadException("validation for loadhousehold action request id failed");
+            throw new LoadException("actionRequestId", "LoadHousehold");
         }
         this.id = id;
     }

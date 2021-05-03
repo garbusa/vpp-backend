@@ -24,12 +24,12 @@ public class StorageController {
     private final ApplicationDomainConverter converter;
 
     @GetMapping(path = "/by/dpp/{" +
-            "dppBusinessKey}")
-    public ResponseEntity<?> getAllStoragesByDecentralizedPowerPlant(@PathVariable String dppBusinessKey) {
+            "decentralizedPowerPlantId}")
+    public ResponseEntity<?> getAllStoragesByDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "storages successfully fetched.",
-                            service.getAllByDecentralizedPowerPlantId(dppBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Speicher war erfolgreich",
+                            service.getAllByDecentralizedPowerPlantId(decentralizedPowerPlantId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -38,18 +38,18 @@ public class StorageController {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping(path = "/by/household/{" +
-            "householdBusinessKey}")
-    public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdBusinessKey) {
+            "householdId}")
+    public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "storages successfully fetched.",
-                            service.getAllByHouseholdId(householdBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Speicher war erfolgreich",
+                            service.getAllByHouseholdId(householdId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -58,16 +58,16 @@ public class StorageController {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping(path = "/{businessKey}")
-    public ResponseEntity<?> getOneStorage(@PathVariable String businessKey) {
+    @GetMapping(path = "/{storageId}")
+    public ResponseEntity<?> getOneStorage(@PathVariable String storageId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "storage successfully fetched", converter.toApplication(service.get(businessKey)))
+                    new ApiResponse(true, false, "Abfrage eines Speichers war erfolgreich", converter.toApplication(service.get(storageId)))
                     , HttpStatus.OK);
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -75,75 +75,75 @@ public class StorageController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/by/dpp/{dppBusinessKey}")
+    @PostMapping("/by/dpp/{decentralizedPowerPlantId}")
     public ResponseEntity<?> saveStorageWithDecentralizedPowerPlant(@RequestBody StorageDTO dto,
-                                                                    @PathVariable String dppBusinessKey) {
+                                                                    @PathVariable String decentralizedPowerPlantId) {
         try {
-            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), dppBusinessKey);
+            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), decentralizedPowerPlantId);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "storage successfully created and assigned to dpp", null));
+                    true, false, "Speicher wurde erfolgreich erstellt und einem DK zugewiesen", null));
         } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/by/household/{householdBusinessKey}")
+    @PostMapping("/by/household/{householdId}")
     public ResponseEntity<?> saveStorageWithHousehold(@RequestBody StorageDTO dto,
-                                                      @PathVariable String householdBusinessKey) {
+                                                      @PathVariable String householdId) {
         try {
-            service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
+            service.saveWithHousehold(converter.toDomain(dto), householdId);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "storage successfully created and assigned to household", null));
+                    true, false, "Speicher wurde erfolgreich erstellt und einem Haushalt zugewiesen", null));
         } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping(path = "/{businessKey}")
-    public ResponseEntity<?> deleteStorage(@PathVariable String businessKey, @RequestParam String vppBusinessKey) {
+    @DeleteMapping(path = "/{storageId}")
+    public ResponseEntity<?> deleteStorage(@PathVariable String storageId, @RequestParam String virtualPowerPlantId) {
         try {
-            service.delete(businessKey, vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "Storage successfully deleted", null));
+            service.delete(storageId, virtualPowerPlantId);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "Speicher wurde erfolgreich gelöscht", null));
         } catch (StorageServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PutMapping(path = "/{businessKey}")
-    public ResponseEntity<?> updateStorage(@PathVariable String businessKey, @RequestBody StorageDTO newDto, @RequestParam String vppBusinessKey) {
+    @PutMapping(path = "/{storageId}")
+    public ResponseEntity<?> updateStorage(@PathVariable String storageId, @RequestBody StorageDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {
-            service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "storage successfully updated", null));
+            service.update(storageId, converter.toDomain(newDto), virtualPowerPlantId);
+            return ResponseEntity.ok().body(new ApiResponse(true, false, "Speicher wurde erfolgreich aktualisiert", null));
         } catch (StorageServiceException | StorageException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }

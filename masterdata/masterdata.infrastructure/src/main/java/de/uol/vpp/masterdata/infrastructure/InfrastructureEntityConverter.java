@@ -22,7 +22,7 @@ public class InfrastructureEntityConverter {
         try {
             VirtualPowerPlantAggregate domainEntity = new VirtualPowerPlantAggregate();
             domainEntity.setVirtualPowerPlantId(
-                    new VirtualPowerPlantIdVO(jpaEntity.getBusinessKey())
+                    new VirtualPowerPlantIdVO(jpaEntity.getId())
             );
             List<DecentralizedPowerPlantAggregate> list = new ArrayList<>();
             for (DecentralizedPowerPlant decentralizedPowerPlant : jpaEntity.getDecentralizedPowerPlants()) {
@@ -53,7 +53,7 @@ public class InfrastructureEntityConverter {
         try {
             DecentralizedPowerPlantAggregate domainEntity = new DecentralizedPowerPlantAggregate();
             domainEntity.setDecentralizedPowerPlantId(
-                    new DecentralizedPowerPlantIdVO(jpaEntity.getBusinessKey())
+                    new DecentralizedPowerPlantIdVO(jpaEntity.getId())
             );
 
             List<WaterEnergyEntity> waters = new ArrayList<>();
@@ -105,7 +105,7 @@ public class InfrastructureEntityConverter {
         try {
             HouseholdAggregate domainEntity = new HouseholdAggregate();
             domainEntity.setHouseholdId(
-                    new HouseholdIdVO(jpaEntity.getBusinessKey())
+                    new HouseholdIdVO(jpaEntity.getId())
             );
             domainEntity.setHouseholdMemberAmount(
                     new HouseholdMemberAmountVO(jpaEntity.getMemberAmount())
@@ -156,7 +156,7 @@ public class InfrastructureEntityConverter {
 
     public WaterEnergyEntity toDomain(WaterEnergy jpaEntity) throws ProducerException {
         WaterEnergyEntity domainEntity = new WaterEnergyEntity();
-        domainEntity.setId(new WaterEnergyIdVO(jpaEntity.getBusinessKey()));
+        domainEntity.setId(new WaterEnergyIdVO(jpaEntity.getId()));
         domainEntity.setCapacity(new WaterEnergyCapacityVO(jpaEntity.getCapacity()));
         domainEntity.setEfficiency(new WaterEnergyEfficiencyVO(jpaEntity.getEfficiency()));
         domainEntity.setHeight(new WaterEnergyHeightVO(jpaEntity.getHeight()));
@@ -168,7 +168,7 @@ public class InfrastructureEntityConverter {
 
     public WindEnergyEntity toDomain(WindEnergy jpaEntity) throws ProducerException {
         WindEnergyEntity domainEntity = new WindEnergyEntity();
-        domainEntity.setId(new WindEnergyIdVO(jpaEntity.getBusinessKey()));
+        domainEntity.setId(new WindEnergyIdVO(jpaEntity.getId()));
         domainEntity.setLatitude(new WindEnergyLatitudeVO(jpaEntity.getLatitude()));
         domainEntity.setLongitude(new WindEnergyLongitudeVO(jpaEntity.getLongitude()));
         domainEntity.setCapacity(new WindEnergyCapacityVO(jpaEntity.getCapacity()));
@@ -180,7 +180,7 @@ public class InfrastructureEntityConverter {
 
     public SolarEnergyEntity toDomain(SolarEnergy jpaEntity) throws ProducerException {
         SolarEnergyEntity domainEntity = new SolarEnergyEntity();
-        domainEntity.setId(new SolarEnergyIdVO(jpaEntity.getBusinessKey()));
+        domainEntity.setId(new SolarEnergyIdVO(jpaEntity.getId()));
         domainEntity.setLatitude(new SolarEnergyLatitudeVO(jpaEntity.getLatitude()));
         domainEntity.setLongitude(new SolarEnergyLongitudeVO(jpaEntity.getLongitude()));
         domainEntity.setCapacity(new SolarEnergyCapacityVO(jpaEntity.getCapacity()));
@@ -192,7 +192,7 @@ public class InfrastructureEntityConverter {
 
     public OtherEnergyEntity toDomain(OtherEnergy jpaEntity) throws ProducerException {
         OtherEnergyEntity domainEntity = new OtherEnergyEntity();
-        domainEntity.setId(new OtherEnergyIdVO(jpaEntity.getBusinessKey()));
+        domainEntity.setId(new OtherEnergyIdVO(jpaEntity.getId()));
         domainEntity.setCapacity(new OtherEnergyCapacityVO(jpaEntity.getCapacity()));
         domainEntity.setRatedCapacity(new OtherEnergyRatedCapacityVO(jpaEntity.getRatedCapacity()));
         return domainEntity;
@@ -201,7 +201,7 @@ public class InfrastructureEntityConverter {
     public StorageEntity toDomain(Storage jpaEntity) throws StorageException {
         StorageEntity domainEntity = new StorageEntity();
         domainEntity.setStorageId(
-                new StorageIdVO(jpaEntity.getBusinessKey())
+                new StorageIdVO(jpaEntity.getId())
         );
         domainEntity.setStoragePower(
                 new StoragePowerVO(jpaEntity.getRatedPower())
@@ -217,7 +217,7 @@ public class InfrastructureEntityConverter {
 
     public VirtualPowerPlant toInfrastructure(VirtualPowerPlantAggregate domainEntity) {
         VirtualPowerPlant jpaEntity = new VirtualPowerPlant();
-        jpaEntity.setBusinessKey(domainEntity.getVirtualPowerPlantId().getValue());
+        jpaEntity.setId(domainEntity.getVirtualPowerPlantId().getValue());
         if (domainEntity.getDecentralizedPowerPlants() != null && !domainEntity.getDecentralizedPowerPlants().isEmpty()) {
             jpaEntity.setDecentralizedPowerPlants(
                     domainEntity.getDecentralizedPowerPlants().stream().map(this::toInfrastructure)
@@ -238,7 +238,7 @@ public class InfrastructureEntityConverter {
 
     public DecentralizedPowerPlant toInfrastructure(DecentralizedPowerPlantAggregate domainEntity) {
         DecentralizedPowerPlant jpaEntity = new DecentralizedPowerPlant();
-        jpaEntity.setBusinessKey(domainEntity.getDecentralizedPowerPlantId().getValue());
+        jpaEntity.setId(domainEntity.getDecentralizedPowerPlantId().getValue());
         if (domainEntity.getSolars() != null && !domainEntity.getSolars().isEmpty()) {
             jpaEntity.setSolars(
                     domainEntity.getSolars().stream().map(this::toInfrastructure)
@@ -274,7 +274,7 @@ public class InfrastructureEntityConverter {
 
     public Household toInfrastructure(HouseholdAggregate domainEntity) {
         Household jpaEntity = new Household();
-        jpaEntity.setBusinessKey(domainEntity.getHouseholdId().getValue());
+        jpaEntity.setId(domainEntity.getHouseholdId().getValue());
         jpaEntity.setMemberAmount(domainEntity.getHouseholdMemberAmount().getValue());
         if (domainEntity.getSolars() != null && !domainEntity.getSolars().isEmpty()) {
             jpaEntity.setSolars(
@@ -312,7 +312,7 @@ public class InfrastructureEntityConverter {
 
     public SolarEnergy toInfrastructure(SolarEnergyEntity domainEntity) {
         SolarEnergy jpaEntity = new SolarEnergy();
-        jpaEntity.setBusinessKey(domainEntity.getId().getValue());
+        jpaEntity.setId(domainEntity.getId().getValue());
         jpaEntity.setCapacity(domainEntity.getCapacity().getValue());
         jpaEntity.setRatedCapacity(domainEntity.getRatedCapacity().getValue());
         jpaEntity.setLatitude(domainEntity.getLatitude().getValue());
@@ -324,7 +324,7 @@ public class InfrastructureEntityConverter {
 
     public WindEnergy toInfrastructure(WindEnergyEntity domainEntity) {
         WindEnergy jpaEntity = new WindEnergy();
-        jpaEntity.setBusinessKey(domainEntity.getId().getValue());
+        jpaEntity.setId(domainEntity.getId().getValue());
         jpaEntity.setCapacity(domainEntity.getCapacity().getValue());
         jpaEntity.setEfficiency(domainEntity.getEfficiency().getValue());
         jpaEntity.setLatitude(domainEntity.getLatitude().getValue());
@@ -336,7 +336,7 @@ public class InfrastructureEntityConverter {
 
     public WaterEnergy toInfrastructure(WaterEnergyEntity domainEntity) {
         WaterEnergy jpaEntity = new WaterEnergy();
-        jpaEntity.setBusinessKey(domainEntity.getId().getValue());
+        jpaEntity.setId(domainEntity.getId().getValue());
         jpaEntity.setCapacity(domainEntity.getCapacity().getValue());
         jpaEntity.setDensity(domainEntity.getDensity().getValue());
         jpaEntity.setEfficiency(domainEntity.getEfficiency().getValue());
@@ -348,7 +348,7 @@ public class InfrastructureEntityConverter {
 
     public OtherEnergy toInfrastructure(OtherEnergyEntity domainEntity) {
         OtherEnergy jpaEntity = new OtherEnergy();
-        jpaEntity.setBusinessKey(domainEntity.getId().getValue());
+        jpaEntity.setId(domainEntity.getId().getValue());
         jpaEntity.setCapacity(domainEntity.getCapacity().getValue());
         jpaEntity.setRatedCapacity(domainEntity.getRatedCapacity().getValue());
         return jpaEntity;
@@ -356,7 +356,7 @@ public class InfrastructureEntityConverter {
 
     public Storage toInfrastructure(StorageEntity domainEntity) {
         Storage jpaEntity = new Storage();
-        jpaEntity.setBusinessKey(domainEntity.getStorageId().getValue());
+        jpaEntity.setId(domainEntity.getStorageId().getValue());
         jpaEntity.setRatedPower(domainEntity.getStoragePower().getValue());
         jpaEntity.setLoadTimeHour(domainEntity.getLoadTimeHour().getValue());
         jpaEntity.setCapacity(domainEntity.getStorageCapacity().getValue());

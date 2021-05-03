@@ -9,8 +9,8 @@ public class ActionHoursVO {
 
     public ActionHoursVO(Double value) throws ActionException {
         if (value == null || value < 0.) {
-            throw new ActionException("validation for action hours failed");
+            throw new ActionException("hours", "Action");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

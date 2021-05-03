@@ -4,8 +4,12 @@ import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
 import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
 import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
+import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
+import de.uol.vpp.masterdata.domain.valueobjects.HouseholdIdVO;
 import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
+import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
+import de.uol.vpp.masterdata.infrastructure.entities.Household;
 import de.uol.vpp.masterdata.infrastructure.entities.VirtualPowerPlant;
 import de.uol.vpp.masterdata.infrastructure.jpaRepositories.*;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +56,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
 
     @Override
     public void deleteById(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
-        Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<VirtualPowerPlant> result = jpaRepository.findOneById(id.getValue());
         if (result.isPresent()) {
             VirtualPowerPlant vpp = result.get();
 
@@ -78,35 +82,35 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             jpaRepository.delete(result.get());
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("vpp %s can not be found and can not be deleted", id.getValue())
+                    String.format("VK %s kann nicht gelöscht werden da VK nicht gefunden werden kann", id.getValue())
             );
         }
     }
 
     @Override
     public void publish(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
-        Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<VirtualPowerPlant> result = jpaRepository.findOneById(id.getValue());
         if (result.isPresent()) {
             VirtualPowerPlant vpp = result.get();
             vpp.setPublished(true);
             jpaRepository.save(vpp);
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("vpp %s can not be found and can not be deleted", id.getValue())
+                    String.format("VK %s kann nicht veröffentlicht werden, da VK nicht gefunden wurde", id.getValue())
             );
         }
     }
 
     @Override
     public void unpublish(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
-        Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<VirtualPowerPlant> result = jpaRepository.findOneById(id.getValue());
         if (result.isPresent()) {
             VirtualPowerPlant vpp = result.get();
             vpp.setPublished(false);
             jpaRepository.save(vpp);
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("vpp %s can not be found and can not be deleted", id.getValue())
+                    String.format("VK %s kann nicht unveröffentlich werden, da VK nicht gefunden wurde", id.getValue())
             );
         }
     }
@@ -117,14 +121,14 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
         if (vpp.isPresent()) {
             return vpp.get().getPublished().isValue();
         } else {
-            throw new VirtualPowerPlantRepositoryException(String.format("failed to find vpp with actionRequestId %s", id.getValue()));
+            throw new VirtualPowerPlantRepositoryException(String.format("VK %s konnte nicht gefunden werden", id.getValue()));
         }
     }
 
     @Override
     public Optional<VirtualPowerPlantAggregate> getById(VirtualPowerPlantIdVO id) throws VirtualPowerPlantRepositoryException {
         try {
-            Optional<VirtualPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getValue());
+            Optional<VirtualPowerPlant> result = jpaRepository.findOneById(id.getValue());
             jpaRepository.flush();
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
@@ -139,17 +143,59 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
     }
 
     @Override
+    public VirtualPowerPlantAggregate getByDpp(DecentralizedPowerPlantIdVO decentralizedPowerPlantId) throws VirtualPowerPlantRepositoryException {
+        try {
+            List<VirtualPowerPlant> vpps = jpaRepository.findAll();
+
+            for (VirtualPowerPlant vpp : vpps) {
+                for (DecentralizedPowerPlant dpp : vpp.getDecentralizedPowerPlants()) {
+                    if (dpp.getId().equals(decentralizedPowerPlantId.getValue())) {
+                        return converter.toDomain(vpp);
+                    }
+                }
+            }
+        } catch (VirtualPowerPlantException e) {
+            throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
+        }
+        throw new VirtualPowerPlantRepositoryException(
+                String.format("Es ist ein Fehler beim abrufen eines VK durch DK %s aufgetreten", decentralizedPowerPlantId.getValue())
+        );
+    }
+
+    @Override
+    public VirtualPowerPlantAggregate getByHousehold(HouseholdIdVO householdId) throws VirtualPowerPlantRepositoryException {
+        try {
+            List<VirtualPowerPlant> vpps = jpaRepository.findAll();
+
+            for (VirtualPowerPlant vpp : vpps) {
+                for (Household dpp : vpp.getHouseholds()) {
+                    if (dpp.getId().equals(householdId.getValue())) {
+                        return converter.toDomain(vpp);
+                    }
+                }
+            }
+        } catch (VirtualPowerPlantException e) {
+            throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
+        }
+        throw new VirtualPowerPlantRepositoryException(
+                String.format("Es ist ein Fehler beim abrufen eines VK durch Haushalt %s aufgetreten", householdId.getValue())
+        );
+    }
+
+    @Override
     public void update(VirtualPowerPlantIdVO id, VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantRepositoryException {
-        Optional<VirtualPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<VirtualPowerPlant> jpaEntityOptional = jpaRepository.findOneById(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             VirtualPowerPlant jpaEntity = jpaEntityOptional.get();
             VirtualPowerPlant updated = converter.toInfrastructure(domainEntity);
-            jpaEntity.setBusinessKey(updated.getBusinessKey());
+            jpaEntity.setId(updated.getId());
             jpaEntity.setOverflowThreshold(updated.getOverflowThreshold());
             jpaEntity.setShortageThreshold(updated.getShortageThreshold());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new VirtualPowerPlantRepositoryException("failed to update vpp. can not find vpp entity.");
+            throw new VirtualPowerPlantRepositoryException(
+                    String.format("VK %s konnte nicht aktualisiert werden, da VK nicht gefunden wurde", id.getValue())
+            );
         }
     }
 

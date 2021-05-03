@@ -22,7 +22,7 @@ public class ApplicationDomainConverter {
         dto.setActionRequestId(domainEntity.getActionRequestId().getValue());
         dto.setVirtualPowerPlantId(domainEntity.getVirtualPowerPlantId().getValue());
         dto.setTimestamp(domainEntity.getTimestamp().getValue().toEpochSecond());
-        dto.setFinished(domainEntity.getFinished().getValue());
+        dto.setStatus(domainEntity.getStatus().getValue().toString());
         dto.setCatalogs(new ArrayList<>());
         if (domainEntity.getCatalogs() != null && domainEntity.getCatalogs().size() > 0) {
             for (ActionCatalogEntity entity : domainEntity.getCatalogs()) {
@@ -62,7 +62,7 @@ public class ApplicationDomainConverter {
         domainEntity.setActionRequestId(new ActionRequestIdVO(dto.getActionRequestId()));
         domainEntity.setVirtualPowerPlantId(new ActionRequestVirtualPowerPlantIdVO(dto.getVirtualPowerPlantId()));
         domainEntity.setTimestamp(new ActionRequestTimestampVO(dto.getTimestamp()));
-        //domainEntity.setFinished(new ActionFinishedVO(dto.getFinished()));
+        //domainEntity.setStatus(new ActionRequestStatusVO(dto.getStatus()));
         domainEntity.setCatalogs(new ArrayList<>());
         return domainEntity;
     }

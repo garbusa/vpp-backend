@@ -9,8 +9,8 @@ public class ActionCatalogCumulativeGapVO {
 
     public ActionCatalogCumulativeGapVO(Double value) throws ActionException {
         if (value == null || value < 0.) {
-            throw new ActionException("validation for action catalog cumulativeGap failed");
+            throw new ActionException("cumultativeGap", "Action");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

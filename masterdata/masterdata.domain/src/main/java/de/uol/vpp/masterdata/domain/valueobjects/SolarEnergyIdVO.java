@@ -13,7 +13,7 @@ public class SolarEnergyIdVO {
 
     public SolarEnergyIdVO(String value) throws ProducerException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new ProducerException("validation for solar actionRequestId failed");
+            throw new ProducerException("solarEnergyId", "SolarEnergy");
         }
         this.value = value.toUpperCase();
     }

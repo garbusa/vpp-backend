@@ -15,13 +15,13 @@ public class LoadStartTimestampVO {
 
     public LoadStartTimestampVO(Long ts) throws LoadException {
         if (ts == null) {
-            throw new LoadException("load start startTimestamp validation failed");
+            throw new LoadException("startTimestamp", "Load");
         }
 
         try {
             this.timestamp = TimestampUtils.toBerlinTimestamp(ts);
         } catch (Exception e) {
-            throw new LoadException("failed to create startTimestamp", e);
+            throw new LoadException("startTimestamp", "Load");
         }
     }
 

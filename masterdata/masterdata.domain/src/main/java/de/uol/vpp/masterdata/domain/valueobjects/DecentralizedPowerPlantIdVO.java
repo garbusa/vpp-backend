@@ -12,7 +12,7 @@ public class DecentralizedPowerPlantIdVO {
 
     public DecentralizedPowerPlantIdVO(String value) throws DecentralizedPowerPlantException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new DecentralizedPowerPlantException("validation for dpp householdLoad failed");
+            throw new DecentralizedPowerPlantException("decentralizedPowerPlantId");
         }
         this.value = value.toUpperCase();
     }

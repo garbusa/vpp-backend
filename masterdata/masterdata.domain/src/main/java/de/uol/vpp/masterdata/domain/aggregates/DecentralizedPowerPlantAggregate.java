@@ -1,18 +1,12 @@
 package de.uol.vpp.masterdata.domain.aggregates;
 
-import de.uol.vpp.masterdata.domain.entities.*;
+import de.uol.vpp.masterdata.domain.aggregates.abstracts.DomainHasProducersAndStorages;
 import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class DecentralizedPowerPlantAggregate {
+public class DecentralizedPowerPlantAggregate extends DomainHasProducersAndStorages {
     private DecentralizedPowerPlantIdVO decentralizedPowerPlantId;
-    private List<SolarEnergyEntity> solars = new ArrayList<>();
-    private List<WindEnergyEntity> winds = new ArrayList<>();
-    private List<WaterEnergyEntity> waters = new ArrayList<>();
-    private List<OtherEnergyEntity> others = new ArrayList<>();
-    private List<StorageEntity> storages = new ArrayList<>();
 }

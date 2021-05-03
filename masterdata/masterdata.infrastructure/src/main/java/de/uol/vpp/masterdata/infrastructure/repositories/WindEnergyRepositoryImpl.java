@@ -34,7 +34,7 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
     public List<WindEnergyEntity> getAllByDecentralizedPowerPlant(DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
         try {
             Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository
-                    .findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
+                    .findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
             if (dpp.isPresent()) {
                 List<WindEnergyEntity> result = new ArrayList<>();
                 for (WindEnergy WindEnergy : jpaRepository.findAllByDecentralizedPowerPlant(dpp.get())) {
@@ -42,7 +42,7 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Can not find dpp %s to get all WindEnergys", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
+                throw new ProducerRepositoryException(String.format("DK %s konnte nicht gefunden werden um Windkraftanlage abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -53,7 +53,7 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
     public List<WindEnergyEntity> getAllByHousehold(HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
         try {
             Optional<Household> household = householdJpaRepository
-                    .findOneByBusinessKey(householdAggregate.getHouseholdId().getValue());
+                    .findOneById(householdAggregate.getHouseholdId().getValue());
             if (household.isPresent()) {
                 List<WindEnergyEntity> result = new ArrayList<>();
                 for (WindEnergy WindEnergy : jpaRepository.findAllByHousehold(household.get())) {
@@ -61,7 +61,7 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Can not find household %s to get all WindEnergys", householdAggregate.getHouseholdId().getValue()));
+                throw new ProducerRepositoryException(String.format("Haushalt %s konnte nicht gefunden werden um Windkraftanlage abzufragen", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -72,7 +72,7 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
     @Override
     public Optional<WindEnergyEntity> getById(WindEnergyIdVO id) throws ProducerRepositoryException {
         try {
-            Optional<WindEnergy> result = jpaRepository.findOneByBusinessKey(id.getValue());
+            Optional<WindEnergy> result = jpaRepository.findOneById(id.getValue());
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             }
@@ -90,9 +90,9 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
 
     @Override
     public void assignToDecentralizedPowerPlant(WindEnergyEntity windEnergyEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
-        Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneByBusinessKey(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
+        Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<WindEnergy> wind = jpaRepository.findOneByBusinessKey(windEnergyEntity.getId().getValue());
+            Optional<WindEnergy> wind = jpaRepository.findOneById(windEnergyEntity.getId().getValue());
             if (wind.isPresent()) {
                 if (wind.get().getDecentralizedPowerPlant() == null &&
                         wind.get().getHousehold() == null) {
@@ -102,26 +102,26 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("To assign an entity for WindEnergy %s, the assigments have to be empty", windEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Windkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", windEnergyEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Failed to fetch WindEnergy %s", windEnergyEntity.getId().getValue())
+                        String.format("Windkraftanlage %s konnte nicht gefunden werden", windEnergyEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Dpp %s does not exist. Failed to fetch all WindEnergy", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("DK %s konnte nicht gefunden werden um Windkraftanlage abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
 
     @Override
-    public void assignToHousehold(WindEnergyEntity WindEnergyEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
-        Optional<Household> household = householdJpaRepository.findOneByBusinessKey(householdAggregate.getHouseholdId().getValue());
+    public void assignToHousehold(WindEnergyEntity windEnergyEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
+        Optional<Household> household = householdJpaRepository.findOneById(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<WindEnergy> WindEnergy = jpaRepository.findOneByBusinessKey(WindEnergyEntity.getId().getValue());
+            Optional<WindEnergy> WindEnergy = jpaRepository.findOneById(windEnergyEntity.getId().getValue());
             if (WindEnergy.isPresent()) {
                 if (WindEnergy.get().getDecentralizedPowerPlant() == null &&
                         WindEnergy.get().getHousehold() == null) {
@@ -131,40 +131,40 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("To assign an entity for WindEnergy %s, the assigments have to be empty", WindEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Windkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", windEnergyEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Failed to fetch WindEnergy %s", WindEnergyEntity.getId().getValue())
+                        String.format("Windkraftanlage %s konnte nicht gefunden werden", windEnergyEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Household %s does not exist. Failed to fetch all WindEnergy", householdAggregate.getHouseholdId().getValue())
+                    String.format("Haushalt %s konnte nicht gefunden werden um Windkraftanlage abzufragen", householdAggregate.getHouseholdId().getValue())
             );
         }
     }
 
     @Override
     public void deleteById(WindEnergyIdVO id) throws ProducerRepositoryException {
-        Optional<WindEnergy> jpaEntity = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<WindEnergy> jpaEntity = jpaRepository.findOneById(id.getValue());
         if (jpaEntity.isPresent()) {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new ProducerRepositoryException(
-                    String.format("WindEnergy %s can not be found and can not be deleted", id.getValue())
+                    String.format("Windkraftanlage %s konnte nicht gelöscht werden, da Wasserkraftanlage nicht gefunden werden konnte", id.getValue())
             );
         }
     }
 
     @Override
     public void update(WindEnergyIdVO id, WindEnergyEntity domainEntity) throws ProducerRepositoryException {
-        Optional<WindEnergy> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<WindEnergy> jpaEntityOptional = jpaRepository.findOneById(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             WindEnergy jpaEntity = jpaEntityOptional.get();
             WindEnergy updated = converter.toInfrastructure(domainEntity);
-            jpaEntity.setBusinessKey(updated.getBusinessKey());
+            jpaEntity.setId(updated.getId());
             jpaEntity.setLongitude(updated.getLongitude());
             jpaEntity.setLatitude(updated.getLatitude());
             jpaEntity.setCapacity(updated.getCapacity());
@@ -173,7 +173,7 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
             jpaEntity.setRadius(updated.getRadius());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new ProducerRepositoryException("failed to update WindEnergy. can not find WindEnergy entity.");
+            throw new ProducerRepositoryException("Windkraftanlage %s konnte nicht aktualisiert werden, da Wasserkraftanlage nicht gefunden wurde");
         }
     }
 

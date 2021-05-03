@@ -2,6 +2,7 @@ package de.uol.vpp.masterdata.service.services;
 
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
+import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.entities.StorageEntity;
 import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
 import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
@@ -29,19 +30,20 @@ import java.util.Optional;
 public class StorageServiceImpl implements IStorageService {
 
     private final IStorageRepository repository;
+    private final IVirtualPowerPlantRepository virtualPowerPlantRepository;
     private final IDecentralizedPowerPlantRepository decentralizedPowerPlantRepository;
     private final IHouseholdRepository householdRepository;
     private final IPublishUtil publishUtil;
 
     @Override
-    public List<StorageEntity> getAllByDecentralizedPowerPlantId(String dppBusinessKey) throws StorageServiceException {
+    public List<StorageEntity> getAllByDecentralizedPowerPlantId(String decentralizedPowerPlantId) throws StorageServiceException {
         try {
-            Optional<DecentralizedPowerPlantAggregate> dpp = decentralizedPowerPlantRepository.getById(new DecentralizedPowerPlantIdVO(dppBusinessKey));
+            Optional<DecentralizedPowerPlantAggregate> dpp = decentralizedPowerPlantRepository.getById(new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId));
             if (dpp.isPresent()) {
                 return repository.getAllByDecentralizedPowerPlant(dpp.get());
             }
             throw new StorageServiceException(
-                    String.format("There is no dpp %s to find any storages", dppBusinessKey)
+                    String.format("DK %s konnte nicht gefunden werden um Speicher abzufragen", decentralizedPowerPlantId)
             );
         } catch (StorageRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new StorageServiceException(e.getMessage(), e);
@@ -49,15 +51,15 @@ public class StorageServiceImpl implements IStorageService {
     }
 
     @Override
-    public List<StorageEntity> getAllByHouseholdId(String householdBusinessKey) throws StorageServiceException {
+    public List<StorageEntity> getAllByHouseholdId(String householdId) throws StorageServiceException {
         try {
             Optional<HouseholdAggregate> household = householdRepository.
-                    getById(new HouseholdIdVO(householdBusinessKey));
+                    getById(new HouseholdIdVO(householdId));
             if (household.isPresent()) {
                 return repository.getAllByHousehold(household.get());
             }
             throw new StorageServiceException(
-                    String.format("There is no household %s to find any storages", householdBusinessKey)
+                    String.format("Haushalt %s konnte nicht gefunden werden um Speicher abzufragen", householdId)
             );
         } catch (StorageRepositoryException | HouseholdException | HouseholdRepositoryException e) {
             throw new StorageServiceException(e.getMessage(), e);
@@ -65,73 +67,90 @@ public class StorageServiceImpl implements IStorageService {
     }
 
     @Override
-    public StorageEntity get(String businessKey) throws StorageServiceException {
+    public StorageEntity get(String storageId) throws StorageServiceException {
         try {
-            return repository.getById(new StorageIdVO(businessKey))
-                    .orElseThrow(() -> new StorageServiceException(String.format("Can't find storage by actionRequestId %s", businessKey)));
+            return repository.getById(new StorageIdVO(storageId))
+                    .orElseThrow(() -> new StorageServiceException(String.format(
+                            "Speicher %s konnte nicht gefunden werden", storageId)));
         } catch (StorageException | StorageRepositoryException e) {
-            throw new StorageServiceException(String.format("Can't find storage by actionRequestId %s", businessKey));
+            throw new StorageServiceException(String.format("Speicher %s konnte nicht gefunden werden", storageId));
         }
 
     }
 
     @Override
-    public void saveWithDecentralizedPowerPlant(StorageEntity domainEntity, String dppBusinessKey) throws StorageServiceException {
+    public void saveWithDecentralizedPowerPlant(StorageEntity domainEntity, String decentralizedPowerPlantId) throws StorageServiceException {
         try {
             if (repository.getById(domainEntity.getStorageId()).isPresent()) {
                 throw new StorageServiceException(
-                        String.format("storage with actionRequestId %s already exists", domainEntity.getStorageId().getValue()));
+                        String.format("Speicher %s existiert bereits", domainEntity.getStorageId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
-                    new DecentralizedPowerPlantIdVO(dppBusinessKey)
+                    new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId)
             );
             if (dppOptional.isPresent()) {
                 DecentralizedPowerPlantAggregate dpp = dppOptional.get();
+                VirtualPowerPlantAggregate vpp = virtualPowerPlantRepository.getByDpp(new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId));
+                if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
+                        dpp.getDecentralizedPowerPlantId())) {
+                    throw new StorageServiceException(
+                            String.format("Speicher %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getStorageId().getValue(),
+                                    vpp.getVirtualPowerPlantId().getValue())
+                    );
+                }
                 repository.save(domainEntity);
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new StorageServiceException(
-                        String.format("Failed to assign Storage %s to dpp %s", domainEntity.getStorageId().getValue(),
-                                dppBusinessKey)
+                        String.format("Zuweisung des Speichers %s zum DK %s ist fehlgeschlagen. DK konnte nicht gefunden werden", domainEntity.getStorageId().getValue(),
+                                decentralizedPowerPlantId)
                 );
             }
-        } catch (StorageRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
+        } catch (StorageRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException | VirtualPowerPlantRepositoryException | PublishException e) {
             throw new StorageServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void saveWithHousehold(StorageEntity domainEntity, String householdBusinessKey) throws StorageServiceException {
+    public void saveWithHousehold(StorageEntity domainEntity, String householdId) throws StorageServiceException {
         try {
             if (repository.getById(domainEntity.getStorageId()).isPresent()) {
                 throw new StorageServiceException(
-                        String.format("storage with actionRequestId %s already exists", domainEntity.getStorageId().getValue()));
+                        String.format("Speicher %s existiert bereits", domainEntity.getStorageId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
-                    new HouseholdIdVO(householdBusinessKey)
+                    new HouseholdIdVO(householdId)
             );
             if (householdOptional.isPresent()) {
+                VirtualPowerPlantAggregate vpp = virtualPowerPlantRepository.getByHousehold(new HouseholdIdVO(householdId));
                 HouseholdAggregate household = householdOptional.get();
+                if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
+                        household.getHouseholdId())) {
+                    throw new StorageServiceException(
+                            String.format("Speicher %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getStorageId().getValue(),
+                                    vpp.getVirtualPowerPlantId().getValue())
+                    );
+                }
                 repository.save(domainEntity);
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new StorageServiceException(
-                        String.format("Failed to assign Storage %s to household %s", domainEntity.getStorageId().getValue(),
-                                householdBusinessKey)
+                        String.format("Zuweisung des Speichers %s zum Haushalt %s ist fehlgeschlagen. Haushalt konnte nicht gefunden werden", domainEntity.getStorageId().getValue(),
+                                householdId)
                 );
             }
-        } catch (StorageRepositoryException | HouseholdException | HouseholdRepositoryException e) {
+        } catch (StorageRepositoryException | HouseholdException | HouseholdRepositoryException | VirtualPowerPlantRepositoryException | PublishException e) {
             throw new StorageServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public void delete(String businessKey, String vppBusinessKey) throws StorageServiceException {
+    public void delete(String storageId, String virtualPowerPlantId) throws StorageServiceException {
         try {
-            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(vppBusinessKey), new StorageIdVO(businessKey))) {
-                repository.deleteById(new StorageIdVO(businessKey));
+            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new StorageIdVO(storageId))) {
+                repository.deleteById(new StorageIdVO(storageId));
             } else {
-                throw new StorageServiceException("failed to delete storage. vpp has to be unpublished");
+                throw new StorageServiceException("Speicher konnte nicht gelöscht werden, da VK veröffentlicht ist");
             }
 
         } catch (StorageRepositoryException | StorageException | VirtualPowerPlantException | PublishException e) {
@@ -140,10 +159,12 @@ public class StorageServiceImpl implements IStorageService {
     }
 
     @Override
-    public void update(String businessKey, StorageEntity domainEntity, String vppBusinessKey) throws StorageServiceException {
+    public void update(String storageId, StorageEntity domainEntity, String virtualPowerPlantId) throws StorageServiceException {
         try {
-            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(vppBusinessKey), new StorageIdVO(businessKey))) {
-                repository.update(new StorageIdVO(businessKey), domainEntity);
+            if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new StorageIdVO(storageId))) {
+                repository.update(new StorageIdVO(storageId), domainEntity);
+            } else {
+                throw new StorageServiceException("Speicher konnte nicht bearbeitet werden, da VK veröffentlicht ist");
             }
         } catch (PublishException | VirtualPowerPlantException | StorageException | StorageRepositoryException e) {
             throw new StorageServiceException(e.getMessage(), e);

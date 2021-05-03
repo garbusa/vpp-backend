@@ -10,5 +10,5 @@ public class ActionRequestDTO {
     private String virtualPowerPlantId;
     private Long timestamp;
     private List<ActionCatalogDTO> catalogs;
-    private Boolean finished;
+    private String status;
 }

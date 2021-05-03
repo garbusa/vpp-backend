@@ -47,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/wind/**").permitAll()
                 .antMatchers("/other/**").permitAll()
                 .antMatchers("/storage/**").permitAll()
+                .antMatchers("/actuator/health").permitAll()
                 .anyRequest()
                 .authenticated();
 

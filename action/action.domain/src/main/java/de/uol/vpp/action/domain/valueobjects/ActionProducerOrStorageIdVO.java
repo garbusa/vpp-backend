@@ -9,7 +9,7 @@ public class ActionProducerOrStorageIdVO {
 
     public ActionProducerOrStorageIdVO(String value) throws ActionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ActionException("validation for action producerOrStorageId failed");
+            throw new ActionException("producerOrStorage", "Action");
         }
         this.value = value;
     }

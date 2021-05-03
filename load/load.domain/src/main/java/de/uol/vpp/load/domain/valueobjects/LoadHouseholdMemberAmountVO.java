@@ -12,7 +12,7 @@ public class LoadHouseholdMemberAmountVO {
 
     public LoadHouseholdMemberAmountVO(Integer amount) throws LoadException {
         if (amount == null || amount < 1) {
-            throw new LoadException("validation for load household member amount failed.");
+            throw new LoadException("householdMemberAmount", "LoadHousehold");
         }
         this.amount = amount;
     }

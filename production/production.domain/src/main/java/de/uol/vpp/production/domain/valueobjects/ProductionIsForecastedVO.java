@@ -11,7 +11,7 @@ public class ProductionIsForecastedVO {
 
     public ProductionIsForecastedVO(Boolean value) throws ProductionException {
         if (value == null) {
-            throw new ProductionException("validation for production forecast failed");
+            throw new ProductionException("isForecasted", "Production");
         }
         this.value = value;
     }

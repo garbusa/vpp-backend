@@ -16,8 +16,14 @@ public class RabbitMQSender {
     @Value("${vpp.rabbitmq.exchange.forecastGeneration}")
     private String forecastGenerationExchange;
 
+    @Value("${vpp.rabbitmq.exchange.actionRequestFailed}")
+    private String actionRequestFailedExchange;
+
     @Value("${vpp.rabbitmq.key.production.to.action}")
     private String productionToActionKey;
+
+    @Value("${vpp.rabbitmq.key.load.to.action.failed}")
+    private String loadToActionFailedKey;
 
 
     public void send(String actionRequestId, Long timestamp) {
@@ -26,5 +32,12 @@ public class RabbitMQSender {
         productionMessage.setTimestamp(timestamp);
         rabbitTemplate.convertAndSend(forecastGenerationExchange, productionToActionKey, productionMessage);
         log.info("Send productionMessage: {}, {}", productionMessage.getActionRequestId(), productionMessage.getTimestamp());
+    }
+
+    public void sendFailed(String actionRequestId) {
+        ActionFailedMessage failedMessage = new ActionFailedMessage();
+        failedMessage.setActionRequestId(actionRequestId);
+        rabbitTemplate.convertAndSend(actionRequestFailedExchange, loadToActionFailedKey, failedMessage);
+        log.info("Send failedMessage: {}", failedMessage.getActionRequestId());
     }
 }

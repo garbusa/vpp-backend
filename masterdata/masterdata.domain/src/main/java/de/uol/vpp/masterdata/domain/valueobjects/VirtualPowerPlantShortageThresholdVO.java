@@ -10,9 +10,9 @@ public class VirtualPowerPlantShortageThresholdVO {
 
     public VirtualPowerPlantShortageThresholdVO(Double value) throws VirtualPowerPlantException {
         if (value == null || value < 0. || value > 100.) {
-            throw new VirtualPowerPlantException("validation for shortage threshold failed");
+            throw new VirtualPowerPlantException("shortageThreshold");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }
 

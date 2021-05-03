@@ -13,7 +13,7 @@ public class WaterEnergyIdVO {
 
     public WaterEnergyIdVO(String value) throws ProducerException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new ProducerException("validation for water actionRequestId failed");
+            throw new ProducerException("waterEnergyId", "WaterEnergy");
         }
         this.value = value.toUpperCase();
     }

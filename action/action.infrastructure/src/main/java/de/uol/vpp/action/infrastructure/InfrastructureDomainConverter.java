@@ -21,7 +21,7 @@ public class InfrastructureDomainConverter {
         domainEntity.setActionRequestId(new ActionRequestIdVO(jpaEntity.getActionRequestId()));
         domainEntity.setVirtualPowerPlantId(new ActionRequestVirtualPowerPlantIdVO(jpaEntity.getVirtualPowerPlantId()));
         domainEntity.setTimestamp(new ActionRequestTimestampVO(jpaEntity.getTimestamp().toEpochSecond()));
-        domainEntity.setFinished(new ActionFinishedVO(jpaEntity.getFinished()));
+        domainEntity.setStatus(new ActionRequestStatusVO(jpaEntity.getStatus()));
         domainEntity.setCatalogs(new ArrayList<>());
         if (jpaEntity.getCatalogs() != null && jpaEntity.getCatalogs().size() > 0) {
             for (ActionCatalog actionCatalog : jpaEntity.getCatalogs()) {
@@ -73,7 +73,7 @@ public class InfrastructureDomainConverter {
         jpaEntity.setActionRequestId(domainEntity.getActionRequestId().getValue());
         jpaEntity.setVirtualPowerPlantId(domainEntity.getVirtualPowerPlantId().getValue());
         jpaEntity.setTimestamp(domainEntity.getTimestamp().getValue());
-        jpaEntity.setFinished(domainEntity.getFinished().getValue());
+        jpaEntity.setStatus(domainEntity.getStatus().getValue());
         jpaEntity.setCatalogs(new HashSet<>());
         if (domainEntity.getCatalogs() != null && domainEntity.getCatalogs().size() > 0) {
             for (ActionCatalogEntity actionCatalog : domainEntity.getCatalogs()) {

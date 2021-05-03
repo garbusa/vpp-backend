@@ -12,7 +12,7 @@ public class SolarEnergyLongitudeVO {
 
     public SolarEnergyLongitudeVO(Double value) throws ProducerException {
         if (value == null || value < -180. || value > 180.) {
-            throw new ProducerException("validation for solar longitude failed");
+            throw new ProducerException("longitude", "SolarEnergy");
         }
         this.value = value;
     }

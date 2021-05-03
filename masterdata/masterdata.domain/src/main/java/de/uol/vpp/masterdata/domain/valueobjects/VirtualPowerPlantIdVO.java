@@ -12,7 +12,7 @@ public class VirtualPowerPlantIdVO {
 
     public VirtualPowerPlantIdVO(String value) throws VirtualPowerPlantException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new VirtualPowerPlantException("validation for vpp householdLoad failed");
+            throw new VirtualPowerPlantException("virtualPowerPlantId");
         }
         this.value = value.toUpperCase();
     }

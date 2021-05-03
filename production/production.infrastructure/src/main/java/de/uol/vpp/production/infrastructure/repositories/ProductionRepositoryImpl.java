@@ -22,11 +22,11 @@ public class ProductionRepositoryImpl implements IProductionRepository {
     private final InfrastructureDomainConverter converter;
 
     @Override
-    public List<ProductionAggregate> getProductions(ProductionActionRequestIdVO actionRequestBusinessKey) throws ProductionRepositoryException {
+    public List<ProductionAggregate> getProductions(ProductionActionRequestIdVO actionRequestId) throws ProductionRepositoryException {
         try {
             List<ProductionAggregate> result = new ArrayList<>();
             for (Production production : productionJpaRepository
-                    .findAllByActionRequestTimestamp_ActionRequestId(actionRequestBusinessKey.getValue())) {
+                    .findAllByActionRequestTimestamp_ActionRequestId(actionRequestId.getValue())) {
                 result.add(converter.toDomain(production));
             }
             return result;
@@ -42,9 +42,9 @@ public class ProductionRepositoryImpl implements IProductionRepository {
     }
 
     @Override
-    public void deleteProductionsByActionRequestId(ProductionActionRequestIdVO actionRequestBusinessKey) throws ProductionRepositoryException {
+    public void deleteProductionsByActionRequestId(ProductionActionRequestIdVO actionRequestId) throws ProductionRepositoryException {
         List<Production> productions = productionJpaRepository.findAllByActionRequestTimestamp_ActionRequestId(
-                actionRequestBusinessKey.getValue());
+                actionRequestId.getValue());
         for (Production production : productions) {
             productionJpaRepository.delete(production);
         }
@@ -58,7 +58,10 @@ public class ProductionRepositoryImpl implements IProductionRepository {
         )).isPresent()) {
             productionJpaRepository.save(converter.toInfrastructure(production));
         } else {
-            throw new ProductionRepositoryException("failed to update production. not able to find.");
+            throw new ProductionRepositoryException(
+                    String.format("Erzeugungsaggregat %s (Zeitstempel %s) konnte nicht aktualisiert werden, da Erzeugungsaggregat nicht gefunden werden konnte",
+                            production.getProductionActionRequestId().getValue(), production.getProductionStartTimestamp().getTimestamp().toEpochSecond())
+            );
         }
     }
 }

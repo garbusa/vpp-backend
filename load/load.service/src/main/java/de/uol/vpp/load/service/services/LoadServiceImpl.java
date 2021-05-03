@@ -21,9 +21,9 @@ public class LoadServiceImpl implements ILoadService {
     private final LoadScheduler scheduler;
 
     @Override
-    public List<LoadAggregate> getLoadsByActionRequestId(String actionRequestBusinessKey) throws LoadServiceException {
+    public List<LoadAggregate> getLoadsByActionRequestId(String actionRequestId) throws LoadServiceException {
         try {
-            return repository.getLoadsByActionRequestId(new LoadActionRequestIdVO(actionRequestBusinessKey));
+            return repository.getLoadsByActionRequestId(new LoadActionRequestIdVO(actionRequestId));
         } catch (LoadRepositoryException | LoadException e) {
             throw new LoadServiceException(e.getMessage(), e);
         }

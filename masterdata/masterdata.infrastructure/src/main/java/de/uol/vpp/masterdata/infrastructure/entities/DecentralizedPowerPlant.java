@@ -11,10 +11,10 @@ public class DecentralizedPowerPlant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long internalId;
 
     @Column(unique = true, nullable = false)
-    private String businessKey;
+    private String id;
 
     @OneToMany(mappedBy = "decentralizedPowerPlant")
     private List<WindEnergy> winds;

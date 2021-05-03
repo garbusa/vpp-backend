@@ -10,7 +10,7 @@ public class StorageIdVO {
 
     public StorageIdVO(String value) throws StorageException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new StorageException("validation for storage householdLoad failed");
+            throw new StorageException("storageId");
         }
         this.value = value.toUpperCase();
     }

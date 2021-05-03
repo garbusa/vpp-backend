@@ -8,9 +8,11 @@ import de.uol.vpp.production.infrastructure.rest.dto.OtherEnergyDTO;
 import de.uol.vpp.production.infrastructure.rest.dto.SolarEnergyDTO;
 import de.uol.vpp.production.infrastructure.rest.dto.WaterEnergyDTO;
 import de.uol.vpp.production.infrastructure.rest.dto.WindEnergyDTO;
+import de.uol.vpp.production.infrastructure.rest.exceptions.MasterdataRestClientException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -21,11 +23,11 @@ import java.util.List;
 public class MasterdataRestClient {
 
 
-    public boolean isActiveVpp(String vppId) {
+    public boolean isActiveVpp(String virtualPowerPlantId) throws MasterdataRestClientException {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/vpp/" + vppId;
+                    = "http://localhost:8081/masterdata/api/vpp/" + virtualPowerPlantId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -35,22 +37,21 @@ public class MasterdataRestClient {
                     JsonNode vpp = root.get("data");
                     return vpp.has("published") && vpp.get("published").booleanValue();
                 }
-
             }
-        } catch (JsonProcessingException e) {
-            log.info(e);
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return false;
+        throw new MasterdataRestClientException("Something went wrong while requesting for vpp published status");
     }
 
-    public List<String> getAllHouseholdsByVppId(String vppBusinessKey) {
+    public List<String> getAllHouseholdsByVppId(String virtualPowerPlantId) throws MasterdataRestClientException {
         List<String> ids = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/household/by/vpp/";
             ResponseEntity<String> response
-                    = restTemplate.getForEntity(fooResourceUrl + vppBusinessKey, String.class);
+                    = restTemplate.getForEntity(fooResourceUrl + virtualPowerPlantId, String.class);
             if (response != null && response.getBody() != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
@@ -60,21 +61,20 @@ public class MasterdataRestClient {
                 }
 
             }
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            return ids;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-
-        return ids;
     }
 
-    public List<String> getAllDppsByVppId(String vppBusinessKey) {
+    public List<String> getAllDppsByVppId(String virtualPowerPlantId) throws MasterdataRestClientException {
         List<String> ids = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/dpp/by/vpp/";
             ResponseEntity<String> response
-                    = restTemplate.getForEntity(fooResourceUrl + vppBusinessKey, String.class);
+                    = restTemplate.getForEntity(fooResourceUrl + virtualPowerPlantId, String.class);
             if (response != null && response.getBody() != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(response.getBody());
@@ -84,28 +84,28 @@ public class MasterdataRestClient {
                 }
 
             }
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            return ids;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return ids;
     }
 
-    public List<WaterEnergyDTO> getAllWatersByDppId(String dppBusinessKey) {
+    public List<WaterEnergyDTO> getAllWatersByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<WaterEnergyDTO> waters = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/water/by/dpp/";
-            this.addWaterDTO(dppBusinessKey, waters, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            this.addWaterDTO(decentralizedPowerPlantId, waters, restTemplate, fooResourceUrl);
+            return waters;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return waters;
     }
 
-    private void addWaterDTO(String dppBusinessKey, List<WaterEnergyDTO> waters, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    private void addWaterDTO(String decentralizedPowerPlantId, List<WaterEnergyDTO> waters, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + dppBusinessKey, String.class);
+                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -127,35 +127,35 @@ public class MasterdataRestClient {
         }
     }
 
-    public List<WaterEnergyDTO> getAllWatersByHouseholdId(String householdBusinessKey) {
+    public List<WaterEnergyDTO> getAllWatersByHouseholdId(String householdId) throws MasterdataRestClientException {
         List<WaterEnergyDTO> waters = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/water/by/household/";
-            this.addWaterDTO(householdBusinessKey, waters, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            this.addWaterDTO(householdId, waters, restTemplate, fooResourceUrl);
+            return waters;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return waters;
     }
 
-    public List<WindEnergyDTO> getAllWindsByDppId(String dppBusinessKey) {
+    public List<WindEnergyDTO> getAllWindsByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<WindEnergyDTO> winds = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/wind/by/dpp/";
-            addWindDTO(dppBusinessKey, winds, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            addWindDTO(decentralizedPowerPlantId, winds, restTemplate, fooResourceUrl);
+            return winds;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return winds;
     }
 
-    private void addWindDTO(String dppBusinessKey, List<WindEnergyDTO> winds, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    private void addWindDTO(String decentralizedPowerPlantId, List<WindEnergyDTO> winds, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + dppBusinessKey, String.class);
+                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -177,35 +177,35 @@ public class MasterdataRestClient {
         }
     }
 
-    public List<WindEnergyDTO> getAllWindsByHouseholdId(String householdBusinessKey) {
+    public List<WindEnergyDTO> getAllWindsByHouseholdId(String householdId) throws MasterdataRestClientException {
         List<WindEnergyDTO> winds = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/wind/by/household/";
-            addWindDTO(householdBusinessKey, winds, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            addWindDTO(householdId, winds, restTemplate, fooResourceUrl);
+            return winds;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return winds;
     }
 
-    public List<SolarEnergyDTO> getAllSolarsByDppId(String dppBusinessKey) {
+    public List<SolarEnergyDTO> getAllSolarsByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<SolarEnergyDTO> solars = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/solar/by/dpp/";
-            addSolarDTO(dppBusinessKey, solars, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            addSolarDTO(decentralizedPowerPlantId, solars, restTemplate, fooResourceUrl);
+            return solars;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return solars;
     }
 
-    private void addSolarDTO(String dppBusinessKey, List<SolarEnergyDTO> solars, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    private void addSolarDTO(String decentralizedPowerPlantId, List<SolarEnergyDTO> solars, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + dppBusinessKey, String.class);
+                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -227,22 +227,22 @@ public class MasterdataRestClient {
         }
     }
 
-    public List<OtherEnergyDTO> getAllOthersByDppId(String dppBusinessKey) {
+    public List<OtherEnergyDTO> getAllOthersByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<OtherEnergyDTO> others = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/other/by/dpp/";
-            addOtherDTO(dppBusinessKey, others, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            addOtherDTO(decentralizedPowerPlantId, others, restTemplate, fooResourceUrl);
+            return others;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return others;
     }
 
-    private void addOtherDTO(String dppOrHouseholdBusinessKey, List<OtherEnergyDTO> others, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    private void addOtherDTO(String decentralizedPowerPlantOrHouseholdId, List<OtherEnergyDTO> others, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + dppOrHouseholdBusinessKey, String.class);
+                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantOrHouseholdId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -260,30 +260,30 @@ public class MasterdataRestClient {
         }
     }
 
-    public List<OtherEnergyDTO> getAllOthersByHousehold(String householdBusinessKey) {
+    public List<OtherEnergyDTO> getAllOthersByHousehold(String householdId) throws MasterdataRestClientException {
         List<OtherEnergyDTO> others = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/other/by/household/";
-            addOtherDTO(householdBusinessKey, others, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            addOtherDTO(householdId, others, restTemplate, fooResourceUrl);
+            return others;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return others;
     }
 
-    public List<SolarEnergyDTO> getAllSolarsByHouseholdId(String householdBusinessKey) {
+    public List<SolarEnergyDTO> getAllSolarsByHouseholdId(String householdId) throws MasterdataRestClientException {
         List<SolarEnergyDTO> solars = new ArrayList<>();
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8081/masterdata/api/solar/by/household/";
-            addSolarDTO(householdBusinessKey, solars, restTemplate, fooResourceUrl);
-        } catch (JsonProcessingException e) {
-            log.info(e);
+            addSolarDTO(householdId, solars, restTemplate, fooResourceUrl);
+            return solars;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
         }
-        return solars;
     }
 
 }

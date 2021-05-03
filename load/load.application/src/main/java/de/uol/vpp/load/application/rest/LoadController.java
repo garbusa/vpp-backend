@@ -26,12 +26,12 @@ public class LoadController {
     private final ILoadService loadService;
     private final ApplicationDomainConverter converter;
 
-    @GetMapping(path = "/{actionRequestBusinessKey}")
-    public ResponseEntity<?> getAllLoadsByActionRequestId(@PathVariable String actionRequestBusinessKey) {
+    @GetMapping(path = "/{actionRequestId}")
+    public ResponseEntity<?> getAllLoadsByActionRequestId(@PathVariable String actionRequestId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "loads successfully fetched.",
-                            loadService.getLoadsByActionRequestId(actionRequestBusinessKey)
+                    new ApiResponse(true, false, "Abfrage der Stromlast war erfolgreich",
+                            loadService.getLoadsByActionRequestId(actionRequestId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -42,7 +42,7 @@ public class LoadController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }

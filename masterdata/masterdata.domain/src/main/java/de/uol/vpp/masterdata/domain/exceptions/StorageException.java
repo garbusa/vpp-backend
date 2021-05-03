@@ -2,11 +2,11 @@ package de.uol.vpp.masterdata.domain.exceptions;
 
 public class StorageException extends Exception {
 
-    public StorageException(String message) {
-        super(message);
+    public StorageException(String attribute) {
+        super("Validierung des " + attribute + "-Attributs der Entität Storage fehlgeschlagen");
     }
 
-    public StorageException(String message, Throwable cause) {
-        super(message, cause);
+    public StorageException(String attribute, Throwable cause) {
+        super("Validierung des " + attribute + "-Attributs der Entität Storage fehlgeschlagen", cause);
     }
 }

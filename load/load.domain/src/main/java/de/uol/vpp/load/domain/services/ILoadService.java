@@ -6,5 +6,5 @@ import de.uol.vpp.load.domain.exceptions.LoadServiceException;
 import java.util.List;
 
 public interface ILoadService {
-    List<LoadAggregate> getLoadsByActionRequestId(String actionRequestBusinessKey) throws LoadServiceException;
+    List<LoadAggregate> getLoadsByActionRequestId(String actionRequestId) throws LoadServiceException;
 }

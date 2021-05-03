@@ -13,7 +13,7 @@ public class LoadHouseholdIdVO {
 
     public LoadHouseholdIdVO(String id) throws LoadException {
         if (id == null || id.isBlank() || id.isEmpty()) {
-            throw new LoadException("validation for householdTimestamp failed");
+            throw new LoadException("householdId", "LoadHousehold");
         }
         this.id = id;
     }

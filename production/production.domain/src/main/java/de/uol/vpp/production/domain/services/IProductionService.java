@@ -6,5 +6,5 @@ import de.uol.vpp.production.domain.exceptions.ProductionServiceException;
 import java.util.List;
 
 public interface IProductionService {
-    List<ProductionAggregate> getProductionsByActionRequestId(String actionRequestBusinessKey) throws ProductionServiceException;
+    List<ProductionAggregate> getProductionsByActionRequestId(String actionRequestId) throws ProductionServiceException;
 }

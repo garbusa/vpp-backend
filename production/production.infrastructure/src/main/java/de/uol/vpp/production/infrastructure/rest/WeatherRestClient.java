@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.uol.vpp.production.infrastructure.rest.dto.WeatherDTO;
+import de.uol.vpp.production.infrastructure.rest.exceptions.WeatherRestClientException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -20,7 +22,7 @@ import java.util.List;
 @Log4j2
 public class WeatherRestClient {
 
-    public List<WeatherDTO> getWeather(Double latitude, Double longitude) {
+    public List<WeatherDTO> getWeather(Double latitude, Double longitude) throws WeatherRestClientException {
         List<WeatherDTO> result = new ArrayList<>();
 
         String url = this.getBaseUrl(longitude, latitude);
@@ -40,10 +42,10 @@ public class WeatherRestClient {
                     });
                 }
             } else {
-                log.info("something went wrong weather men");
+                throw new WeatherRestClientException("weather rest api request is not equal to 200");
             }
-        } catch (JsonProcessingException e) {
-            log.info(e);
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new WeatherRestClientException("weather rest client exception while executing request", e);
         }
 
         return result;

@@ -12,7 +12,7 @@ public class HouseholdIdVO {
 
     public HouseholdIdVO(String value) throws HouseholdException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new HouseholdException("validation for household householdLoad failed");
+            throw new HouseholdException("householdId");
         }
         this.value = value.toUpperCase();
     }

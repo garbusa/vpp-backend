@@ -1,5 +1,6 @@
 package de.uol.vpp.action.infrastructure.entities;
 
+import de.uol.vpp.action.domain.enums.StatusEnum;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -23,6 +24,7 @@ public class ActionRequest {
     private Set<ActionCatalog> catalogs;
 
     @Column(nullable = false)
-    private Boolean finished;
+    @Enumerated(EnumType.ORDINAL)
+    private StatusEnum status;
 
 }

@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.uol.vpp.action.infrastructure.rest.dto.LoadDTO;
 import de.uol.vpp.action.infrastructure.rest.dto.LoadHouseholdDTO;
+import de.uol.vpp.action.infrastructure.rest.exceptions.LoadRestClientException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -18,9 +20,27 @@ import java.util.List;
 @Log4j2
 public class LoadRestClient {
 
-    public List<LoadDTO> getAllLoadsByActionRequestId(String actionRequestId) {
-        List<LoadDTO> loads = new ArrayList<>();
+    public boolean isHealthy() {
         try {
+            RestTemplate restTemplate = new RestTemplate();
+            String fooResourceUrl
+                    = "http://localhost:8082/load/api/actuator/health";
+            ResponseEntity<String> response
+                    = restTemplate.getForEntity(fooResourceUrl, String.class);
+            if (response != null && response.getBody() != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+                return root.has("status") && root.get("status").textValue().equals("UP");
+            }
+        } catch (RestClientException | JsonProcessingException e) {
+            return false;
+        }
+        return false;
+    }
+
+    public List<LoadDTO> getAllLoadsByActionRequestId(String actionRequestId) throws LoadRestClientException {
+        try {
+            List<LoadDTO> loads = new ArrayList<>();
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
                     = "http://localhost:8082/load/api/load/" + actionRequestId;
@@ -53,10 +73,12 @@ public class LoadRestClient {
                 }
 
             }
-        } catch (JsonProcessingException e) {
-            log.info(e);
+
+            return loads;
+        } catch (RestClientException | JsonProcessingException e) {
+            throw new LoadRestClientException("load rest client exception occured while executing request", e);
         }
-        return loads;
+
     }
 
 }

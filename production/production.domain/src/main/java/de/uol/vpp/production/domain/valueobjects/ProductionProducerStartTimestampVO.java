@@ -14,13 +14,13 @@ public class ProductionProducerStartTimestampVO {
 
     public ProductionProducerStartTimestampVO(Long ts) throws ProductionException {
         if (ts == null) {
-            throw new ProductionException("production producer startTimestamp validation failed");
+            throw new ProductionException("startTimestamp", "ProductionProducer");
         }
 
         try {
             this.timestamp = TimestampUtils.toBerlinTimestamp(ts);
         } catch (Exception e) {
-            throw new ProductionException("failed to create startTimestamp", e);
+            throw new ProductionException("startTimestamp", "ProductionProducer", e);
         }
     }
 

@@ -11,7 +11,7 @@ public class ProductionIsOutdatedVO {
 
     public ProductionIsOutdatedVO(Boolean value) throws ProductionException {
         if (value == null) {
-            throw new ProductionException("validation for production outdated failed");
+            throw new ProductionException("isOutdated", "Production");
         }
         this.value = value;
     }

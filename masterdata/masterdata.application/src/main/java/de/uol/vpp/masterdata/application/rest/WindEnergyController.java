@@ -24,12 +24,12 @@ public class WindEnergyController {
     private final ApplicationDomainConverter converter;
 
     @GetMapping(path = "/by/dpp/{" +
-            "dppBusinessKey}")
-    public ResponseEntity<?> getAllWindEnergysByDecentralizedPowerPlant(@PathVariable String dppBusinessKey) {
+            "decentralizedPowerPlantId}")
+    public ResponseEntity<?> getAllWindEnergysByDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "windEnergys successfully fetched.",
-                            service.getAllByDecentralizedPowerPlantId(dppBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Windkraftanlagen war erfolgreich",
+                            service.getAllByDecentralizedPowerPlantId(decentralizedPowerPlantId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -38,18 +38,18 @@ public class WindEnergyController {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping(path = "/by/household/{" +
-            "householdBusinessKey}")
-    public ResponseEntity<?> getAllWindEnergysByHousehold(@PathVariable String householdBusinessKey) {
+            "householdId}")
+    public ResponseEntity<?> getAllWindEnergysByHousehold(@PathVariable String householdId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "windEnergys successfully fetched.",
-                            service.getAllByHouseholdId(householdBusinessKey)
+                    new ApiResponse(true, false, "Abfrage aller Windkraftanlagen war erfolgreich",
+                            service.getAllByHouseholdId(householdId)
                                     .stream()
                                     .map(converter::toApplication)
                                     .collect(Collectors.toList())
@@ -58,16 +58,16 @@ public class WindEnergyController {
             return new ResponseEntity<>(new ApiResponse(false, false, e.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping(path = "/{businessKey}")
-    public ResponseEntity<?> getOneWindEnergy(@PathVariable String businessKey) {
+    @GetMapping(path = "/{windEnergyId}")
+    public ResponseEntity<?> getOneWindEnergy(@PathVariable String windEnergyId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "windEnergy successfully fetched", converter.toApplication(service.get(businessKey)))
+                    new ApiResponse(true, false, "Abfrage einer Windkraftanlage war erfolgreich", converter.toApplication(service.get(windEnergyId)))
                     , HttpStatus.OK);
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -75,77 +75,77 @@ public class WindEnergyController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
     //todo wenn vpp schon ein windEnergy hat, aber published => error (selbe für storage)
-    @PostMapping("/by/dpp/{dppBusinessKey}")
-    public ResponseEntity<?> saveWindEnergyWithDecentralizedPowerPlant(@RequestBody WindEnergyDTO dto, @PathVariable String dppBusinessKey) {
+    @PostMapping("/by/dpp/{decentralizedPowerPlantId}")
+    public ResponseEntity<?> saveWindEnergyWithDecentralizedPowerPlant(@RequestBody WindEnergyDTO dto, @PathVariable String decentralizedPowerPlantId) {
         try {
-            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), dppBusinessKey);
+            service.saveWithDecentralizedPowerPlant(converter.toDomain(dto), decentralizedPowerPlantId);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "windEnergy successfully created and assigned to dpp", null));
+                    true, false, "Windkraftanlage wurde erfolgreich angelegt und einem DK zugewiesen", null));
         } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PostMapping("/by/household/{householdBusinessKey}")
+    @PostMapping("/by/household/{householdId}")
     public ResponseEntity<?> saveWindEnergyWithHousehold(@RequestBody WindEnergyDTO dto,
-                                                         @PathVariable String householdBusinessKey) {
+                                                         @PathVariable String householdId) {
         try {
-            service.saveWithHousehold(converter.toDomain(dto), householdBusinessKey);
+            service.saveWithHousehold(converter.toDomain(dto), householdId);
             return ResponseEntity.ok().body(new ApiResponse(
-                    true, false, "windEnergy successfully created and assigned to household", null));
+                    true, false, "Windkraftanlage wurde erfolgreich angelegt und einem Haushalt zugewiesen", null));
         } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping(path = "/{businessKey}")
-    public ResponseEntity<?> deleteWindEnergy(@PathVariable String businessKey, @RequestParam String vppBusinessKey) {
+    @DeleteMapping(path = "/{windEnergyId}")
+    public ResponseEntity<?> deleteWindEnergy(@PathVariable String windEnergyId, @RequestParam String virtualPowerPlantId) {
         try {
-            service.delete(businessKey, vppBusinessKey);
+            service.delete(windEnergyId, virtualPowerPlantId);
             return ResponseEntity.ok().body(
-                    new ApiResponse(true, false, "windEnergy successfully deleted", null));
+                    new ApiResponse(true, false, "Windkraftanlage wurde erfolgreich gelöscht", null));
         } catch (ProducerServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }
 
-    @PutMapping(path = "/{businessKey}")
-    public ResponseEntity<?> updateWindEnergy(@PathVariable String businessKey, @RequestBody WindEnergyDTO newDto, @RequestParam String vppBusinessKey) {
+    @PutMapping(path = "/{windEnergyId}")
+    public ResponseEntity<?> updateWindEnergy(@PathVariable String windEnergyId, @RequestBody WindEnergyDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {
-            service.update(businessKey, converter.toDomain(newDto), vppBusinessKey);
+            service.update(windEnergyId, converter.toDomain(newDto), virtualPowerPlantId);
             return ResponseEntity.ok().body(new ApiResponse(true, false,
-                    "windEnergy successfully updated", null));
+                    "Windkraftanlage wurde erfolgreich aktualisiert", null));
         } catch (ProducerServiceException | ProducerException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "data integrity error occured", null
+                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
             ), HttpStatus.NOT_FOUND);
         }
     }

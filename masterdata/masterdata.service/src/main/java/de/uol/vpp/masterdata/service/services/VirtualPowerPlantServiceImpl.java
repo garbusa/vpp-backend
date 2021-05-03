@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Transactional(rollbackFor = VirtualPowerPlantServiceException.class)
 @RequiredArgsConstructor
@@ -33,11 +34,20 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     }
 
     @Override
+    public List<VirtualPowerPlantAggregate> getAllActives() throws VirtualPowerPlantServiceException {
+        try {
+            return repository.getAll().stream().filter((vpp) -> vpp.getPublished().isValue()).collect(Collectors.toList());
+        } catch (VirtualPowerPlantRepositoryException e) {
+            throw new VirtualPowerPlantServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void save(VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantServiceException {
         try {
             if (repository.getById(domainEntity.getVirtualPowerPlantId()).isPresent()) {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("vpp with actionRequestId %s already exists", domainEntity.getVirtualPowerPlantId().getValue()));
+                        String.format("VK %s existiert bereits", domainEntity.getVirtualPowerPlantId().getValue()));
             }
             repository.save(domainEntity);
         } catch (VirtualPowerPlantRepositoryException e) {
@@ -47,13 +57,13 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     }
 
     @Override
-    public void delete(String businessKey) throws VirtualPowerPlantServiceException {
+    public void delete(String virtualPowerPlantId) throws VirtualPowerPlantServiceException {
         try {
-            if (!repository.isPublished(new VirtualPowerPlantIdVO(businessKey))) {
-                repository.deleteById(new VirtualPowerPlantIdVO(businessKey));
+            if (!repository.isPublished(new VirtualPowerPlantIdVO(virtualPowerPlantId))) {
+                repository.deleteById(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             } else {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("vpp %s can only be edited if its not published", businessKey)
+                        String.format("VK %s konnte nicht gelöscht werden, da VK veröffentlich ist", virtualPowerPlantId)
                 );
             }
 
@@ -63,10 +73,10 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     }
 
     @Override
-    public void publish(String businessKey) throws VirtualPowerPlantServiceException {
+    public void publish(String virtualPowerPlantId) throws VirtualPowerPlantServiceException {
         try {
-            if (!repository.isPublished(new VirtualPowerPlantIdVO(businessKey))) {
-                VirtualPowerPlantAggregate vpp = this.get(businessKey);
+            if (!repository.isPublished(new VirtualPowerPlantIdVO(virtualPowerPlantId))) {
+                VirtualPowerPlantAggregate vpp = this.get(virtualPowerPlantId);
                 if (vpp.getHouseholds().size() > 0) {
                     AtomicBoolean hasProducer = new AtomicBoolean(false);
                     vpp.getHouseholds().forEach((household) -> {
@@ -94,15 +104,19 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                         });
                     }
                     if (!hasProducer.get()) {
-                        throw new VirtualPowerPlantServiceException("failed to publish vpp. a vpp needs minimum one producer in household or dpp");
+                        throw new VirtualPowerPlantServiceException(
+                                String.format("VK %s konnte nicht veröffentlicht werden. VK benötigt min. eine Erzeugungsanlage", virtualPowerPlantId)
+                        );
                     }
-                    repository.publish(new VirtualPowerPlantIdVO(businessKey));
+                    repository.publish(new VirtualPowerPlantIdVO(virtualPowerPlantId));
                 } else {
-                    throw new VirtualPowerPlantServiceException("failed to publish vpp. a vpp needs minimum one household");
+                    throw new VirtualPowerPlantServiceException(
+                            String.format("VK %s konnte nicht veröffentlicht werden. VK benötigt min. ein Haushalt", virtualPowerPlantId)
+                    );
                 }
             } else {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("vpp %s can only be published when its unpublished", businessKey)
+                        String.format("VK %s ist bereits veröffentlicht", virtualPowerPlantId)
                 );
             }
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
@@ -111,11 +125,11 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     }
 
     @Override
-    public VirtualPowerPlantAggregate get(String businessKey) throws VirtualPowerPlantServiceException {
+    public VirtualPowerPlantAggregate get(String virtualPowerPlantId) throws VirtualPowerPlantServiceException {
         try {
-            Optional<VirtualPowerPlantAggregate> result = repository.getById(new VirtualPowerPlantIdVO(businessKey));
+            Optional<VirtualPowerPlantAggregate> result = repository.getById(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             return result.orElseThrow(() -> new VirtualPowerPlantServiceException(
-                    String.format("Can not find VPP by actionRequestId %s", businessKey)
+                    String.format("VK %s konnte nicht gefunden werden", virtualPowerPlantId)
             ));
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
@@ -124,16 +138,18 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     }
 
     @Override
-    public void unpublish(String businessKey) throws VirtualPowerPlantServiceException {
+    public void unpublish(String virtualPowerPlantId) throws VirtualPowerPlantServiceException {
         try {
-            VirtualPowerPlantAggregate vpp = this.get(businessKey);
+            VirtualPowerPlantAggregate vpp = this.get(virtualPowerPlantId);
             if (vpp.getPublished().isValue()) {
                 vpp.setPublished(
                         new VirtualPowerPlantPublishedVO(false)
                 );
-                repository.unpublish(new VirtualPowerPlantIdVO(businessKey));
+                repository.unpublish(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             } else {
-                throw new VirtualPowerPlantServiceException("vpp has to be published while unpublishing");
+                throw new VirtualPowerPlantServiceException(
+                        String.format("VK %s ist bereits unveröffentlicht", virtualPowerPlantId)
+                );
             }
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
@@ -141,13 +157,15 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
     }
 
     @Override
-    public void update(String businessKey, VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantServiceException {
+    public void update(String virtualPowerPlantId, VirtualPowerPlantAggregate domainEntity) throws VirtualPowerPlantServiceException {
         try {
-            VirtualPowerPlantAggregate vpp = this.get(businessKey);
+            VirtualPowerPlantAggregate vpp = this.get(virtualPowerPlantId);
             if (!vpp.getPublished().isValue()) {
-                repository.update(new VirtualPowerPlantIdVO(businessKey), domainEntity);
+                repository.update(new VirtualPowerPlantIdVO(virtualPowerPlantId), domainEntity);
             } else {
-                throw new VirtualPowerPlantServiceException("failed to update vpp. vpp has to be unpublished");
+                throw new VirtualPowerPlantServiceException(
+                        String.format("VK %s konnte nicht aktualisiert werden, da VK veröffentlicht ist", virtualPowerPlantId)
+                );
             }
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);

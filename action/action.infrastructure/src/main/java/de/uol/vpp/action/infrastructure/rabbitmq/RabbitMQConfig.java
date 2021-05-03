@@ -18,6 +18,9 @@ public class RabbitMQConfig {
     @Value("${vpp.rabbitmq.exchange.forecastGeneration}")
     String forecastGenerationExchange;
 
+    @Value("${vpp.rabbitmq.exchange.actionRequestFailed}")
+    String actionRequestFailedExchange;
+
 
     @Value("${vpp.rabbitmq.queue.load.to.action}")
     String loadToActionQueue;
@@ -43,6 +46,19 @@ public class RabbitMQConfig {
     @Value("${vpp.rabbitmq.key.action.to.production}")
     String actionToProductionKey;
 
+    @Value("${vpp.rabbitmq.queue.load.to.action.failed}")
+    String loadToActionFailedQueue;
+
+    @Value("${vpp.rabbitmq.key.load.to.action.failed}")
+    String loadToActionFailedKey;
+
+    @Value("${vpp.rabbitmq.queue.production.to.action.failed}")
+    String productionToActionFailedQueue;
+
+    @Value("${vpp.rabbitmq.key.production.to.action.failed}")
+    String productionToActionFailedKey;
+
+
     @Bean
     public AmqpTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -66,6 +82,16 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    Queue loadToActionFailedQueue() {
+        return new Queue(loadToActionFailedQueue, false);
+    }
+
+    @Bean
+    Queue productionToActionFailedQueue() {
+        return new Queue(productionToActionFailedQueue, false);
+    }
+
+    @Bean
     Queue actionToLoadQueue() {
         return new Queue(actionToLoadQueue, false);
     }
@@ -85,6 +111,10 @@ public class RabbitMQConfig {
         return new DirectExchange(forecastGenerationExchange);
     }
 
+    @Bean
+    DirectExchange actionRequestFailedExchange() {
+        return new DirectExchange(actionRequestFailedExchange);
+    }
 
     @Bean
     Binding bindingLoadToAction(Queue loadToActionQueue, DirectExchange forecastGenerationExchange) {
@@ -105,5 +135,16 @@ public class RabbitMQConfig {
     Binding bindingActionToLoad(Queue actionToLoadQueue, DirectExchange actionRequestExchange) {
         return BindingBuilder.bind(actionToLoadQueue).to(actionRequestExchange).with(actionToLoadKey);
     }
+
+    @Bean
+    Binding bindingLoadToActionFailed(Queue loadToActionFailedQueue, DirectExchange actionRequestFailedExchange) {
+        return BindingBuilder.bind(loadToActionFailedQueue).to(actionRequestFailedExchange).with(loadToActionFailedKey);
+    }
+
+    @Bean
+    Binding bindingProductionToActionFailed(Queue productionToActionFailedQueue, DirectExchange actionRequestFailedExchange) {
+        return BindingBuilder.bind(productionToActionFailedQueue).to(actionRequestFailedExchange).with(productionToActionFailedKey);
+    }
+
 
 }

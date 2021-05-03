@@ -4,18 +4,18 @@ import de.uol.vpp.masterdata.domain.valueobjects.*;
 
 public interface IPublishUtil {
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, DecentralizedPowerPlantIdVO dppBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, DecentralizedPowerPlantIdVO decentralizedPowerPlantId) throws PublishException;
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, HouseholdIdVO householdBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, HouseholdIdVO householdId) throws PublishException;
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, WindEnergyIdVO windEnergyBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, WindEnergyIdVO windEnergyId) throws PublishException;
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, WaterEnergyIdVO waterEnergyBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, WaterEnergyIdVO waterEnergyId) throws PublishException;
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, SolarEnergyIdVO solarEnergyBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, SolarEnergyIdVO solarEnergyId) throws PublishException;
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, OtherEnergyIdVO otherEnergyBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, OtherEnergyIdVO otherEnergyId) throws PublishException;
 
-    boolean isEditable(VirtualPowerPlantIdVO vppBusinessKey, StorageIdVO storageBusinessKey) throws PublishException;
+    boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, StorageIdVO storageId) throws PublishException;
 
 }

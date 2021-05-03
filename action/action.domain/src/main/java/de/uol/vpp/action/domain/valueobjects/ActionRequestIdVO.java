@@ -9,7 +9,7 @@ public class ActionRequestIdVO {
 
     public ActionRequestIdVO(String value) throws ActionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ActionException("validation for action request actionRequestId failed");
+            throw new ActionException("actionRequestId", "ActionRequest");
         }
         this.value = value;
     }

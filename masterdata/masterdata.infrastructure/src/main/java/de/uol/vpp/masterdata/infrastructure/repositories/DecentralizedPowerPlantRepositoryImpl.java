@@ -35,7 +35,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
     @Override
     public List<DecentralizedPowerPlantAggregate> getAllByVppKey(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws DecentralizedPowerPlantRepositoryException {
         try {
-            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue());
+            Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneById(virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue());
             if (virtualPowerPlantOptional.isPresent()) {
                 List<DecentralizedPowerPlant> vpps = jpaRepository.findAllByVirtualPowerPlant(virtualPowerPlantOptional.get());
                 List<DecentralizedPowerPlantAggregate> result = new ArrayList<>();
@@ -45,7 +45,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
                 return result;
             } else {
                 throw new VirtualPowerPlantRepositoryException(
-                        String.format("There is no VPP with actionRequestId %s", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
+                        String.format("VK %s konnte nicht gefunden werden um DK abzufragen", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
                 );
             }
         } catch (DecentralizedPowerPlantException | VirtualPowerPlantRepositoryException e) {
@@ -56,7 +56,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
     @Override
     public Optional<DecentralizedPowerPlantAggregate> getById(DecentralizedPowerPlantIdVO id) throws DecentralizedPowerPlantRepositoryException {
         try {
-            Optional<DecentralizedPowerPlant> result = jpaRepository.findOneByBusinessKey(id.getValue());
+            Optional<DecentralizedPowerPlant> result = jpaRepository.findOneById(id.getValue());
             if (result.isPresent()) {
                 return Optional.of(converter.toDomain(result.get()));
             } else {
@@ -75,8 +75,8 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
 
     @Override
     public void assign(DecentralizedPowerPlantAggregate domainEntity, VirtualPowerPlantAggregate virtualPowerPlant) throws DecentralizedPowerPlantRepositoryException {
-        Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(domainEntity.getDecentralizedPowerPlantId().getValue());
-        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneByBusinessKey(virtualPowerPlant.getVirtualPowerPlantId().getValue());
+        Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneById(domainEntity.getDecentralizedPowerPlantId().getValue());
+        Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneById(virtualPowerPlant.getVirtualPowerPlantId().getValue());
         if (jpaEntityOptional.isPresent() && virtualPowerPlantOptional.isPresent()) {
             DecentralizedPowerPlant jpaEntity = jpaEntityOptional.get();
             VirtualPowerPlant virtualPowerPlantJpaEntity = virtualPowerPlantOptional.get();
@@ -87,13 +87,13 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
                 virtualPowerPlantJpaRepository.save(virtualPowerPlantJpaEntity);
             } else {
                 throw new DecentralizedPowerPlantRepositoryException(
-                        String.format("Dpp %s is already assigned to vpp %s", domainEntity.getDecentralizedPowerPlantId().getValue(),
-                                jpaEntity.getVirtualPowerPlant().getBusinessKey())
+                        String.format("DK %s konnte VK %s nicht zugewiesen werden, da DK bereits zugewiesen wurde", domainEntity.getDecentralizedPowerPlantId().getValue(),
+                                jpaEntity.getVirtualPowerPlant().getId())
                 );
             }
         } else {
             throw new DecentralizedPowerPlantRepositoryException(
-                    String.format("An error occured while assigning dpp %s to vpp %s", domainEntity.getDecentralizedPowerPlantId().getValue(),
+                    String.format("DK %s konnte VK %s nicht zugewiesen werden", domainEntity.getDecentralizedPowerPlantId().getValue(),
                             virtualPowerPlant.getVirtualPowerPlantId().getValue())
             );
         }
@@ -101,19 +101,21 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
 
     @Override
     public void update(DecentralizedPowerPlantIdVO id, DecentralizedPowerPlantAggregate domainEntity) throws DecentralizedPowerPlantRepositoryException {
-        Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<DecentralizedPowerPlant> jpaEntityOptional = jpaRepository.findOneById(id.getValue());
         if (jpaEntityOptional.isPresent()) {
             DecentralizedPowerPlant jpaEntity = jpaEntityOptional.get();
-            jpaEntity.setBusinessKey(domainEntity.getDecentralizedPowerPlantId().getValue());
+            jpaEntity.setId(domainEntity.getDecentralizedPowerPlantId().getValue());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new DecentralizedPowerPlantRepositoryException("failed to update dpp. can not find dpp entity");
+            throw new DecentralizedPowerPlantRepositoryException(
+                    String.format("DK %s konnte nicht aktualisiert werden, da DK nicht gefunden wurde", id.getValue())
+            );
         }
     }
 
     @Override
     public void deleteById(DecentralizedPowerPlantIdVO id) throws DecentralizedPowerPlantRepositoryException {
-        Optional<DecentralizedPowerPlant> jpaEntity = jpaRepository.findOneByBusinessKey(id.getValue());
+        Optional<DecentralizedPowerPlant> jpaEntity = jpaRepository.findOneById(id.getValue());
         if (jpaEntity.isPresent()) {
             DecentralizedPowerPlant dpp = jpaEntity.get();
 
@@ -126,7 +128,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
             jpaRepository.delete(dpp);
         } else {
             throw new DecentralizedPowerPlantRepositoryException(
-                    String.format("dpp %s can not be found and can not be deleted", id.getValue())
+                    String.format("DK %s konnte nicht gelöscht werden, da DK nicht gefunden wurde", id.getValue())
             );
         }
     }

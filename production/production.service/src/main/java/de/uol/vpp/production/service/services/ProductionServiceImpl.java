@@ -21,9 +21,9 @@ public class ProductionServiceImpl implements IProductionService {
     private final ProductionScheduler scheduler;
 
     @Override
-    public List<ProductionAggregate> getProductionsByActionRequestId(String actionRequestBusinessKey) throws ProductionServiceException {
+    public List<ProductionAggregate> getProductionsByActionRequestId(String actionRequestId) throws ProductionServiceException {
         try {
-            return repository.getProductions(new ProductionActionRequestIdVO(actionRequestBusinessKey));
+            return repository.getProductions(new ProductionActionRequestIdVO(actionRequestId));
         } catch (ProductionRepositoryException | ProductionException e) {
             throw new ProductionServiceException(e.getMessage(), e);
         }

@@ -11,8 +11,8 @@ public class WindEnergyHeightVO {
 
     public WindEnergyHeightVO(Double value) throws ProducerException {
         if (value == null || value < 0) {
-            throw new ProducerException("validation for wind height failed");
+            throw new ProducerException("height", "WindEnergy");
         }
-        this.value = value;
+        this.value = Math.round(1000.0 * value) / 1000.0;
     }
 }

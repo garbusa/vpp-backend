@@ -14,13 +14,13 @@ public class LoadHouseholdStartTimestampVO {
 
     public LoadHouseholdStartTimestampVO(Long ts) throws LoadException {
         if (ts == null) {
-            throw new LoadException("load household startTimestamp validation failed");
+            throw new LoadException("startTimestamp", "LoadHousehold");
         }
 
         try {
             this.timestamp = TimestampUtils.toBerlinTimestamp(ts);
         } catch (Exception e) {
-            throw new LoadException("failed to create startTimestamp", e);
+            throw new LoadException("startTimestamp", "LoadHousehold", e);
         }
     }
 
