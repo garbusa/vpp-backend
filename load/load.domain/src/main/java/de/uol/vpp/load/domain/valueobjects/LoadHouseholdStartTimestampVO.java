@@ -18,7 +18,7 @@ public class LoadHouseholdStartTimestampVO {
         }
 
         try {
-            this.timestamp = TimestampUtils.toBerlinTimestamp(ts);
+            this.timestamp = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
             throw new LoadException("startTimestamp", "LoadHousehold", e);
         }

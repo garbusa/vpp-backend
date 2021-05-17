@@ -23,10 +23,4 @@ public class VirtualPowerPlant {
 
     @Column(nullable = false)
     private boolean published;
-
-    @Column(nullable = false)
-    private Double shortageThreshold;
-
-    @Column(nullable = false)
-    private Double overflowThreshold;
 }

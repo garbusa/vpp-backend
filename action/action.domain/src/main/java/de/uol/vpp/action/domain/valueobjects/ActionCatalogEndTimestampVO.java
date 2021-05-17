@@ -16,7 +16,7 @@ public class ActionCatalogEndTimestampVO {
         }
 
         try {
-            this.value = TimestampUtils.toBerlinTimestamp(ts);
+            this.value = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
             throw new ActionException("endTimestamp", "Action", e);
         }

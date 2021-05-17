@@ -1,5 +1,7 @@
 package de.uol.vpp.load.infrastructure.rabbitmq;
 
+import de.uol.vpp.load.infrastructure.rabbitmq.messages.ActionFailedMessage;
+import de.uol.vpp.load.infrastructure.rabbitmq.messages.LoadMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.AmqpTemplate;

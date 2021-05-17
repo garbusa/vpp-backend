@@ -89,7 +89,7 @@ public class VirtualPowerPlantController {
             }
             service.save(converter.toDomain(dto));
             return ResponseEntity.ok().body(new ApiResponse(true, false, "" +
-                    "vpp successfully created", null));
+                    "VK wurde erfolgreich angelegt", null));
         } catch (VirtualPowerPlantServiceException | VirtualPowerPlantException e) {
             log.error(e);
             return new ResponseEntity<>(new ApiResponse(

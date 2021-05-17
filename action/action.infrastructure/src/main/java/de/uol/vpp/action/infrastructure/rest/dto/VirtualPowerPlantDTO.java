@@ -10,6 +10,4 @@ public class VirtualPowerPlantDTO {
         @JsonIgnore
         private List<DecentralizedPowerPlantDTO> decentralizedPowerPlants = new ArrayList<>();*/
     private boolean published;
-    private Double shortageThreshold;
-    private Double overflowThreshold;
 }

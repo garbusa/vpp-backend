@@ -1,5 +1,6 @@
 package de.uol.vpp.action.infrastructure.rabbitmq;
 
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.ActionRequestMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -22,12 +23,9 @@ public class RabbitMQSender {
     @Value("${vpp.rabbitmq.key.action.to.production}")
     private String actionToProductionKey;
 
-    public void sendActionRequest(String actionRequestId, String vppId) {
-        ActionRequestMessage message = new ActionRequestMessage();
-        message.setActionRequestId(actionRequestId);
-        message.setVppId(vppId);
+    public void sendActionRequest(ActionRequestMessage message) {
         rabbitTemplate.convertAndSend(actionRequestExchange, actionToLoadKey, message);
         rabbitTemplate.convertAndSend(actionRequestExchange, actionToProductionKey, message);
-        log.info("sendActionRequest: {}, {}", actionRequestId, vppId);
+        log.info("sendActionRequest: {}, {}", message.getActionRequestId(), message.getVppId());
     }
 }

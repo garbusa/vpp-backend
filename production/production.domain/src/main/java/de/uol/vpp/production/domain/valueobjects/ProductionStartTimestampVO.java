@@ -18,7 +18,7 @@ public class ProductionStartTimestampVO {
         }
 
         try {
-            this.timestamp = TimestampUtils.toBerlinTimestamp(ts);
+            this.timestamp = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
             throw new ProductionException("startTimestamp", "Production", e);
         }

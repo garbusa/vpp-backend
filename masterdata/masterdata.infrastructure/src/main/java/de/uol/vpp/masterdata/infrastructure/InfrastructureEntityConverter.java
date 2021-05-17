@@ -41,8 +41,6 @@ public class InfrastructureEntityConverter {
                     result
             );
             domainEntity.setPublished(new VirtualPowerPlantPublishedVO(jpaEntity.isPublished()));
-            domainEntity.setShortageThreshold(new VirtualPowerPlantShortageThresholdVO(jpaEntity.getShortageThreshold()));
-            domainEntity.setOverflowThreshold(new VirtualPowerPlantOverflowThresholdVO(jpaEntity.getOverflowThreshold()));
             return domainEntity;
         } catch (DecentralizedPowerPlantException | HouseholdException e) {
             throw new VirtualPowerPlantException(e.getMessage(), e);
@@ -231,8 +229,6 @@ public class InfrastructureEntityConverter {
             );
         }
         jpaEntity.setPublished(domainEntity.getPublished().isValue());
-        jpaEntity.setShortageThreshold(domainEntity.getShortageThreshold().getValue());
-        jpaEntity.setOverflowThreshold(domainEntity.getOverflowThreshold().getValue());
         return jpaEntity;
     }
 

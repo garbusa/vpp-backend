@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.TreeSet;
 
 @Data
-public class ActionTimeseries {
+public class DifferenceTimeseries {
     private String actionRequestId;
     private String virtualPowerPlantId;
     private TreeSet<Long> timestamps;

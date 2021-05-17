@@ -19,7 +19,7 @@ public class LoadStartTimestampVO {
         }
 
         try {
-            this.timestamp = TimestampUtils.toBerlinTimestamp(ts);
+            this.timestamp = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
             throw new LoadException("startTimestamp", "Load");
         }

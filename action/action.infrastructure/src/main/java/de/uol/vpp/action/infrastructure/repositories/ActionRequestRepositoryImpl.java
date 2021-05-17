@@ -4,6 +4,7 @@ import de.uol.vpp.action.domain.aggregates.ActionRequestAggregate;
 import de.uol.vpp.action.domain.enums.StatusEnum;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ActionRepositoryException;
+import de.uol.vpp.action.domain.exceptions.ManipulationException;
 import de.uol.vpp.action.domain.repositories.IActionRequestRepository;
 import de.uol.vpp.action.domain.valueobjects.ActionRequestIdVO;
 import de.uol.vpp.action.domain.valueobjects.ActionRequestVirtualPowerPlantIdVO;
@@ -11,6 +12,10 @@ import de.uol.vpp.action.infrastructure.InfrastructureDomainConverter;
 import de.uol.vpp.action.infrastructure.entities.ActionRequest;
 import de.uol.vpp.action.infrastructure.jpaRepositories.ActionRequestJpaRepository;
 import de.uol.vpp.action.infrastructure.rabbitmq.RabbitMQSender;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.ActionRequestMessage;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.GridManipulationMessage;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.ProducerManipulationMessage;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.StorageManipulationMessage;
 import de.uol.vpp.action.infrastructure.rest.LoadRestClient;
 import de.uol.vpp.action.infrastructure.rest.ProductionRestClient;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +47,7 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
             }
 
             return result;
-        } catch (ActionException e) {
+        } catch (ActionException | ManipulationException e) {
             throw new ActionRepositoryException(e.getMessage(), e);
         }
     }
@@ -55,7 +61,7 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
             } else {
                 return Optional.empty();
             }
-        } catch (ActionException e) {
+        } catch (ActionException | ManipulationException e) {
             throw new ActionRepositoryException(e.getMessage(), e);
         }
     }
@@ -66,13 +72,56 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
         ActionRequest saved = actionRequestJpaRepository.save(jpaEntity);
         if (isInitialSave) {
             if (loadRestClient.isHealthy() && productionRestClient.isHealthy()) {
-                sender.sendActionRequest(jpaEntity.getActionRequestId(), jpaEntity.getVirtualPowerPlantId());
+                ActionRequestMessage actionRequestMessage = this.toMessage(saved);
+                sender.sendActionRequest(actionRequestMessage);
             } else {
                 saved.setStatus(StatusEnum.FAILED);
                 actionRequestJpaRepository.save(saved);
                 throw new ActionRepositoryException("Eine Maßnahmanabfrage kann nur erstellt werden, wenn der Erzeugungs- und Lastenservice aktiv sind");
             }
         }
+    }
+
+    private ActionRequestMessage toMessage(ActionRequest saved) {
+        ActionRequestMessage actionRequestMessage = new ActionRequestMessage();
+        actionRequestMessage.setActionRequestId(saved.getActionRequestId());
+        actionRequestMessage.setVppId(saved.getVirtualPowerPlantId());
+        actionRequestMessage.setOverflowThreshold(saved.getOverflowThreshold());
+        actionRequestMessage.setShortageThreshold(saved.getShortageThreshold());
+        actionRequestMessage.setProducerManipulations(saved.getProducerManipulations().stream().map(
+                (manipulation) -> {
+                    ProducerManipulationMessage manipulationMessage = new ProducerManipulationMessage();
+                    manipulationMessage.setStartTimestamp(manipulation.getProducerManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
+                    manipulationMessage.setEndTimestamp(manipulation.getProducerManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
+                    manipulationMessage.setProducerId(manipulation.getProducerManipulationPrimaryKey().getProducerId());
+                    manipulationMessage.setType(manipulation.getManipulationType().toString());
+                    manipulationMessage.setCapacity(manipulation.getCapacity());
+                    return manipulationMessage;
+                }
+        ).collect(Collectors.toList()));
+        actionRequestMessage.setStorageManipulations(saved.getStorageManipulations().stream().map(
+                (manipulation) -> {
+                    StorageManipulationMessage manipulationMessage = new StorageManipulationMessage();
+                    manipulationMessage.setStartTimestamp(manipulation.getStorageManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
+                    manipulationMessage.setEndTimestamp(manipulation.getStorageManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
+                    manipulationMessage.setStorageId(manipulation.getStorageManipulationPrimaryKey().getStorageId());
+                    manipulationMessage.setType(manipulation.getManipulationType().toString());
+                    manipulationMessage.setHours(manipulation.getHours());
+                    manipulationMessage.setRatedPower(manipulation.getRatedPower());
+                    return manipulationMessage;
+                }
+        ).collect(Collectors.toList()));
+        actionRequestMessage.setGridManipulations(saved.getGridManipulations().stream().map(
+                (manipulation) -> {
+                    GridManipulationMessage manipulationMessage = new GridManipulationMessage();
+                    manipulationMessage.setStartTimestamp(manipulation.getGridManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
+                    manipulationMessage.setEndTimestamp(manipulation.getGridManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
+                    manipulationMessage.setType(manipulation.getManipulationType().toString());
+                    manipulationMessage.setRatedCapacity(manipulation.getRatedPower());
+                    return manipulationMessage;
+                }
+        ).collect(Collectors.toList()));
+        return actionRequestMessage;
     }
 
 }

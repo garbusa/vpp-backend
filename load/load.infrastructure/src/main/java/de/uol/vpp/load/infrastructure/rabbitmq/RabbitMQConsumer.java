@@ -1,5 +1,6 @@
 package de.uol.vpp.load.infrastructure.rabbitmq;
 
+import de.uol.vpp.load.infrastructure.rabbitmq.messages.ActionRequestMessage;
 import de.uol.vpp.load.infrastructure.scheduler.LoadScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

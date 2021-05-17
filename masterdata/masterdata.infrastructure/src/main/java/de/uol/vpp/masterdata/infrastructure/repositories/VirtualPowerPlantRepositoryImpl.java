@@ -189,8 +189,6 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             VirtualPowerPlant jpaEntity = jpaEntityOptional.get();
             VirtualPowerPlant updated = converter.toInfrastructure(domainEntity);
             jpaEntity.setId(updated.getId());
-            jpaEntity.setOverflowThreshold(updated.getOverflowThreshold());
-            jpaEntity.setShortageThreshold(updated.getShortageThreshold());
             jpaRepository.save(jpaEntity);
         } else {
             throw new VirtualPowerPlantRepositoryException(

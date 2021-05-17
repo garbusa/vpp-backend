@@ -1,6 +1,7 @@
 package de.uol.vpp.masterdata.service.services;
 
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
+import de.uol.vpp.masterdata.domain.aggregates.abstracts.DomainHasProducersAndStorages;
 import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
 import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
 import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
@@ -80,27 +81,11 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                 if (vpp.getHouseholds().size() > 0) {
                     AtomicBoolean hasProducer = new AtomicBoolean(false);
                     vpp.getHouseholds().forEach((household) -> {
-                        if (household.getWaters().size() > 0) {
-                            hasProducer.set(true);
-                        }
-                        if (household.getSolars().size() > 0) {
-                            hasProducer.set(true);
-                        }
-                        if (household.getWaters().size() > 0) {
-                            hasProducer.set(true);
-                        }
+                        checkProducers(hasProducer, household);
                     });
                     if (!hasProducer.get() && vpp.getDecentralizedPowerPlants().size() > 0) {
                         vpp.getDecentralizedPowerPlants().forEach((dpp) -> {
-                            if (dpp.getWaters().size() > 0) {
-                                hasProducer.set(true);
-                            }
-                            if (dpp.getSolars().size() > 0) {
-                                hasProducer.set(true);
-                            }
-                            if (dpp.getWinds().size() > 0) {
-                                hasProducer.set(true);
-                            }
+                            checkProducers(hasProducer, dpp);
                         });
                     }
                     if (!hasProducer.get()) {
@@ -137,6 +122,21 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
 
     }
 
+    private void checkProducers(AtomicBoolean hasProducer, DomainHasProducersAndStorages householdOrDpp) {
+        if (householdOrDpp.getWaters().size() > 0) {
+            hasProducer.set(true);
+        }
+        if (householdOrDpp.getSolars().size() > 0) {
+            hasProducer.set(true);
+        }
+        if (householdOrDpp.getWinds().size() > 0) {
+            hasProducer.set(true);
+        }
+        if (householdOrDpp.getOthers().size() > 0) {
+            hasProducer.set(true);
+        }
+    }
+
     @Override
     public void unpublish(String virtualPowerPlantId) throws VirtualPowerPlantServiceException {
         try {
@@ -161,7 +161,13 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
         try {
             VirtualPowerPlantAggregate vpp = this.get(virtualPowerPlantId);
             if (!vpp.getPublished().isValue()) {
-                repository.update(new VirtualPowerPlantIdVO(virtualPowerPlantId), domainEntity);
+                if (domainEntity.getVirtualPowerPlantId().getValue().equals(virtualPowerPlantId)) {
+                    repository.update(new VirtualPowerPlantIdVO(virtualPowerPlantId), domainEntity);
+                } else {
+                    throw new VirtualPowerPlantServiceException(
+                            "Der Name eines VK kann nicht geändert werden"
+                    );
+                }
             } else {
                 throw new VirtualPowerPlantServiceException(
                         String.format("VK %s konnte nicht aktualisiert werden, da VK veröffentlicht ist", virtualPowerPlantId)

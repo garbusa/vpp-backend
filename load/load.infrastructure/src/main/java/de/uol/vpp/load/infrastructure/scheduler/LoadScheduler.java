@@ -15,11 +15,9 @@ import de.uol.vpp.load.infrastructure.rest.exceptions.MasterdataRestClientExcept
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -38,7 +36,6 @@ public class LoadScheduler {
     private final ILoadHouseholdRepository loadHouseholdRepository;
     private final RabbitMQSender rabbitMQSender;
     private HSSFSheet sheet;
-    private Map<Integer, Integer> timeRowMap;
 
     public LoadScheduler(MasterdataRestClient masterdataRestClient,
                          ILoadRepository loadRepository,
@@ -49,16 +46,75 @@ public class LoadScheduler {
         this.loadHouseholdRepository = loadHouseholdRepository;
         this.rabbitMQSender = rabbitMQSender;
         try {
-            File file = ResourceUtils.getFile("classpath:slp.xls");
-            HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
+            ClassPathResource classPathResource = new ClassPathResource("slp.xls");
+            HSSFWorkbook workbook = new HSSFWorkbook(classPathResource.getInputStream());
             sheet = workbook.getSheetAt(0);
-            timeRowMap = createTimeRowMap();
         } catch (IOException e) {
-            log.error("failed to load excel file");
+            log.error("failed to load excel file", e);
         }
     }
 
-    private Map<Integer, Integer> createTimeRowMap() {
+    private int getRowIndex(ZonedDateTime date) {
+        int key = (date.getHour() * 100) + date.getMinute();
+        return createTimeRowMap().get(key);
+    }
+
+
+    public void createLoad(String actionRequestId, String vppId) {
+        try {
+            ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
+            ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
+                    currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
+                    currentZDT.getMinute() - (currentZDT.getMinute() % 15),
+                    0, 0, ZoneId.of("GMT+2")
+            );
+            if (masterdataRestClient.isActiveVpp(vppId)) {
+                for (int forecastIndex = 0; forecastIndex <= LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
+                    this.saveLoad(currentWithoutSeconds, actionRequestId, vppId);
+                    currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15L);
+                }
+                rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
+            } else {
+                //Send error
+                rabbitMQSender.sendFailed(actionRequestId);
+            }
+        } catch (Exception e) {
+            log.error(e);
+            rabbitMQSender.sendFailed(actionRequestId);
+        }
+
+    }
+
+
+    private void saveLoad(ZonedDateTime currentZDT, String actionRequestId, String vppId) throws LoadException, LoadRepositoryException, JsonProcessingException, MasterdataRestClientException, LoadHouseholdRepositoryException {
+        int rowIndex = getRowIndex(currentZDT);
+        int columnIndex = getColumnIndex(currentZDT);
+        LoadAggregate loadAggregate = new LoadAggregate();
+        loadAggregate.setLoadActionRequestId(new LoadActionRequestIdVO(actionRequestId));
+        loadAggregate.setLoadVirtualPowerPlantId(new LoadVirtualPowerPlantIdVO(vppId));
+        loadAggregate.setLoadStartTimestamp(new LoadStartTimestampVO(currentZDT.toEpochSecond()));
+        loadRepository.saveLoad(loadAggregate);
+        List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(vppId);
+
+        for (String householdId : householdIds) {
+            LoadHouseholdEntity householdEntity = new LoadHouseholdEntity();
+            householdEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(currentZDT.toEpochSecond()));
+            householdEntity.setLoadHouseholdId(new LoadHouseholdIdVO(householdId));
+            householdEntity.setLoadHouseholdMemberAmount(
+                    new LoadHouseholdMemberAmountVO(masterdataRestClient.getHouseholdMemberAmountById(householdId))
+            );
+            householdEntity.setLoadHouseholdValueVO(
+                    new LoadHouseholdValueVO(
+                            sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue() * householdEntity.getLoadHouseholdMemberAmount().getAmount()
+                    )
+            );
+            Long internalId = loadHouseholdRepository.saveLoadHouseholdInternal(householdEntity);
+            loadHouseholdRepository.assignToInternal(internalId, loadAggregate);
+        }
+
+    }
+
+    private static Map<Integer, Integer> createTimeRowMap() {
         return new HashMap<>() {
             {
                 put(15, 3);
@@ -159,66 +215,6 @@ public class LoadScheduler {
                 put(0, 98);
             }
         };
-    }
-
-
-    public void createLoad(String actionRequestId, String vppId) {
-        try {
-            ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
-            ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
-                    currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
-                    currentZDT.getMinute() - (currentZDT.getMinute() % 15),
-                    0, 0, ZoneId.of("GMT+2")
-            );
-            if (masterdataRestClient.isActiveVpp(vppId)) {
-                for (int forecastIndex = 0; forecastIndex <= LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
-                    this.saveLoad(currentWithoutSeconds, actionRequestId, vppId);
-                    currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15L);
-                }
-                rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
-            } else {
-                //Send error
-                rabbitMQSender.sendFailed(actionRequestId);
-            }
-        } catch (Exception e) {
-            log.error(e);
-            rabbitMQSender.sendFailed(actionRequestId);
-        }
-
-    }
-
-
-    private void saveLoad(ZonedDateTime currentZDT, String actionRequestId, String vppId) throws LoadException, LoadRepositoryException, JsonProcessingException, MasterdataRestClientException, LoadHouseholdRepositoryException {
-            int rowIndex = getRowIndex(currentZDT);
-            int columnIndex = getColumnIndex(currentZDT);
-            LoadAggregate loadAggregate = new LoadAggregate();
-            loadAggregate.setLoadActionRequestId(new LoadActionRequestIdVO(actionRequestId));
-            loadAggregate.setLoadVirtualPowerPlantId(new LoadVirtualPowerPlantIdVO(vppId));
-            loadAggregate.setLoadStartTimestamp(new LoadStartTimestampVO(currentZDT.toEpochSecond()));
-            loadRepository.saveLoad(loadAggregate);
-            List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(vppId);
-
-        for (String householdId : householdIds) {
-            LoadHouseholdEntity householdEntity = new LoadHouseholdEntity();
-            householdEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(currentZDT.toEpochSecond()));
-            householdEntity.setLoadHouseholdId(new LoadHouseholdIdVO(householdId));
-            householdEntity.setLoadHouseholdMemberAmount(
-                    new LoadHouseholdMemberAmountVO(masterdataRestClient.getHouseholdMemberAmountById(householdId))
-            );
-            householdEntity.setLoadHouseholdValueVO(
-                    new LoadHouseholdValueVO(
-                            sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue() * householdEntity.getLoadHouseholdMemberAmount().getAmount()
-                    )
-            );
-            Long internalId = loadHouseholdRepository.saveLoadHouseholdInternal(householdEntity);
-            loadHouseholdRepository.assignToInternal(internalId, loadAggregate);
-        }
-
-    }
-
-    private int getRowIndex(ZonedDateTime date) {
-        int key = (date.getHour() * 100) + date.getMinute();
-        return timeRowMap.get(key);
     }
 
     private int getColumnIndex(ZonedDateTime date) {

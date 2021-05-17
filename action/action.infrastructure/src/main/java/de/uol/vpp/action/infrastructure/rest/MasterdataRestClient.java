@@ -53,8 +53,6 @@ public class MasterdataRestClient {
                     VirtualPowerPlantDTO dto = new VirtualPowerPlantDTO();
                     dto.setVirtualPowerPlantId(data.get("virtualPowerPlantId").asText());
                     dto.setPublished(data.get("published").asBoolean());
-                    dto.setOverflowThreshold(data.get("overflowThreshold").asDouble());
-                    dto.setShortageThreshold(data.get("shortageThreshold").asDouble());
                     return dto;
                 }
             }

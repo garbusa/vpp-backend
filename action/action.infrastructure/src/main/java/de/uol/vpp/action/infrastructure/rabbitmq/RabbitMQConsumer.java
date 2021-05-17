@@ -5,7 +5,9 @@ import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ActionRepositoryException;
 import de.uol.vpp.action.domain.repositories.IActionRequestRepository;
 import de.uol.vpp.action.domain.valueobjects.ActionRequestIdVO;
-import de.uol.vpp.action.infrastructure.algorithm.ActionInfrastructureService;
+import de.uol.vpp.action.infrastructure.algorithm.ActionCatalogInfrastructureService;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.ActionFailedMessage;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.LoadMessage;
 import de.uol.vpp.action.infrastructure.rest.exceptions.LoadRestClientException;
 import de.uol.vpp.action.infrastructure.rest.exceptions.MasterdataRestClientException;
 import de.uol.vpp.action.infrastructure.rest.exceptions.ProductionRestClientException;
@@ -24,14 +26,14 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RabbitMQConsumer {
 
-    private final ActionInfrastructureService actionInfrastructureService;
+    private final ActionCatalogInfrastructureService actionCatalogInfrastructureService;
     private final IActionRequestRepository actionRequestRepository;
     private final Map<String, Integer> actionRequestIdCounterMap = new HashMap<>();
 
     @RabbitListener(queues = "${vpp.rabbitmq.queue.load.to.action.failed}")
     public void receivedActionFailedMessage(ActionFailedMessage actionFailedMessage) {
         log.info("receivedActionFailedMessage {}", actionFailedMessage.getActionRequestId());
-        actionInfrastructureService.actionFailed(actionFailedMessage.getActionRequestId());
+        actionCatalogInfrastructureService.actionFailed(actionFailedMessage.getActionRequestId());
     }
 
     @RabbitListener(queues = "${vpp.rabbitmq.queue.load.to.action}")
@@ -58,10 +60,10 @@ public class RabbitMQConsumer {
             actionRequestIdCounterMap.remove(actionRequestId);
             log.info("Both messages for {} received", actionRequestId);
             try {
-                actionInfrastructureService.actionAlgorithm(actionRequestId);
+                actionCatalogInfrastructureService.createActionCatalogs(actionRequestId);
             } catch (ActionException | ActionRepositoryException | MasterdataRestClientException | LoadRestClientException | ProductionRestClientException e) {
-                log.error("actionAlgorithm failed", e);
-                actionInfrastructureService.actionFailed(actionRequestId);
+                log.error("createActionCatalogs failed", e);
+                actionCatalogInfrastructureService.actionFailed(actionRequestId);
             }
         } else if (actionRequestIdCounterMap.get(actionRequestId) == 1) {
             log.info("First Message for {} received. Waiting for second...", actionRequestId);
@@ -72,7 +74,7 @@ public class RabbitMQConsumer {
                         TimeUnit.MINUTES.sleep(5);
                     } catch (InterruptedException e) {
                         log.info("Something went wrong for {} while sleeping thread", actionRequestId);
-                        actionInfrastructureService.actionFailed(actionRequestId);
+                        actionCatalogInfrastructureService.actionFailed(actionRequestId);
                     } finally {
                         if (actionRequestIdCounterMap.get(actionRequestId) != null) {
                             if (actionRequestIdCounterMap.get(actionRequestId) == 1) {
@@ -88,7 +90,7 @@ public class RabbitMQConsumer {
             }).start();
         } else {
             log.info("Something went wrong (numberOfMessages) for {}", actionRequestId);
-            actionInfrastructureService.actionFailed(actionRequestId);
+            actionCatalogInfrastructureService.actionFailed(actionRequestId);
         }
     }
 

@@ -5,19 +5,15 @@ import de.uol.vpp.action.application.dto.ActionRequestDTO;
 import de.uol.vpp.action.application.payload.ApiResponse;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ActionServiceException;
+import de.uol.vpp.action.domain.exceptions.ManipulationException;
 import de.uol.vpp.action.domain.services.IActionRequestService;
-import de.uol.vpp.action.domain.utils.SecureRandomString;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.stream.Collectors;
 
 @RestController
@@ -66,17 +62,13 @@ public class ActionRequestController {
         }
     }
 
-    @GetMapping("/schedule/{virtualPowerPlantId}")
-    public ResponseEntity<?> scheduleActionRequest(@PathVariable String virtualPowerPlantId) {
+    @PostMapping()
+    public ResponseEntity<?> scheduleActionRequest(@RequestBody ActionRequestDTO dto) {
         try {
-            ActionRequestDTO dto = new ActionRequestDTO();
-            dto.setActionRequestId(SecureRandomString.generate());
-            dto.setTimestamp(Instant.now().getEpochSecond());
-            dto.setVirtualPowerPlantId(virtualPowerPlantId);
             actionRequestService.save(converter.toDomain(dto));
             return ResponseEntity.ok().body(new ApiResponse(true, false, "" +
                     "Maßnahmenanfrage wurde erfolgreich angelegt", null));
-        } catch (ActionServiceException | ActionException e) {
+        } catch (ActionServiceException | ActionException | ManipulationException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
             ), HttpStatus.NOT_FOUND);

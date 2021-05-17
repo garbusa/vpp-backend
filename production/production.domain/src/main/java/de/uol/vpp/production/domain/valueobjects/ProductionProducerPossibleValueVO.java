@@ -10,7 +10,7 @@ public class ProductionProducerPossibleValueVO {
     private Double value;
 
     public ProductionProducerPossibleValueVO(Double value) throws ProductionException {
-        if (value == null || value < 0) {
+        if (value == null) {
             throw new ProductionException("possibleValue", "ProductionProducer");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;

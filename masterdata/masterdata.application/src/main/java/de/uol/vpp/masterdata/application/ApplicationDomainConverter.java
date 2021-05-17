@@ -24,8 +24,6 @@ public class ApplicationDomainConverter {
         dto.setDecentralizedPowerPlants(domainEntity.getDecentralizedPowerPlants().stream()
                 .map(this::toApplication).collect(Collectors.toList()));
         dto.setPublished(domainEntity.getPublished().isValue());
-        dto.setShortageThreshold(domainEntity.getShortageThreshold().getValue());
-        dto.setOverflowThreshold(domainEntity.getOverflowThreshold().getValue());
         return dto;
     }
 
@@ -97,8 +95,6 @@ public class ApplicationDomainConverter {
             VirtualPowerPlantAggregate domainEntity = new VirtualPowerPlantAggregate();
             domainEntity.setVirtualPowerPlantId(new VirtualPowerPlantIdVO(dto.getVirtualPowerPlantId()));
             domainEntity.setPublished(new VirtualPowerPlantPublishedVO(dto.isPublished()));
-            domainEntity.setShortageThreshold(new VirtualPowerPlantShortageThresholdVO(dto.getShortageThreshold()));
-            domainEntity.setOverflowThreshold(new VirtualPowerPlantOverflowThresholdVO(dto.getOverflowThreshold()));
             List<DecentralizedPowerPlantAggregate> dpps = new ArrayList<>();
             for (DecentralizedPowerPlantDTO dpp : dto.getDecentralizedPowerPlants()) {
                 dpps.add(this.toDomain(dpp));
