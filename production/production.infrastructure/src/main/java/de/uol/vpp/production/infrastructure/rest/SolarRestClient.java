@@ -62,7 +62,6 @@ public class SolarRestClient {
         } catch (RestClientException | JsonProcessingException e) {
             throw new SolarRestClientException("solar rest client exception while executing request", e);
         }
-
         return null;
     }
 

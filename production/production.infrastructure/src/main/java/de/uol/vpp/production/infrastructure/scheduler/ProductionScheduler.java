@@ -186,9 +186,7 @@ public class ProductionScheduler {
             }
             WeatherDTO weatherDTO = this.getCorrectDTO(windWeatherMap.get(windEnergyDTO.getWindEnergyId()), currentWithoutSeconds);
             if (weatherDTO != null) {
-                Double density = ProductionsUtils.calculateAirDensity(weatherDTO.getAirPressure(), weatherDTO.getAirHumidity(),
-                        weatherDTO.getTemperatureCelsius());
-                Double possibleValue = ProductionsUtils.calculateWind(windEnergyDTO.getRadius(), weatherDTO.getWindSpeed(), density,
+                Double possibleValue = ProductionsUtils.calculateWind(windEnergyDTO.getRadius(), weatherDTO.getWindSpeed(),
                         windEnergyDTO.getEfficiency());
 
                 double currentValue = this.producerManipulation(producerManipulationMessage, possibleValue, windEnergyDTO.getCapacity());

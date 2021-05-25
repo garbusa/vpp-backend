@@ -303,12 +303,16 @@ public class ActionCatalogInfrastructureService {
         return differenceTimeseries;
     }
 
+    //Methode aus ActionCatalogInfrastructureService.java
     private Double getAverageCurrentProductionByProducerInTs(List<ProductionDTO> productions, DifferenceTimeseries ts, String producerId) {
         Double value = 0.;
         double counter = 0.;
+        // Iteriere alle Erzeugungsprognosen
         for (ProductionDTO production : productions) {
+            // Wenn der aktuelle Zeitstempel der Prognose innerhalb der Differenzzeitreihe ist
             if (ts.getTimestamps().contains(production.getStartTimestamp())) {
                 for (ProductionProducerDTO productionProducer : production.getProducers()) {
+                    // Summiere die Prognosewerte der aktuellen Erzeugungsanlage
                     if (productionProducer.getProducerId().equals(producerId)) {
                         value = value + productionProducer.getCurrentValue();
                         counter = counter + 1.;
@@ -316,6 +320,7 @@ public class ActionCatalogInfrastructureService {
                 }
             }
         }
+        // Berechne den Durchschnitt
         return value / counter;
     }
 
