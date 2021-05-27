@@ -7,6 +7,11 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * RabbitMQ Consumer
+ * Hört die Queue zwischen Maßnahmen- und Erzeugungs-Service ab und nimmt Nachrichten entgegen,
+ * wenn eine Maßnahmenabfrage gestartet ist
+ */
 @Component
 @Log4j2
 @RequiredArgsConstructor

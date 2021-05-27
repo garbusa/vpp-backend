@@ -18,10 +18,22 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * REST-Client für die Anfrage an ein Wetterdienst für die benötigte Berechnung von Windkraftanlagen
+ * https://openweathermap.org/api/one-call-api
+ */
 @Component
 @Log4j2
 public class WeatherRestClient {
 
+    /**
+     * Hole Wetterdaten für eine bestimmte Koordinate
+     *
+     * @param latitude  Breitengrad
+     * @param longitude Längengrad
+     * @return Liste von Wetterdaten, ein DTO bildet ein Zeitstempel ab
+     * @throws WeatherRestClientException e
+     */
     public List<WeatherDTO> getWeather(Double latitude, Double longitude) throws WeatherRestClientException {
         List<WeatherDTO> result = new ArrayList<>();
 
@@ -42,20 +54,33 @@ public class WeatherRestClient {
                     });
                 }
             } else {
-                throw new WeatherRestClientException("weather rest api request is not equal to 200");
+                throw new WeatherRestClientException("Es ist ein Fehler bei der Abfrage des Wetters geschehen");
             }
         } catch (RestClientException | JsonProcessingException e) {
-            throw new WeatherRestClientException("weather rest client exception while executing request", e);
+            throw new WeatherRestClientException("Es ist ein Fehler bei der Abfrage des Wetters geschehen", e);
         }
 
         return result;
     }
 
+    /**
+     * Gibt die REST-Ressource für eine spezifische Koordinate wieder
+     *
+     * @param longitude Längengrad
+     * @param latitude  Breitengrad
+     * @return REST-Ressourcen URL
+     */
     private String getBaseUrl(double longitude, double latitude) {
         return String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%f&lon=%f&exclude=minutely,daily,alerts&appid=c08f12d6278384104c9d1a15be86b1d7&units=metric",
                 latitude, longitude);
     }
 
+    /**
+     * Konvertierung von JSON in ein DTO aus der REST-Anfrage
+     *
+     * @param current JSON Daten
+     * @return Wetterdaten DTO
+     */
     private WeatherDTO setWeatherDTO(JsonNode current) {
         WeatherDTO currentWeather = new WeatherDTO();
         currentWeather.setTimestamp(ZonedDateTime.ofInstant(Instant.ofEpochSecond(current.get("dt").asLong()), ZoneId.of("GMT+2")));

@@ -4,6 +4,9 @@ import de.uol.vpp.production.domain.exceptions.ProductionException;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Siehe {@link de.uol.vpp.production.domain.entities.ProductionProducerEntity}
+ */
 @Getter
 @Setter
 public class ProductionProducerIdVO {

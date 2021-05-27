@@ -8,6 +8,11 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * RabbitMQ Sender
+ * Legt Nachrichten für den Maßnahmen-Service bereit, sobald die Erzeugungsprognose
+ * erfolgreich beendet wurde oder ein Fehler aufgetreten ist
+ */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -28,6 +33,12 @@ public class RabbitMQSender {
     private String loadToActionFailedKey;
 
 
+    /**
+     * Sendet Nachricht an den Maßnahmen-Service, wenn Erzeugungsprognose vollendet ist
+     *
+     * @param actionRequestId Id der Maßnahmenabfrage
+     * @param timestamp       aktueller Zeitstempel
+     */
     public void send(String actionRequestId, Long timestamp) {
         ProductionMessage productionMessage = new ProductionMessage();
         productionMessage.setActionRequestId(actionRequestId);
@@ -36,6 +47,11 @@ public class RabbitMQSender {
         log.info("Send productionMessage: {}, {}", productionMessage.getActionRequestId(), productionMessage.getTimestamp());
     }
 
+    /**
+     * Sendet Nachricht an den Maßnahmen-Service, wenn Erzeugungsprognose fehlerhaft ist
+     *
+     * @param actionRequestId Id der Maßnahmenabfrage
+     */
     public void sendFailed(String actionRequestId) {
         ActionFailedMessage failedMessage = new ActionFailedMessage();
         failedMessage.setActionRequestId(actionRequestId);

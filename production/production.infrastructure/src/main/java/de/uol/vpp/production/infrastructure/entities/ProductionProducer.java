@@ -5,6 +5,10 @@ import lombok.Data;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
+/**
+ * Datenbank-Entität des Erzeugungswert einer Erzeugungsanlage
+ * Siehe {@link de.uol.vpp.production.domain.entities.ProductionProducerEntity}
+ */
 @Entity
 @Data
 public class ProductionProducer {

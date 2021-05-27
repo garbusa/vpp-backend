@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * RabbitMQ Austauschobjekt
+ * Benachrichtigt die Maßnahmen-Service, wenn die Lastgenerierung erfolgreich beendet ist.
+ */
 @Data
 @NoArgsConstructor
 public class LoadMessage implements Serializable {

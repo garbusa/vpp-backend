@@ -3,9 +3,7 @@ package de.uol.vpp.action.application;
 import de.uol.vpp.action.application.dto.*;
 import de.uol.vpp.action.domain.aggregates.ActionRequestAggregate;
 import de.uol.vpp.action.domain.entities.*;
-import de.uol.vpp.action.domain.enums.GridManipulationTypeEnum;
-import de.uol.vpp.action.domain.enums.ProducerManipulationTypeEnum;
-import de.uol.vpp.action.domain.enums.StorageManipulationEnum;
+import de.uol.vpp.action.domain.enums.ManipulationTypeEnum;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ManipulationException;
 import de.uol.vpp.action.domain.valueobjects.*;
@@ -13,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
+/**
+ * Konvertierungsklasse für die Konvertierung zwischen Applikations- und Domänenschicht
+ */
 @Component
 public class ApplicationDomainConverter {
 
@@ -51,12 +52,12 @@ public class ApplicationDomainConverter {
         return dto;
     }
 
-    public ActionCatalogDTO toApplication(ActionCatalogEntity domainEntity) {
+    private ActionCatalogDTO toApplication(ActionCatalogEntity domainEntity) {
         ActionCatalogDTO dto = new ActionCatalogDTO();
         dto.setStartTimestamp(domainEntity.getStartTimestamp().getValue().toEpochSecond());
         dto.setEndTimestamp(domainEntity.getEndTimestamp().getValue().toEpochSecond());
         dto.setProblemType(domainEntity.getProblemType().getValue().toString());
-        dto.setCumulativeGap(domainEntity.getCumulativeGap().getValue());
+        dto.setAverageGap(domainEntity.getAverageGap().getValue());
         dto.setActions(new ArrayList<>());
         if (domainEntity.getActions() != null && domainEntity.getActions().size() > 0) {
             for (ActionEntity entity : domainEntity.getActions()) {
@@ -66,17 +67,7 @@ public class ApplicationDomainConverter {
         return dto;
     }
 
-    public ActionDTO toApplication(ActionEntity domainEntity) {
-        ActionDTO dto = new ActionDTO();
-        dto.setActionType(domainEntity.getActionType().getValue().toString());
-        dto.setProducerOrStorageId(domainEntity.getProducerOrStorageId().getValue());
-        dto.setHours(domainEntity.getHours().getValue());
-        dto.setIsStorage(domainEntity.getIsStorage().getValue());
-        dto.setActionValue(domainEntity.getActionValue().getValue());
-        return dto;
-    }
-
-    public ProducerManipulationDTO toApplication(ProducerManipulationEntity domainEntity) {
+    private ProducerManipulationDTO toApplication(ProducerManipulationEntity domainEntity) {
         ProducerManipulationDTO dto = new ProducerManipulationDTO();
         dto.setStartTimestamp(domainEntity.getStartEndTimestamp().getStart().toEpochSecond());
         dto.setEndTimestamp(domainEntity.getStartEndTimestamp().getEnd().toEpochSecond());
@@ -86,7 +77,7 @@ public class ApplicationDomainConverter {
         return dto;
     }
 
-    public StorageManipulationDTO toApplication(StorageManipulationEntity domainEntity) {
+    private StorageManipulationDTO toApplication(StorageManipulationEntity domainEntity) {
         StorageManipulationDTO dto = new StorageManipulationDTO();
         dto.setStartTimestamp(domainEntity.getStartEndTimestamp().getStart().toEpochSecond());
         dto.setEndTimestamp(domainEntity.getStartEndTimestamp().getEnd().toEpochSecond());
@@ -103,12 +94,22 @@ public class ApplicationDomainConverter {
         return dto;
     }
 
-    public GridManipulationDTO toApplication(GridManipulationEntity domainEntity) {
+    private GridManipulationDTO toApplication(GridManipulationEntity domainEntity) {
         GridManipulationDTO dto = new GridManipulationDTO();
         dto.setStartTimestamp(domainEntity.getStartEndTimestamp().getStart().toEpochSecond());
         dto.setEndTimestamp(domainEntity.getStartEndTimestamp().getEnd().toEpochSecond());
         dto.setType(domainEntity.getType().getValue().toString());
         dto.setRatedPower(domainEntity.getRatedPower().getValue());
+        return dto;
+    }
+
+    private ActionDTO toApplication(ActionEntity domainEntity) {
+        ActionDTO dto = new ActionDTO();
+        dto.setActionType(domainEntity.getActionType().getValue().toString());
+        dto.setProducerOrStorageId(domainEntity.getProducerOrStorageId().getValue());
+        dto.setHours(domainEntity.getHours().getValue());
+        dto.setIsStorage(domainEntity.getIsStorage().getValue());
+        dto.setActionValue(domainEntity.getActionValue().getValue());
         return dto;
     }
 
@@ -146,22 +147,19 @@ public class ApplicationDomainConverter {
         return domainEntity;
     }
 
-    public ProducerManipulationEntity toDomain(ProducerManipulationDTO dto, String actionRequestId) throws ManipulationException {
+    private ProducerManipulationEntity toDomain(ProducerManipulationDTO dto, String actionRequestId) throws ManipulationException, ActionException {
         ProducerManipulationEntity domainEntity = new ProducerManipulationEntity();
-        domainEntity.setActionRequestId(new ProducerManipulationActionRequestIdVO(actionRequestId));
-        domainEntity.setStartEndTimestamp(new ProducerManipulationStartEndTimestampVO(dto.getStartTimestamp(), dto.getEndTimestamp()));
+        this.setManipulationProperties(domainEntity, actionRequestId, dto.getStartTimestamp(), dto.getEndTimestamp(), dto.getType());
         domainEntity.setProducerId(new ProducerManipulationProducerIdVO(dto.getProducerId()));
-        domainEntity.setType(new ProducerManipulationTypeVO(ProducerManipulationTypeEnum.valueOf(dto.getType())));
         domainEntity.setCapacity(new ProducerManipulationCapacityVO(dto.getCapacity()));
         return domainEntity;
     }
 
-    public StorageManipulationEntity toDomain(StorageManipulationDTO dto, String actionRequestId) throws ManipulationException {
+    @SuppressWarnings("Duplicates")
+    private StorageManipulationEntity toDomain(StorageManipulationDTO dto, String actionRequestId) throws ManipulationException, ActionException {
         StorageManipulationEntity domainEntity = new StorageManipulationEntity();
-        domainEntity.setActionRequestId(new StorageManipulationActionRequestIdVO(actionRequestId));
-        domainEntity.setStartEndTimestamp(new StorageManipulationStartEndTimestampVO(dto.getStartTimestamp(), dto.getEndTimestamp()));
+        this.setManipulationProperties(domainEntity, actionRequestId, dto.getStartTimestamp(), dto.getEndTimestamp(), dto.getType());
         domainEntity.setStorageId(new StorageManipulationStorageIdVO(dto.getStorageId()));
-        domainEntity.setType(new StorageManipulationTypeVO(StorageManipulationEnum.valueOf(dto.getType())));
         domainEntity.setHours(new StorageManipulationHoursVO(0.));
         if (dto.getHours() != null && dto.getHours() > 0.) {
             domainEntity.setHours(new StorageManipulationHoursVO(dto.getHours()));
@@ -173,13 +171,17 @@ public class ApplicationDomainConverter {
         return domainEntity;
     }
 
-    public GridManipulationEntity toDomain(GridManipulationDTO dto, String actionRequestId) throws ManipulationException {
+    private GridManipulationEntity toDomain(GridManipulationDTO dto, String actionRequestId) throws ManipulationException, ActionException {
         GridManipulationEntity domainEntity = new GridManipulationEntity();
-        domainEntity.setActionRequestId(new GridManipulationActionRequestIdVO(actionRequestId));
-        domainEntity.setStartEndTimestamp(new GridManipulationStartEndTimestampVO(dto.getStartTimestamp(), dto.getEndTimestamp()));
-        domainEntity.setType(new GridManipulationTypeVO(GridManipulationTypeEnum.valueOf(dto.getType())));
+        this.setManipulationProperties(domainEntity, actionRequestId, dto.getStartTimestamp(), dto.getEndTimestamp(), dto.getType());
         domainEntity.setRatedPower(new GridManipulationRatedPowerVO(dto.getRatedPower()));
         return domainEntity;
+    }
+
+    private void setManipulationProperties(AbstractManipulationEntity domainEntity, String actionRequestId, Long start, Long end, String type) throws ManipulationException, ActionException {
+        domainEntity.setActionRequestId(new ActionRequestIdVO(actionRequestId));
+        domainEntity.setStartEndTimestamp(new ManipulationStartEndTimestampVO(start, end));
+        domainEntity.setType(new ManipulationTypeVO(ManipulationTypeEnum.valueOf(type)));
     }
 
 

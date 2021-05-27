@@ -6,6 +6,7 @@ import de.uol.vpp.action.domain.exceptions.ActionException;
 import de.uol.vpp.action.domain.exceptions.ManipulationException;
 import de.uol.vpp.action.domain.valueobjects.*;
 import de.uol.vpp.action.infrastructure.entities.*;
+import de.uol.vpp.action.infrastructure.entities.embedded.ManipulationPrimaryKey;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -49,13 +50,13 @@ public class InfrastructureDomainConverter {
         return domainEntity;
     }
 
-    public ActionCatalogEntity toDomain(ActionCatalog jpaEntity) throws ActionException {
+    private ActionCatalogEntity toDomain(ActionCatalog jpaEntity) throws ActionException {
         ActionCatalogEntity domainEntity = new ActionCatalogEntity();
         domainEntity.setActionRequestIdVO(new ActionRequestIdVO(jpaEntity.getActionCatalogPrimaryKey().getActionRequest().getActionRequestId()));
         domainEntity.setStartTimestamp(new ActionCatalogStartTimestampVO(jpaEntity.getActionCatalogPrimaryKey().getStartTimestamp().toEpochSecond()));
         domainEntity.setEndTimestamp(new ActionCatalogEndTimestampVO(jpaEntity.getActionCatalogPrimaryKey().getEndTimestamp().toEpochSecond()));
         domainEntity.setProblemType(new ActionCatalogProblemTypeVO(jpaEntity.getProblemType()));
-        domainEntity.setCumulativeGap(new ActionCatalogCumulativeGapVO(jpaEntity.getCumulativeGap()));
+        domainEntity.setAverageGap(new ActionCatalogAverageGapVO(jpaEntity.getAverageGap()));
         domainEntity.setActions(new ArrayList<>());
         if (jpaEntity.getActions() != null && jpaEntity.getActions().size() > 0) {
             for (Action action : jpaEntity.getActions()) {
@@ -65,35 +66,38 @@ public class InfrastructureDomainConverter {
         return domainEntity;
     }
 
-    private ProducerManipulationEntity toDomain(ProducerManipulation jpaEntity) throws ManipulationException {
+    private ProducerManipulationEntity toDomain(ProducerManipulation jpaEntity) throws ManipulationException, ActionException {
         ProducerManipulationEntity domainEntity = new ProducerManipulationEntity();
         domainEntity.setActionRequestId(
-                new ProducerManipulationActionRequestIdVO(
-                        jpaEntity.getProducerManipulationPrimaryKey().getActionRequest().getActionRequestId()
+                new ActionRequestIdVO(
+                        jpaEntity.getProducerManipulationPrimaryKey().getManipulationPrimaryKey().getActionRequest().getActionRequestId()
                 )
         );
-        domainEntity.setStartEndTimestamp(new ProducerManipulationStartEndTimestampVO(
-                jpaEntity.getProducerManipulationPrimaryKey().getStartTimestamp().toEpochSecond(),
-                jpaEntity.getProducerManipulationPrimaryKey().getEndTimestamp().toEpochSecond()
+        domainEntity.setStartEndTimestamp(new ManipulationStartEndTimestampVO(
+                jpaEntity.getProducerManipulationPrimaryKey().getManipulationPrimaryKey().getStartTimestamp().toEpochSecond(),
+                jpaEntity.getProducerManipulationPrimaryKey().getManipulationPrimaryKey().getEndTimestamp().toEpochSecond()
         ));
+        domainEntity.setType(new ManipulationTypeVO(jpaEntity.getManipulationType()));
+
         domainEntity.setProducerId(new ProducerManipulationProducerIdVO(
                 jpaEntity.getProducerManipulationPrimaryKey().getProducerId()
         ));
-        domainEntity.setType(new ProducerManipulationTypeVO(jpaEntity.getManipulationType()));
         domainEntity.setCapacity(new ProducerManipulationCapacityVO(jpaEntity.getCapacity()));
         return domainEntity;
     }
 
-    private StorageManipulationEntity toDomain(StorageManipulation jpaEntity) throws ManipulationException {
+
+    @SuppressWarnings("Duplicates")
+    private StorageManipulationEntity toDomain(StorageManipulation jpaEntity) throws ManipulationException, ActionException {
         StorageManipulationEntity domainEntity = new StorageManipulationEntity();
         domainEntity.setActionRequestId(
-                new StorageManipulationActionRequestIdVO(
-                        jpaEntity.getStorageManipulationPrimaryKey().getActionRequest().getActionRequestId()
+                new ActionRequestIdVO(
+                        jpaEntity.getStorageManipulationPrimaryKey().getManipulationPrimaryKey().getActionRequest().getActionRequestId()
                 )
         );
-        domainEntity.setStartEndTimestamp(new StorageManipulationStartEndTimestampVO(
-                jpaEntity.getStorageManipulationPrimaryKey().getStartTimestamp().toEpochSecond(),
-                jpaEntity.getStorageManipulationPrimaryKey().getEndTimestamp().toEpochSecond()
+        domainEntity.setStartEndTimestamp(new ManipulationStartEndTimestampVO(
+                jpaEntity.getStorageManipulationPrimaryKey().getManipulationPrimaryKey().getStartTimestamp().toEpochSecond(),
+                jpaEntity.getStorageManipulationPrimaryKey().getManipulationPrimaryKey().getEndTimestamp().toEpochSecond()
         ));
         domainEntity.setStorageId(new StorageManipulationStorageIdVO(
                 jpaEntity.getStorageManipulationPrimaryKey().getStorageId()
@@ -106,27 +110,27 @@ public class InfrastructureDomainConverter {
         if (jpaEntity.getRatedPower() != null && jpaEntity.getRatedPower() > 0.) {
             domainEntity.setRatedPower(new StorageManipulationRatedPowerVO(jpaEntity.getRatedPower()));
         }
-        domainEntity.setType(new StorageManipulationTypeVO(jpaEntity.getManipulationType()));
+        domainEntity.setType(new ManipulationTypeVO(jpaEntity.getManipulationType()));
         return domainEntity;
     }
 
-    private GridManipulationEntity toDomain(GridManipulation jpaEntity) throws ManipulationException {
+    private GridManipulationEntity toDomain(GridManipulation jpaEntity) throws ManipulationException, ActionException {
         GridManipulationEntity domainEntity = new GridManipulationEntity();
         domainEntity.setActionRequestId(
-                new GridManipulationActionRequestIdVO(
-                        jpaEntity.getGridManipulationPrimaryKey().getActionRequest().getActionRequestId()
+                new ActionRequestIdVO(
+                        jpaEntity.getManipulationPrimaryKey().getActionRequest().getActionRequestId()
                 )
         );
-        domainEntity.setStartEndTimestamp(new GridManipulationStartEndTimestampVO(
-                jpaEntity.getGridManipulationPrimaryKey().getStartTimestamp().toEpochSecond(),
-                jpaEntity.getGridManipulationPrimaryKey().getEndTimestamp().toEpochSecond()
+        domainEntity.setStartEndTimestamp(new ManipulationStartEndTimestampVO(
+                jpaEntity.getManipulationPrimaryKey().getStartTimestamp().toEpochSecond(),
+                jpaEntity.getManipulationPrimaryKey().getEndTimestamp().toEpochSecond()
         ));
-        domainEntity.setType(new GridManipulationTypeVO(jpaEntity.getManipulationType()));
+        domainEntity.setType(new ManipulationTypeVO(jpaEntity.getManipulationType()));
         domainEntity.setRatedPower(new GridManipulationRatedPowerVO(jpaEntity.getRatedPower()));
         return domainEntity;
     }
 
-    public ActionEntity toDomain(Action jpaEntity) throws ActionException {
+    private ActionEntity toDomain(Action jpaEntity) throws ActionException {
         ActionEntity domainEntity = new ActionEntity();
         domainEntity.setActionRequestId(new ActionRequestIdVO(
                 jpaEntity.getActionPrimaryKey().getActionCatalog().getActionCatalogPrimaryKey().getActionRequest().getActionRequestId())
@@ -182,7 +186,7 @@ public class InfrastructureDomainConverter {
         return jpaEntity;
     }
 
-    public ActionCatalog toInfrastructure(ActionCatalogEntity domainEntity, ActionRequest actionRequestJpa) {
+    private ActionCatalog toInfrastructure(ActionCatalogEntity domainEntity, ActionRequest actionRequestJpa) {
         ActionCatalog jpaEntity = new ActionCatalog();
         jpaEntity.setActionCatalogPrimaryKey(
                 new ActionCatalog.ActionCatalogPrimaryKey(actionRequestJpa,
@@ -190,7 +194,7 @@ public class InfrastructureDomainConverter {
                         domainEntity.getEndTimestamp().getValue())
         );
         jpaEntity.setProblemType(domainEntity.getProblemType().getValue());
-        jpaEntity.setCumulativeGap(domainEntity.getCumulativeGap().getValue());
+        jpaEntity.setAverageGap(domainEntity.getAverageGap().getValue());
         jpaEntity.setActions(new HashSet<>());
         if (domainEntity.getActions() != null && domainEntity.getActions().size() > 0) {
             for (ActionEntity action : domainEntity.getActions()) {
@@ -205,9 +209,11 @@ public class InfrastructureDomainConverter {
         ProducerManipulation jpaEntity = new ProducerManipulation();
         jpaEntity.setProducerManipulationPrimaryKey(
                 new ProducerManipulation.ProducerManipulationPrimaryKey(
-                        actionRequest,
-                        domainEntity.getStartEndTimestamp().getStart(),
-                        domainEntity.getStartEndTimestamp().getEnd(),
+                        new ManipulationPrimaryKey(
+                                actionRequest,
+                                domainEntity.getStartEndTimestamp().getStart(),
+                                domainEntity.getStartEndTimestamp().getEnd()
+                        ),
                         domainEntity.getProducerId().getValue()
                 )
         );
@@ -220,9 +226,11 @@ public class InfrastructureDomainConverter {
         StorageManipulation jpaEntity = new StorageManipulation();
         jpaEntity.setStorageManipulationPrimaryKey(
                 new StorageManipulation.StorageManipulationPrimaryKey(
-                        actionRequest,
-                        domainEntity.getStartEndTimestamp().getStart(),
-                        domainEntity.getStartEndTimestamp().getEnd(),
+                        new ManipulationPrimaryKey(
+                                actionRequest,
+                                domainEntity.getStartEndTimestamp().getStart(),
+                                domainEntity.getStartEndTimestamp().getEnd()
+                        ),
                         domainEntity.getStorageId().getValue()
                 )
         );
@@ -240,8 +248,8 @@ public class InfrastructureDomainConverter {
 
     private GridManipulation toInfrastructure(GridManipulationEntity domainEntity, ActionRequest actionRequest) {
         GridManipulation jpaEntity = new GridManipulation();
-        jpaEntity.setGridManipulationPrimaryKey(
-                new GridManipulation.GridManipulationPrimaryKey(
+        jpaEntity.setManipulationPrimaryKey(
+                new ManipulationPrimaryKey(
                         actionRequest,
                         domainEntity.getStartEndTimestamp().getStart(),
                         domainEntity.getStartEndTimestamp().getEnd()

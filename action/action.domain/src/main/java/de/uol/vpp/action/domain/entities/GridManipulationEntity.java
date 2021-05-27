@@ -1,15 +1,17 @@
 package de.uol.vpp.action.domain.entities;
 
-import de.uol.vpp.action.domain.valueobjects.GridManipulationActionRequestIdVO;
 import de.uol.vpp.action.domain.valueobjects.GridManipulationRatedPowerVO;
-import de.uol.vpp.action.domain.valueobjects.GridManipulationStartEndTimestampVO;
-import de.uol.vpp.action.domain.valueobjects.GridManipulationTypeVO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Domänen-Entität für Stromnetzmanipulationen
+ */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class GridManipulationEntity {
-    private GridManipulationActionRequestIdVO actionRequestId;
-    private GridManipulationStartEndTimestampVO startEndTimestamp;
-    private GridManipulationTypeVO type;
+public class GridManipulationEntity extends AbstractManipulationEntity {
+    /**
+     * Leistung in kW, die manipuliert wird
+     */
     private GridManipulationRatedPowerVO ratedPower;
 }

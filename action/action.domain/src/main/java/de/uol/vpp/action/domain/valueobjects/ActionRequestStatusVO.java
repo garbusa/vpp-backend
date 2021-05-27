@@ -4,6 +4,9 @@ import de.uol.vpp.action.domain.enums.StatusEnum;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import lombok.Getter;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.aggregates.ActionRequestAggregate}
+ */
 @Getter
 public class ActionRequestStatusVO {
     private StatusEnum value;

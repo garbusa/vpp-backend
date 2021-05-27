@@ -7,6 +7,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
+/**
+ * Beschreibt welche REST-Ressourcen erlaubt sind
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(

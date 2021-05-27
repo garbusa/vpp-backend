@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.aggregates.ActionRequestAggregate}
+ */
 @Getter
 public class ActionRequestTimestampVO {
     private ZonedDateTime value;

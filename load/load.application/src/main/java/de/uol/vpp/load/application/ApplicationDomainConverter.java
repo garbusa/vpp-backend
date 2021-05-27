@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
+/**
+ * Konvertierungsklasse für die Konvertierung zwischen Objekten der Domänen- und Applikationsschicht.
+ */
 @Component
 public class ApplicationDomainConverter {
 

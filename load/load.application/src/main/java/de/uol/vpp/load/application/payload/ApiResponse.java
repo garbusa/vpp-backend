@@ -1,5 +1,9 @@
 package de.uol.vpp.load.application.payload;
 
+/**
+ * Anwortobjekt für Benutzeroberfläche,
+ * beinhaltet Status über den Erfolg der Anfrage, mit Nachricht und eventuell Daten die abgefragt wurden.
+ */
 public class ApiResponse {
     private Boolean success;
     private Boolean returnBack;

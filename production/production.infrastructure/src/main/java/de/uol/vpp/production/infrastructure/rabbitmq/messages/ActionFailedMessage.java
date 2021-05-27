@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * RabbitMQ Austauschobjekt
+ * Benachrichtigt Maßnahmen-Service, wenn etwas bei der Erzeugungsprognose fehlgeschlagen ist
+ */
 @Data
 @NoArgsConstructor
 public class ActionFailedMessage implements Serializable {

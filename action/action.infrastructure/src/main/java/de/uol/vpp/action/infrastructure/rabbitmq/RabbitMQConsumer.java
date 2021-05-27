@@ -6,8 +6,9 @@ import de.uol.vpp.action.domain.exceptions.ActionRepositoryException;
 import de.uol.vpp.action.domain.repositories.IActionRequestRepository;
 import de.uol.vpp.action.domain.valueobjects.ActionRequestIdVO;
 import de.uol.vpp.action.infrastructure.algorithm.ActionCatalogInfrastructureService;
-import de.uol.vpp.action.infrastructure.rabbitmq.messages.ActionFailedMessage;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.ActionRequestFailedMessage;
 import de.uol.vpp.action.infrastructure.rabbitmq.messages.LoadMessage;
+import de.uol.vpp.action.infrastructure.rabbitmq.messages.ProductionMessage;
 import de.uol.vpp.action.infrastructure.rest.exceptions.LoadRestClientException;
 import de.uol.vpp.action.infrastructure.rest.exceptions.MasterdataRestClientException;
 import de.uol.vpp.action.infrastructure.rest.exceptions.ProductionRestClientException;
@@ -21,6 +22,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Listener für RabbitMQ Queues, empfängt die erfolgreiche Generierung der Last- und Erzeugungswerte
+ */
 @Component
 @Log4j2
 @RequiredArgsConstructor
@@ -31,9 +35,9 @@ public class RabbitMQConsumer {
     private final Map<String, Integer> actionRequestIdCounterMap = new HashMap<>();
 
     @RabbitListener(queues = "${vpp.rabbitmq.queue.load.to.action.failed}")
-    public void receivedActionFailedMessage(ActionFailedMessage actionFailedMessage) {
-        log.info("receivedActionFailedMessage {}", actionFailedMessage.getActionRequestId());
-        actionCatalogInfrastructureService.actionFailed(actionFailedMessage.getActionRequestId());
+    public void receivedActionFailedMessage(ActionRequestFailedMessage actionRequestFailedMessage) {
+        log.info("receivedActionFailedMessage {}", actionRequestFailedMessage.getActionRequestId());
+        actionCatalogInfrastructureService.actionFailed(actionRequestFailedMessage.getActionRequestId());
     }
 
     @RabbitListener(queues = "${vpp.rabbitmq.queue.load.to.action}")

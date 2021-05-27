@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementiertes Repository der Schnittstellendefinition aus der Domänenschicht.
+ * Ist für die Kommunikation mit dem JPA-Repository zuständig.
+ */
 @Service
 @RequiredArgsConstructor
 public class ActionRequestRepositoryImpl implements IActionRequestRepository {
@@ -35,7 +39,6 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
     private final RabbitMQSender sender;
     private final LoadRestClient loadRestClient;
     private final ProductionRestClient productionRestClient;
-
 
     @Override
     public List<ActionRequestAggregate> getAllActionRequestsByVppId(ActionRequestVirtualPowerPlantIdVO virtualPowerPlantId) throws ActionRepositoryException {
@@ -82,6 +85,12 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
         }
     }
 
+    /**
+     * Konvertiert eine Datenbank-Entität in eine Message-Entität für die RabbitMQ
+     *
+     * @param saved gespeicherte Datenbank-Entität
+     * @return Message für die Queue
+     */
     private ActionRequestMessage toMessage(ActionRequest saved) {
         ActionRequestMessage actionRequestMessage = new ActionRequestMessage();
         actionRequestMessage.setActionRequestId(saved.getActionRequestId());
@@ -91,8 +100,8 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
         actionRequestMessage.setProducerManipulations(saved.getProducerManipulations().stream().map(
                 (manipulation) -> {
                     ProducerManipulationMessage manipulationMessage = new ProducerManipulationMessage();
-                    manipulationMessage.setStartTimestamp(manipulation.getProducerManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
-                    manipulationMessage.setEndTimestamp(manipulation.getProducerManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
+                    manipulationMessage.setStartTimestamp(manipulation.getProducerManipulationPrimaryKey().getManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
+                    manipulationMessage.setEndTimestamp(manipulation.getProducerManipulationPrimaryKey().getManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
                     manipulationMessage.setProducerId(manipulation.getProducerManipulationPrimaryKey().getProducerId());
                     manipulationMessage.setType(manipulation.getManipulationType().toString());
                     manipulationMessage.setCapacity(manipulation.getCapacity());
@@ -102,8 +111,8 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
         actionRequestMessage.setStorageManipulations(saved.getStorageManipulations().stream().map(
                 (manipulation) -> {
                     StorageManipulationMessage manipulationMessage = new StorageManipulationMessage();
-                    manipulationMessage.setStartTimestamp(manipulation.getStorageManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
-                    manipulationMessage.setEndTimestamp(manipulation.getStorageManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
+                    manipulationMessage.setStartTimestamp(manipulation.getStorageManipulationPrimaryKey().getManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
+                    manipulationMessage.setEndTimestamp(manipulation.getStorageManipulationPrimaryKey().getManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
                     manipulationMessage.setStorageId(manipulation.getStorageManipulationPrimaryKey().getStorageId());
                     manipulationMessage.setType(manipulation.getManipulationType().toString());
                     manipulationMessage.setHours(manipulation.getHours());
@@ -114,8 +123,8 @@ public class ActionRequestRepositoryImpl implements IActionRequestRepository {
         actionRequestMessage.setGridManipulations(saved.getGridManipulations().stream().map(
                 (manipulation) -> {
                     GridManipulationMessage manipulationMessage = new GridManipulationMessage();
-                    manipulationMessage.setStartTimestamp(manipulation.getGridManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
-                    manipulationMessage.setEndTimestamp(manipulation.getGridManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
+                    manipulationMessage.setStartTimestamp(manipulation.getManipulationPrimaryKey().getStartTimestamp().toEpochSecond());
+                    manipulationMessage.setEndTimestamp(manipulation.getManipulationPrimaryKey().getEndTimestamp().toEpochSecond());
                     manipulationMessage.setType(manipulation.getManipulationType().toString());
                     manipulationMessage.setRatedCapacity(manipulation.getRatedPower());
                     return manipulationMessage;

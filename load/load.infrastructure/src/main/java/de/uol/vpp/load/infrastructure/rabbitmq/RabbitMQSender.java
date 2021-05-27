@@ -8,6 +8,10 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * RabbitMQ Sender
+ * Benachrichtigt Maßnahmen-Service, wenn die Lastgenerierung erfolgreich beendet ist oder ein Fehler aufgetreten ist.
+ */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -27,6 +31,12 @@ public class RabbitMQSender {
     @Value("${vpp.rabbitmq.key.load.to.action.failed}")
     private String loadToActionFailedKey;
 
+    /**
+     * Benachrichtigt Maßnahmen-Service, dass die Lastprognose erstellt ist
+     *
+     * @param actionRequestId Id der Maßnahmenabfrage
+     * @param timestamp       Zeitstempel
+     */
     public void send(String actionRequestId, Long timestamp) {
         LoadMessage loadMessage = new LoadMessage();
         loadMessage.setActionRequestId(actionRequestId);
@@ -35,6 +45,11 @@ public class RabbitMQSender {
         log.info("Send loadMessage: {}, {}", loadMessage.getActionRequestId(), loadMessage.getTimestamp());
     }
 
+    /**
+     * Benachrichtigt Maßnahmen-Service, dass ein Fehler in der Generierung der Lastprognose aufgetreten ist.
+     *
+     * @param actionRequestId Id der Maßnahmenabfrage
+     */
     public void sendFailed(String actionRequestId) {
         ActionFailedMessage failedMessage = new ActionFailedMessage();
         failedMessage.setActionRequestId(actionRequestId);

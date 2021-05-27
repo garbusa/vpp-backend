@@ -3,6 +3,9 @@ package de.uol.vpp.production.domain.valueobjects;
 import de.uol.vpp.production.domain.exceptions.ProductionException;
 import lombok.Getter;
 
+/**
+ * Siehe {@link de.uol.vpp.production.domain.aggregates.ProductionAggregate}
+ */
 @Getter
 public class ProductionActionRequestIdVO {
 

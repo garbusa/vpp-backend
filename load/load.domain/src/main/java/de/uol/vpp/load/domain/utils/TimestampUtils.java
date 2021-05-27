@@ -4,8 +4,19 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+/**
+ * Util-Klasse für die Erstellung eines Zeitstempels mit einer Zone
+ */
 public class TimestampUtils {
 
+    /**
+     * Erstellt ein Zeitstempel mit einer Berliner Zeitzone und berücksichtigt,
+     * ob der Zeitstempel auf eine viertelstunde abgerundet werden soll.
+     *
+     * @param ts        Zeitstempel
+     * @param isQuarter soll abgerundet werden?
+     * @return ZonedDateTime
+     */
     public static ZonedDateTime toBerlinTimestamp(Long ts, boolean isQuarter) {
         ZoneId zone = ZoneId.of("Europe/Berlin");
         ZonedDateTime zdt = Instant.ofEpochSecond(ts).atZone(zone);

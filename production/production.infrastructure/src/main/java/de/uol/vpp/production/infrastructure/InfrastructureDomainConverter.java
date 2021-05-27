@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Konvertierungsklasse zwischen der Infrastruktur- und Domänenschicht
+ */
 @Component
 public class InfrastructureDomainConverter {
 
@@ -58,7 +61,7 @@ public class InfrastructureDomainConverter {
         return domainEntity;
     }
 
-    public ProductionProducerEntity toDomain(ProductionProducer jpaEntity) throws ProductionException {
+    private ProductionProducerEntity toDomain(ProductionProducer jpaEntity) throws ProductionException {
         ProductionProducerEntity domainEntity = new ProductionProducerEntity();
         domainEntity.setProducerId(new ProductionProducerIdVO(jpaEntity.getProducerId()));
         domainEntity.setProductionType(new ProductionProducerTypeVO(jpaEntity.getProducerType()));

@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * RabbitMQ Austauschobjekt
+ * Ist Teil der ActionRequestMessage {@link ActionRequestMessage}
+ */
 @Data
 @NoArgsConstructor
 public class StorageManipulationMessage implements Serializable {

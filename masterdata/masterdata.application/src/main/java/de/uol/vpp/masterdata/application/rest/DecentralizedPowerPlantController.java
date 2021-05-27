@@ -4,7 +4,7 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.DecentralizedPowerPlantDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
-import de.uol.vpp.masterdata.domain.services.DecentralizedPowerPlantServiceException;
+import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantServiceException;
 import de.uol.vpp.masterdata.domain.services.IDecentralizedPowerPlantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Ressource für dezentrale Kraftwerke
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/dpp", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,6 +26,12 @@ public class DecentralizedPowerPlantController {
     private final IDecentralizedPowerPlantService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Holt alle DKs aus einem VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return Liste aller DK
+     */
     @GetMapping(path = "/by/vpp/{virtualPowerPlantId}")
     public ResponseEntity<?> getAllDecentralizedPowerPlantsByVirtualPowerPlantId(@PathVariable String virtualPowerPlantId) {
         try {
@@ -42,6 +51,12 @@ public class DecentralizedPowerPlantController {
         }
     }
 
+    /**
+     * Holt ein spezifisches DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return DK
+     */
     @GetMapping(path = "/{decentralizedPowerPlantId}")
     public ResponseEntity<?> getOneDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
         try {
@@ -60,6 +75,13 @@ public class DecentralizedPowerPlantController {
         }
     }
 
+    /**
+     * Persisierung eines DK
+     *
+     * @param dto                 zu speichernde DK
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping(path = "/by/vpp/{virtualPowerPlantId}")
     public ResponseEntity<?> saveDecentralizedPowerPlant(@RequestBody DecentralizedPowerPlantDTO dto,
                                                          @PathVariable String virtualPowerPlantId) {
@@ -78,6 +100,13 @@ public class DecentralizedPowerPlantController {
         }
     }
 
+    /**
+     * Löscht ein DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @param virtualPowerPlantId       Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{decentralizedPowerPlantId}")
     public ResponseEntity<?> deleteDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId, @RequestParam String virtualPowerPlantId) {
         try {
@@ -94,6 +123,14 @@ public class DecentralizedPowerPlantController {
         }
     }
 
+    /**
+     * Aktualisiert ein existierendes DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @param newDto                    aktualisierte Daten
+     * @param virtualPowerPlantId       Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{decentralizedPowerPlantId}")
     public ResponseEntity<?> updateDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId, @RequestBody DecentralizedPowerPlantDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {

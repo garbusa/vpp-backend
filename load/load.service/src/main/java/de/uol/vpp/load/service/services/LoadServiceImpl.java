@@ -7,18 +7,20 @@ import de.uol.vpp.load.domain.exceptions.LoadServiceException;
 import de.uol.vpp.load.domain.repositories.ILoadRepository;
 import de.uol.vpp.load.domain.services.ILoadService;
 import de.uol.vpp.load.domain.valueobjects.LoadActionRequestIdVO;
-import de.uol.vpp.load.infrastructure.scheduler.LoadScheduler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Implementierung der Lastaggregat-Service Schnittstellendefinition
+ * Siehe {@link ILoadService}
+ */
 @Service
 @RequiredArgsConstructor
 public class LoadServiceImpl implements ILoadService {
 
     private final ILoadRepository repository;
-    private final LoadScheduler scheduler;
 
     @Override
     public List<LoadAggregate> getLoadsByActionRequestId(String actionRequestId) throws LoadServiceException {

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
+/**
+ * Konvertierungsklasse zwischen Applikations- und Domänenschicht
+ */
 @Component
 public class ApplicationDomainConverter {
 
@@ -20,7 +23,7 @@ public class ApplicationDomainConverter {
         return dto;
     }
 
-    public ProductionProducerDTO toApplication(ProductionProducerEntity domainEntity) {
+    private ProductionProducerDTO toApplication(ProductionProducerEntity domainEntity) {
         ProductionProducerDTO dto = new ProductionProducerDTO();
         dto.setProducerId(domainEntity.getProducerId().getValue());
         dto.setProducerType(domainEntity.getProductionType().getValue());

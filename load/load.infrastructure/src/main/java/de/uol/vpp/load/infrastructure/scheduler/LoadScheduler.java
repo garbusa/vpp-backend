@@ -25,6 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Diese Klasse ist für die Erstellung der Lasten zuständig.
+ * Hier für wird das Standardlastprofil H0 des BDEW genommen und anhand vom viertelstündigen Zeitpunkt und der
+ * aktuellen Jahreszeit die passende Last in Watt entnommen.
+ */
 @Component
 @Log4j2
 public class LoadScheduler {
@@ -37,6 +42,14 @@ public class LoadScheduler {
     private final RabbitMQSender rabbitMQSender;
     private HSSFSheet sheet;
 
+    /**
+     * Liest Standardlastprofil aus und setzt es in ein von Java lesbares Sheet (apache poi)
+     *
+     * @param masterdataRestClient    Rest-Client zum Daten-Service
+     * @param loadRepository          Lastaggregat-Repository
+     * @param loadHouseholdRepository Hauhaltslast-Repository
+     * @param rabbitMQSender          RabbitMQ Producer
+     */
     public LoadScheduler(MasterdataRestClient masterdataRestClient,
                          ILoadRepository loadRepository,
                          ILoadHouseholdRepository loadHouseholdRepository,
@@ -54,14 +67,15 @@ public class LoadScheduler {
         }
     }
 
-    private int getRowIndex(ZonedDateTime date) {
-        int key = (date.getHour() * 100) + date.getMinute();
-        return createTimeRowMap().get(key);
-    }
-
-
+    /**
+     * Erstellt im viertelstunden Intervall (0 bis 96) eine Tagesprognose der Last durch das Standardlastprofil H0
+     *
+     * @param actionRequestId Maßnahmenabfrage
+     * @param vppId           Id des VK
+     */
     public void createLoad(String actionRequestId, String vppId) {
         try {
+            // Erstelle aktuellen Zeitstempel
             ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
             ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
                     currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
@@ -69,13 +83,14 @@ public class LoadScheduler {
                     0, 0, ZoneId.of("GMT+2")
             );
             if (masterdataRestClient.isActiveVpp(vppId)) {
+                // Erstelle 97 Lasten (24 Stunden * 4 = 97 Viertelstunden)
                 for (int forecastIndex = 0; forecastIndex <= LoadScheduler.FORECAST_PERIODS; forecastIndex++) {
                     this.saveLoad(currentWithoutSeconds, actionRequestId, vppId);
                     currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15L);
                 }
                 rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
             } else {
-                //Send error
+                //Sende Fehler an Maßnahmen-Service
                 rabbitMQSender.sendFailed(actionRequestId);
             }
         } catch (Exception e) {
@@ -85,10 +100,23 @@ public class LoadScheduler {
 
     }
 
-
+    /**
+     * Erstellt für aktuellen Zeitstempel alle Lasten für jeden Haushalt und multipliziert
+     * den Watt-Wert mit der Anzahl der Haushaltsmitglieder
+     *
+     * @param currentZDT      viertelstündiger Zeitstempel
+     * @param actionRequestId Id der Maßnahmenabfrage
+     * @param vppId           Id des VK
+     * @throws LoadException                    e
+     * @throws LoadRepositoryException          e
+     * @throws JsonProcessingException          e
+     * @throws MasterdataRestClientException    e
+     * @throws LoadHouseholdRepositoryException e
+     */
     private void saveLoad(ZonedDateTime currentZDT, String actionRequestId, String vppId) throws LoadException, LoadRepositoryException, JsonProcessingException, MasterdataRestClientException, LoadHouseholdRepositoryException {
         int rowIndex = getRowIndex(currentZDT);
         int columnIndex = getColumnIndex(currentZDT);
+        //Erstelle Lastaggregat
         LoadAggregate loadAggregate = new LoadAggregate();
         loadAggregate.setLoadActionRequestId(new LoadActionRequestIdVO(actionRequestId));
         loadAggregate.setLoadVirtualPowerPlantId(new LoadVirtualPowerPlantIdVO(vppId));
@@ -96,6 +124,7 @@ public class LoadScheduler {
         loadRepository.saveLoad(loadAggregate);
         List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(vppId);
 
+        //Iteriere alle Haushalte und hole Last aus Standardlastprofil pro Haushalt
         for (String householdId : householdIds) {
             LoadHouseholdEntity householdEntity = new LoadHouseholdEntity();
             householdEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(currentZDT.toEpochSecond()));
@@ -103,6 +132,7 @@ public class LoadScheduler {
             householdEntity.setLoadHouseholdMemberAmount(
                     new LoadHouseholdMemberAmountVO(masterdataRestClient.getHouseholdMemberAmountById(householdId))
             );
+            // Hole Last aus Standardlastprofil für Haushalt und multipliziere mit Anzahl der Haushaltsmitglieder
             householdEntity.setLoadHouseholdValueVO(
                     new LoadHouseholdValueVO(
                             sheet.getRow(rowIndex).getCell(columnIndex).getNumericCellValue() * householdEntity.getLoadHouseholdMemberAmount().getAmount()
@@ -114,6 +144,80 @@ public class LoadScheduler {
 
     }
 
+    /**
+     * Konvertiert den aktuellen Zeitstempel in die richtige Reihe im Standardlastprofil
+     *
+     * @param date Zeitstempel
+     * @return Reihe im Excel-Sheet
+     */
+    private int getRowIndex(ZonedDateTime date) {
+        int key = (date.getHour() * 100) + date.getMinute();
+        return createTimeRowMap().get(key);
+    }
+
+    /**
+     * Konvertiert den aktuellen Zeitstempel in die richtige Spalte im Standardlastprofil
+     *
+     * @param date Zeitstempel
+     * @return Spalte im Excel-Sheet
+     */
+    private int getColumnIndex(ZonedDateTime date) {
+        String season = this.getSeason(date);
+        switch (season) {
+            case "Spring":
+            case "Fall":
+                switch (date.getDayOfWeek().getValue()) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        return 9;
+                    case 6:
+                        return 7;
+                    case 7:
+                        return 8;
+                }
+                break;
+            case "Summer":
+                switch (date.getDayOfWeek().getValue()) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        return 6;
+                    case 6:
+                        return 4;
+                    case 7:
+                        return 5;
+                }
+                break;
+            case "Winter":
+                switch (date.getDayOfWeek().getValue()) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        return 3;
+                    case 6:
+                        return 1;
+                    case 7:
+                        return 2;
+                }
+                break;
+        }
+        return -1;
+    }
+
+    /**
+     * Mappt die Uhrzeit zu der richtigen Reihe im Excel Sheet des Standardlastprofils
+     * z.B. 15 -> 00:15,
+     * 1015 -> 10:15 etc.
+     *
+     * @return Hashmap von Uhrzeit -> Row
+     */
     private static Map<Integer, Integer> createTimeRowMap() {
         return new HashMap<>() {
             {
@@ -217,56 +321,12 @@ public class LoadScheduler {
         };
     }
 
-    private int getColumnIndex(ZonedDateTime date) {
-        String season = this.getSeason(date);
-        switch (season) {
-            case "Spring":
-            case "Fall":
-                switch (date.getDayOfWeek().getValue()) {
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return 9;
-                    case 6:
-                        return 7;
-                    case 7:
-                        return 8;
-                }
-                break;
-            case "Summer":
-                switch (date.getDayOfWeek().getValue()) {
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return 6;
-                    case 6:
-                        return 4;
-                    case 7:
-                        return 5;
-                }
-                break;
-            case "Winter":
-                switch (date.getDayOfWeek().getValue()) {
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        return 3;
-                    case 6:
-                        return 1;
-                    case 7:
-                        return 2;
-                }
-                break;
-        }
-        return -1;
-    }
-
+    /**
+     * Gibt die Jahreszeit eines Zeitstempels an
+     *
+     * @param date Zeitstempel
+     * @return Jahreszeit in engl. Sprache
+     */
     private String getSeason(ZonedDateTime date) {
         String[] seasons = {
                 "Winter", "Winter", "Spring", "Spring", "Summer", "Summer",

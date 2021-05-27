@@ -1,13 +1,15 @@
 package de.uol.vpp.action.application.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+/**
+ * Datentransferobjekt für Speichermanipulationen
+ */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class StorageManipulationDTO {
-    private Long startTimestamp;
-    private Long endTimestamp;
+public class StorageManipulationDTO extends AbstractManipulationDTO {
     private String storageId;
-    private String type;
     private Double hours;
     private Double ratedPower;
 }

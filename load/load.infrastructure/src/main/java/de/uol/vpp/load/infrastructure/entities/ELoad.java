@@ -8,6 +8,9 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Datenbank-Entität des Lastaggregats {@link de.uol.vpp.load.domain.aggregates.LoadAggregate}
+ */
 @Entity
 @Data
 public class ELoad {

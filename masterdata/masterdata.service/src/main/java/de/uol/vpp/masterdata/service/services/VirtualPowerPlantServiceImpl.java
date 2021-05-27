@@ -3,10 +3,10 @@ package de.uol.vpp.masterdata.service.services;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.abstracts.DomainHasProducersAndStorages;
 import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
+import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantRepositoryException;
+import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantServiceException;
 import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
-import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
 import de.uol.vpp.masterdata.domain.services.IVirtualPowerPlantService;
-import de.uol.vpp.masterdata.domain.services.VirtualPowerPlantServiceException;
 import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantIdVO;
 import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantPublishedVO;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IVirtualPowerPlantService}
+ */
 @Transactional(rollbackFor = VirtualPowerPlantServiceException.class)
 @RequiredArgsConstructor
 @Service

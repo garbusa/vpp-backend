@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+/**
+ * Datenbank-Entität der Speicheranlagen {@link de.uol.vpp.masterdata.domain.entities.StorageEntity}
+ */
 @Entity
 @Data
 public class Storage {

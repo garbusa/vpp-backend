@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+/**
+ * Datenbank-Entität der Windkraftanlagen {@link de.uol.vpp.masterdata.domain.entities.WindEnergyEntity}
+ */
 @Entity
 @Data
 public class WindEnergy {

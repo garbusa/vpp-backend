@@ -6,9 +6,15 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * Austauschobjekt für die RabbitMQ Queues.
+ * Diese Message wird empfangen wenn die Erzeugungswerte prognostiziert wurden
+ */
 @Data
 @NoArgsConstructor
-public class ActionFailedMessage implements Serializable {
+public class ProductionMessage implements Serializable {
     @JsonProperty("actionRequestId")
     private String actionRequestId;
+    @JsonProperty("timestamp")
+    private Long timestamp;
 }

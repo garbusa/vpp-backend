@@ -18,11 +18,21 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * REST-Client für die Abfrage von Daten aus dem Daten-Service
+ */
 @Component
 @Log4j2
 public class MasterdataRestClient {
 
 
+    /**
+     * Prüft, ob angefragte VK veröffentlich ist
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return true/false
+     * @throws MasterdataRestClientException e
+     */
     public boolean isActiveVpp(String virtualPowerPlantId) throws MasterdataRestClientException {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -44,6 +54,13 @@ public class MasterdataRestClient {
         throw new MasterdataRestClientException("Something went wrong while requesting for vpp published status");
     }
 
+    /**
+     * Holt alle Haushalt Ids des angefragten VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return Liste der Haushalt Ids
+     * @throws MasterdataRestClientException e
+     */
     public List<String> getAllHouseholdsByVppId(String virtualPowerPlantId) throws MasterdataRestClientException {
         List<String> ids = new ArrayList<>();
         try {
@@ -67,6 +84,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle DK Ids aus angefragtem VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return Liste aller DK Ids
+     * @throws MasterdataRestClientException e
+     */
     public List<String> getAllDppsByVppId(String virtualPowerPlantId) throws MasterdataRestClientException {
         List<String> ids = new ArrayList<>();
         try {
@@ -90,6 +114,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle Wasserkraftwerke eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste der Wasserkraftwerke
+     * @throws MasterdataRestClientException e
+     */
     public List<WaterEnergyDTO> getAllWatersByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<WaterEnergyDTO> waters = new ArrayList<>();
         try {
@@ -103,9 +134,19 @@ public class MasterdataRestClient {
         }
     }
 
-    private void addWaterDTO(String decentralizedPowerPlantId, List<WaterEnergyDTO> waters, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    /**
+     * Konvertiere JSON aus {@link MasterdataRestClient#getAllWatersByDppId(String)} oder
+     * * {@link MasterdataRestClient#getAllWatersByHouseholdId(String)} (String)} in ein DTOs
+     *
+     * @param dppOrHouseholdId Id eines DK oder eines Haushaltes
+     * @param waters           leere Liste
+     * @param restTemplate     REST-Anfrage
+     * @param resourceUrl      REST-Resource
+     * @throws JsonProcessingException e
+     */
+    private void addWaterDTO(String dppOrHouseholdId, List<WaterEnergyDTO> waters, RestTemplate restTemplate, String resourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantId, String.class);
+                = restTemplate.getForEntity(resourceUrl + dppOrHouseholdId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -127,6 +168,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle Wasserkraftwerke eines Haushaltes
+     *
+     * @param householdId Id des Haushaltes
+     * @return Liste der Wasserkraftwerke
+     * @throws MasterdataRestClientException e
+     */
     public List<WaterEnergyDTO> getAllWatersByHouseholdId(String householdId) throws MasterdataRestClientException {
         List<WaterEnergyDTO> waters = new ArrayList<>();
         try {
@@ -140,6 +188,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle Windkraftanlagen eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste der Windkraftanlagen
+     * @throws MasterdataRestClientException e
+     */
     public List<WindEnergyDTO> getAllWindsByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<WindEnergyDTO> winds = new ArrayList<>();
         try {
@@ -153,9 +208,19 @@ public class MasterdataRestClient {
         }
     }
 
-    private void addWindDTO(String decentralizedPowerPlantId, List<WindEnergyDTO> winds, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    /**
+     * Konvertiere JSON aus {@link MasterdataRestClient#getAllWindsByDppId(String)}  oder
+     * * {@link MasterdataRestClient#getAllWindsByHouseholdId(String)} in ein DTOs
+     *
+     * @param dppOrHouseholdId Id eines DK oder eines Haushaltes
+     * @param winds            leere Liste
+     * @param restTemplate     REST-Anfrage
+     * @param resourceUrl      REST-Resource
+     * @throws JsonProcessingException e
+     */
+    private void addWindDTO(String dppOrHouseholdId, List<WindEnergyDTO> winds, RestTemplate restTemplate, String resourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantId, String.class);
+                = restTemplate.getForEntity(resourceUrl + dppOrHouseholdId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -177,6 +242,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle Windkraftanlagen eines Haushaltes
+     *
+     * @param householdId Id des Haushaltes
+     * @return Liste der Windkraftanlagen
+     * @throws MasterdataRestClientException e
+     */
     public List<WindEnergyDTO> getAllWindsByHouseholdId(String householdId) throws MasterdataRestClientException {
         List<WindEnergyDTO> winds = new ArrayList<>();
         try {
@@ -190,6 +262,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle Solaranlagen eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste der Solaranlagen
+     * @throws MasterdataRestClientException e
+     */
     public List<SolarEnergyDTO> getAllSolarsByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<SolarEnergyDTO> solars = new ArrayList<>();
         try {
@@ -203,9 +282,19 @@ public class MasterdataRestClient {
         }
     }
 
-    private void addSolarDTO(String decentralizedPowerPlantId, List<SolarEnergyDTO> solars, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    /**
+     * Konvertiere JSON aus {@link MasterdataRestClient#getAllSolarsByDppId(String)} oder
+     * * {@link MasterdataRestClient#getAllSolarsByHouseholdId(String)} in ein DTOs
+     *
+     * @param dppOrHouseholdId Id eines DK oder eines Haushaltes
+     * @param solars           leere Liste
+     * @param restTemplate     REST-Anfrage
+     * @param resourceUrl      REST-Resource
+     * @throws JsonProcessingException e
+     */
+    private void addSolarDTO(String dppOrHouseholdId, List<SolarEnergyDTO> solars, RestTemplate restTemplate, String resourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantId, String.class);
+                = restTemplate.getForEntity(resourceUrl + dppOrHouseholdId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -227,6 +316,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle alternativen Erzeugungsanlagen eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste der alternativen Erzeugungsanlagen
+     * @throws MasterdataRestClientException e
+     */
     public List<OtherEnergyDTO> getAllOthersByDppId(String decentralizedPowerPlantId) throws MasterdataRestClientException {
         List<OtherEnergyDTO> others = new ArrayList<>();
         try {
@@ -240,9 +336,19 @@ public class MasterdataRestClient {
         }
     }
 
-    private void addOtherDTO(String decentralizedPowerPlantOrHouseholdId, List<OtherEnergyDTO> others, RestTemplate restTemplate, String fooResourceUrl) throws JsonProcessingException {
+    /**
+     * Konvertiere JSON aus {@link MasterdataRestClient#getAllOthersByDppId(String)} oder
+     * * {@link MasterdataRestClient#getAllOthersByHousehold(String)}  in ein DTOs
+     *
+     * @param dppOrHouseholdId Id eines DK oder eines Haushaltes
+     * @param others           leere Liste
+     * @param restTemplate     REST-Anfrage
+     * @param resourceUrl      REST-Resource
+     * @throws JsonProcessingException e
+     */
+    private void addOtherDTO(String dppOrHouseholdId, List<OtherEnergyDTO> others, RestTemplate restTemplate, String resourceUrl) throws JsonProcessingException {
         ResponseEntity<String> response
-                = restTemplate.getForEntity(fooResourceUrl + decentralizedPowerPlantOrHouseholdId, String.class);
+                = restTemplate.getForEntity(resourceUrl + dppOrHouseholdId, String.class);
         if (response != null && response.getBody() != null) {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(response.getBody());
@@ -260,6 +366,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle alternativen Erzeugungsanlagen eines Haushaltes
+     *
+     * @param householdId Id des Haushaltes
+     * @return Liste der alternativen Erzeugungsanlagen
+     * @throws MasterdataRestClientException e
+     */
     public List<OtherEnergyDTO> getAllOthersByHousehold(String householdId) throws MasterdataRestClientException {
         List<OtherEnergyDTO> others = new ArrayList<>();
         try {
@@ -273,6 +386,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole alle Solaranlagen eines Haushaltes
+     *
+     * @param householdId Id des Haushaltes
+     * @return Liste der Solaranlagen
+     * @throws MasterdataRestClientException e
+     */
     public List<SolarEnergyDTO> getAllSolarsByHouseholdId(String householdId) throws MasterdataRestClientException {
         List<SolarEnergyDTO> solars = new ArrayList<>();
         try {

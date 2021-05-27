@@ -4,6 +4,9 @@ import de.uol.vpp.load.domain.exceptions.LoadException;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Siehe {@link de.uol.vpp.load.domain.aggregates.LoadAggregate}
+ */
 @Getter
 @Setter
 public class LoadVirtualPowerPlantIdVO {

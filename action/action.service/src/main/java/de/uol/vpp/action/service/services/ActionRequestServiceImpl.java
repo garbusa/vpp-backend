@@ -23,6 +23,10 @@ import org.springframework.stereotype.Service;
 import java.time.ZonedDateTime;
 import java.util.*;
 
+/**
+ * Service-Klasse zur Interaktion zwischen der Applikations- und Infrastrukturschicht.
+ * Diese Klasse arbeitet entlang der Domäne
+ */
 @Service
 @RequiredArgsConstructor
 public class ActionRequestServiceImpl implements IActionRequestService {
@@ -101,6 +105,14 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
+    /**
+     * Helferfunktion zum Prüfen der Existenz der betroffenen Anlagen innerhalb der Manipulationen
+     *
+     * @param domainEntity  Maßnahmenabfrage, die durchsucht wird
+     * @param dppDTOs       Menge aller DKs des VK
+     * @param householdDTOs Menge aller Haushalte des VK
+     * @throws ActionServiceException e
+     */
     private void checkExistence(ActionRequestAggregate domainEntity, List<DecentralizedPowerPlantDTO> dppDTOs, List<HouseholdDTO> householdDTOs) throws ActionServiceException {
         for (ProducerManipulationEntity producerManipulationEntity : domainEntity.getProducerManipulations()) {
             boolean found = false;
@@ -137,6 +149,13 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
+    /**
+     * Holt alle Wasserkraftwerke
+     *
+     * @param dppDTOs       dezentrale Kraftwerke
+     * @param householdDTOs Haushalte
+     * @return Liste aller Wasserkraftwerke
+     */
     private List<WaterEnergyDTO> getAllWaters(List<DecentralizedPowerPlantDTO> dppDTOs, List<HouseholdDTO> householdDTOs) {
         List<WaterEnergyDTO> waters = new ArrayList<>();
         dppDTOs.forEach(dpp -> waters.addAll(dpp.getWaters()));
@@ -144,6 +163,13 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return waters;
     }
 
+    /**
+     * Holt alle Windkraftanlagen
+     *
+     * @param dppDTOs       dezentrale Kraftwerke
+     * @param householdDTOs Haushalte
+     * @return Liste aller Windkraftanlagen
+     */
     private List<WindEnergyDTO> getAllWinds(List<DecentralizedPowerPlantDTO> dppDTOs, List<HouseholdDTO> householdDTOs) {
         List<WindEnergyDTO> winds = new ArrayList<>();
         dppDTOs.forEach(dpp -> winds.addAll(dpp.getWinds()));
@@ -151,6 +177,13 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return winds;
     }
 
+    /**
+     * Holt alle Solaranlagen
+     *
+     * @param dppDTOs       dezentrale Kraftwerke
+     * @param householdDTOs Haushalte
+     * @return Liste aller Solaranlagen
+     */
     private List<SolarEnergyDTO> getAllSolars(List<DecentralizedPowerPlantDTO> dppDTOs, List<HouseholdDTO> householdDTOs) {
         List<SolarEnergyDTO> solars = new ArrayList<>();
         dppDTOs.forEach(dpp -> solars.addAll(dpp.getSolars()));
@@ -158,6 +191,13 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return solars;
     }
 
+    /**
+     * Holt alle alternativen Erzeugungsanlagen
+     *
+     * @param dppDTOs       dezentrale Kraftwerke
+     * @param householdDTOs Haushalte
+     * @return Liste aller alternativen Erzeugungsanlagen
+     */
     private List<OtherEnergyDTO> getAllOthers(List<DecentralizedPowerPlantDTO> dppDTOs, List<HouseholdDTO> householdDTOs) {
         List<OtherEnergyDTO> others = new ArrayList<>();
         dppDTOs.forEach(dpp -> others.addAll(dpp.getOthers()));
@@ -165,6 +205,13 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return others;
     }
 
+    /**
+     * Holt alle Speicheranlagen
+     *
+     * @param dppDTOs       dezentrale Kraftwerke
+     * @param householdDTOs Haushalte
+     * @return Liste aller Speicheranlagen
+     */
     private List<StorageDTO> getAllStorages(List<DecentralizedPowerPlantDTO> dppDTOs, List<HouseholdDTO> householdDTOs) {
         List<StorageDTO> storages = new ArrayList<>();
         dppDTOs.forEach(dpp -> storages.addAll(dpp.getStorages()));
@@ -172,6 +219,11 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return storages;
     }
 
+    /**
+     * Sortiert alle Manipulationen nach Startzeitstempel
+     *
+     * @param domainEntity Maßnahmenabfrage
+     */
     private void sortManipulations(ActionRequestAggregate domainEntity) {
         domainEntity.getProducerManipulations().sort(
                 Comparator.comparing(o -> o.getStartEndTimestamp().getStart()));
@@ -181,6 +233,12 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                 Comparator.comparing(o -> o.getStartEndTimestamp().getStart()));
     }
 
+    /**
+     * Prüft, ob Überlappungen in den Zeiträumen der Manipulationen existieren
+     *
+     * @param domainEntity Maßnahmenabfrage
+     * @throws ActionServiceException e
+     */
     private void checkProducerOverlap(ActionRequestAggregate domainEntity) throws ActionServiceException {
         Map<String, List<ProducerManipulationEntity>> producerIdToManipulationEntity = new HashMap<>();
         domainEntity.getProducerManipulations().forEach((entity) ->
@@ -214,6 +272,12 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
+    /**
+     * Prüft, ob Überlappungen in den Zeiträumen der Manipulationen existieren
+     *
+     * @param domainEntity Maßnahmenabfrage
+     * @throws ActionServiceException e
+     */
     private void checkStorageOverlap(ActionRequestAggregate domainEntity) throws ActionServiceException {
         Map<String, List<StorageManipulationEntity>> storageIdToManipulationEntity = new HashMap<>();
         domainEntity.getStorageManipulations().forEach((entity) ->
@@ -247,6 +311,12 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
+    /**
+     * Prüft, ob die Erzeugungsmaßnahmen die Manipulationen durchführen können. (Von der Kapazität her)
+     *
+     * @param domainEntity Maßnahmenabfrage
+     * @throws ActionServiceException e
+     */
     private void checkProducerCapacity(ActionRequestAggregate domainEntity, List<WaterEnergyDTO> waters, List<WindEnergyDTO> winds, List<SolarEnergyDTO> solars, List<OtherEnergyDTO> others) throws ActionServiceException {
         for (ProducerManipulationEntity manipulation : domainEntity.getProducerManipulations()) {
             for (WaterEnergyDTO water : waters) {
@@ -272,6 +342,12 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
+    /**
+     * Prüft, ob die Speicheranlagen die Manipulationen durchführen können. (Von der Kapazität her)
+     *
+     * @param domainEntity Maßnahmenabfrage
+     * @throws ActionServiceException e
+     */
     private void checkStorageCapacity(ActionRequestAggregate domainEntity, List<StorageDTO> storages) throws ManipulationException, ActionServiceException {
         for (StorageManipulationEntity manipulation : domainEntity.getStorageManipulations()) {
             for (StorageDTO storage : storages) {
@@ -283,23 +359,31 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
-    private boolean findProducer(ProducerManipulationEntity producerManipulationEntity, boolean found, DtoHasProducersAndStorages dpp) {
-        for (WaterEnergyDTO waterEnergyDTO : dpp.getWaters()) {
+    /**
+     * Prüft, ob die Erzeugungsanlage in der Manipulation existiert
+     *
+     * @param producerManipulationEntity Erzeugungsmanipulation
+     * @param found                      überschriebene boolsche Auswertung
+     * @param dppOrHousehold             DK oder Haushalt
+     * @return found
+     */
+    private boolean findProducer(ProducerManipulationEntity producerManipulationEntity, boolean found, DtoHasProducersAndStorages dppOrHousehold) {
+        for (WaterEnergyDTO waterEnergyDTO : dppOrHousehold.getWaters()) {
             if (waterEnergyDTO.getWaterEnergyId().equals(producerManipulationEntity.getProducerId().getValue())) {
                 found = true;
             }
         }
-        for (WindEnergyDTO windEnergyDTO : dpp.getWinds()) {
+        for (WindEnergyDTO windEnergyDTO : dppOrHousehold.getWinds()) {
             if (windEnergyDTO.getWindEnergyId().equals(producerManipulationEntity.getProducerId().getValue())) {
                 found = true;
             }
         }
-        for (SolarEnergyDTO solarEnergyDTO : dpp.getSolars()) {
+        for (SolarEnergyDTO solarEnergyDTO : dppOrHousehold.getSolars()) {
             if (solarEnergyDTO.getSolarEnergyId().equals(producerManipulationEntity.getProducerId().getValue())) {
                 found = true;
             }
         }
-        for (OtherEnergyDTO otherEnergyDTO : dpp.getOthers()) {
+        for (OtherEnergyDTO otherEnergyDTO : dppOrHousehold.getOthers()) {
             if (otherEnergyDTO.getOtherEnergyId().equals(producerManipulationEntity.getProducerId().getValue())) {
                 found = true;
             }
@@ -307,6 +391,15 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return found;
     }
 
+
+    /**
+     * Prüft, ob die Speicheranlage in der Manipulation existiert
+     *
+     * @param storageManipulationEntity Speichermanipulation
+     * @param found                     überschriebene boolsche Auswertung
+     * @param dppOrHousehold            DK oder Haushalt
+     * @return found
+     */
     private boolean findStorage(StorageManipulationEntity storageManipulationEntity, boolean found, DtoHasProducersAndStorages dppOrHousehold) {
         for (StorageDTO storageDTO : dppOrHousehold.getStorages()) {
             if (storageDTO.getStorageId().equals(storageManipulationEntity.getStorageId().getValue())) {
@@ -316,10 +409,27 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         return found;
     }
 
+    /**
+     * Prüft Überlappung von zwei Zeitpunken
+     *
+     * @param start1 Start des ersten Zeitraums
+     * @param end1   Ende des ersten Zeitraums
+     * @param start2 Start des zweiten Zeitraums
+     * @param end2   Ende des zweiten Zeitraums
+     * @return true/false
+     */
     private boolean isOverlapping(ZonedDateTime start1, ZonedDateTime end1, ZonedDateTime start2, ZonedDateTime end2) {
         return start1.isBefore(end2) && start2.isBefore(end1);
     }
 
+    /**
+     * Prüft die Kapazität für eine Erzeugungsmanipulation
+     *
+     * @param domainEntity Maßnahmenabfrage
+     * @param manipulation Erzeugungsmanipulation
+     * @param capacity     Kapazität
+     * @throws ActionServiceException e
+     */
     private void checkProducerPossibility(ActionRequestAggregate domainEntity, ProducerManipulationEntity manipulation, Double capacity) throws ActionServiceException {
         switch (manipulation.getType().getValue()) {
             case PRODUCER_UP:
@@ -346,6 +456,15 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
+
+    /**
+     * Prüft die Kapazität für eine Speichermanipulation
+     *
+     * @param domainEntity Maßnahmenabfrage
+     * @param manipulation Erzeugungsmanipulation
+     * @param storage      Speicheranlage
+     * @throws ActionServiceException e
+     */
     private void checkStoragePossibility(ActionRequestAggregate domainEntity, StorageManipulationEntity manipulation, StorageDTO storage) throws ActionServiceException, ManipulationException {
         switch (manipulation.getType().getValue()) {
             case STORAGE_LOAD:
@@ -356,7 +475,8 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                                     domainEntity.getActionRequestId().getValue(), manipulation.getStorageId().getValue())
                     );
                 } else {
-                    Period p = this.getManipulationPeriod(manipulation); //Manipulationszeitraum
+                    Period p = this.getManipulationPeriod(manipulation.getStartEndTimestamp().getStart(),
+                            manipulation.getStartEndTimestamp().getEnd()); //Manipulationszeitraum
                     //Berechnung der Periode von Sekunden in Stunden
                     double manipulationPeriodInHour = MathUtils.round(Integer.valueOf(p.toStandardSeconds().getSeconds()).doubleValue() / 3600.);
                     //Berechnung der möglichen Ladezeit von Speicher C-Rate in Stunden
@@ -386,7 +506,8 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                                     domainEntity.getActionRequestId().getValue(), manipulation.getStorageId().getValue())
                     );
                 } else {
-                    Period p = this.getManipulationPeriod(manipulation);
+                    Period p = this.getManipulationPeriod(manipulation.getStartEndTimestamp().getStart(),
+                            manipulation.getStartEndTimestamp().getEnd());
                     double manipulationPeriodInHour = (Integer.valueOf(p.toStandardSeconds().getSeconds()).doubleValue() / 3600.);
                     double capacityHours = (1 / storage.getLoadTimeHour()) / 100. * (100. - ((100. - storage.getCapacity())));
                     if (manipulationPeriodInHour >= capacityHours) {
@@ -415,9 +536,14 @@ public class ActionRequestServiceImpl implements IActionRequestService {
         }
     }
 
-    private Period getManipulationPeriod(StorageManipulationEntity manipulation) {
-        ZonedDateTime startTs = manipulation.getStartEndTimestamp().getStart();
-        ZonedDateTime endTs = manipulation.getStartEndTimestamp().getEnd();
+    /**
+     * Erstelle ein Perioden-Objekt aus Start und Endzeitpunkt
+     *
+     * @param startTs Start
+     * @param endTs   Ende
+     * @return Periode
+     */
+    private Period getManipulationPeriod(ZonedDateTime startTs, ZonedDateTime endTs) {
         return new Period(startTs.toEpochSecond() * 1000, endTs.toEpochSecond() * 1000);
     }
 }

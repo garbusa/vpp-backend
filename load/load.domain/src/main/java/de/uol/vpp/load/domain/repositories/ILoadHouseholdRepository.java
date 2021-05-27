@@ -3,17 +3,26 @@ package de.uol.vpp.load.domain.repositories;
 import de.uol.vpp.load.domain.aggregates.LoadAggregate;
 import de.uol.vpp.load.domain.entities.LoadHouseholdEntity;
 import de.uol.vpp.load.domain.exceptions.LoadHouseholdRepositoryException;
-import de.uol.vpp.load.domain.valueobjects.LoadActionRequestIdVO;
-import de.uol.vpp.load.domain.valueobjects.LoadStartTimestampVO;
 
-import java.util.List;
-
+/**
+ * Schnittstellendefinition für das Haushaltslast-Repository in der Infrastrukturenschicht
+ */
 public interface ILoadHouseholdRepository {
-    List<LoadHouseholdEntity> getLoadHouseholdByActionRequestId(LoadActionRequestIdVO actionRequestId, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException;
-
+    /**
+     * Weist ein Domänen-Objekt zur Datenbank-Entität, da die Datenbank-Entität eine von der Datenbank erstellten Id besitzt.
+     *
+     * @param loadHouseholdInternalId interne Datenbank Identifizierung
+     * @param load                    Last Aggregat
+     * @throws LoadHouseholdRepositoryException e
+     */
     void assignToInternal(Long loadHouseholdInternalId, LoadAggregate load) throws LoadHouseholdRepositoryException;
 
+    /**
+     * Persistiert eine Haushaltslast
+     *
+     * @param load Haushaltslast
+     * @return interne Datenbank Identifizierung
+     * @throws LoadHouseholdRepositoryException e
+     */
     Long saveLoadHouseholdInternal(LoadHouseholdEntity load) throws LoadHouseholdRepositoryException;
-
-    void deleteHouseholdsByActionRequestId(LoadActionRequestIdVO actionRequestId, LoadStartTimestampVO timestamp) throws LoadHouseholdRepositoryException;
 }

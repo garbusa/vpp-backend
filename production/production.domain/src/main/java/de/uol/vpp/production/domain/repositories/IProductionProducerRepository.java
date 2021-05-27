@@ -3,17 +3,26 @@ package de.uol.vpp.production.domain.repositories;
 import de.uol.vpp.production.domain.aggregates.ProductionAggregate;
 import de.uol.vpp.production.domain.entities.ProductionProducerEntity;
 import de.uol.vpp.production.domain.exceptions.ProductionProducerRepositoryException;
-import de.uol.vpp.production.domain.valueobjects.ProductionStartTimestampVO;
-import de.uol.vpp.production.domain.valueobjects.ProductionVirtualPowerPlantIdVO;
 
-import java.util.List;
-
+/**
+ * Schnittstellendefinition für das Erzeugungswert Repository in der Infrastrukturschicht
+ */
 public interface IProductionProducerRepository {
-    List<ProductionProducerEntity> getProductionProducersByVppTimestamp(ProductionVirtualPowerPlantIdVO virtualPowerPlantId, ProductionStartTimestampVO timestamp) throws ProductionProducerRepositoryException;
-
+    /**
+     * Weist Erzeugungswert dem Erzeugungsaggregat mittels internet Datenbank-Id
+     *
+     * @param producerInternalId interne Datenbank Id
+     * @param production         Erzeugungsaggregat
+     * @throws ProductionProducerRepositoryException e
+     */
     void assignToInternal(Long producerInternalId, ProductionAggregate production) throws ProductionProducerRepositoryException;
 
-    Long saveProductionProducerInternal(ProductionProducerEntity load) throws ProductionProducerRepositoryException;
+    /**
+     * Persistiert Erzeugungswert
+     *
+     * @param productionProducer Erzeugungswert Entität
+     * @throws ProductionProducerRepositoryException e
+     */
+    Long saveProductionProducerInternal(ProductionProducerEntity productionProducer) throws ProductionProducerRepositoryException;
 
-    void deleteProductionProducersByVppTimestamp(ProductionVirtualPowerPlantIdVO virtualPowerPlantId, ProductionStartTimestampVO timestamp) throws ProductionProducerRepositoryException;
 }

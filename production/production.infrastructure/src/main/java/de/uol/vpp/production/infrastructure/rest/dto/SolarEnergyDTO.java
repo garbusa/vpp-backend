@@ -2,6 +2,9 @@ package de.uol.vpp.production.infrastructure.rest.dto;
 
 import lombok.Data;
 
+/**
+ * Kopie des DTO aus dem Daten-Service
+ */
 @Data
 public class SolarEnergyDTO {
     private String solarEnergyId;

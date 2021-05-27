@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Wetterdaten DTO für die Berechnung von Windkraftanlagen
+ */
 @Data
 public class WeatherDTO {
     private ZonedDateTime timestamp;

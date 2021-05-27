@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.entities.ActionCatalogEntity}
+ */
 @Getter
 public class ActionCatalogEndTimestampVO {
     private ZonedDateTime value;

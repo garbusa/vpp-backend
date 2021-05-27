@@ -4,6 +4,9 @@ import de.uol.vpp.action.domain.enums.ProblemTypeEnum;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import lombok.Getter;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.entities.ActionCatalogEntity}
+ */
 @Getter
 public class ActionCatalogProblemTypeVO {
     private ProblemTypeEnum value;

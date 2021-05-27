@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Konvertierungsklasse zwischen der Infrastruktur und Domänenschicht für die Kommunikation mit der Serviceschicht
+ */
 @Service
 @RequiredArgsConstructor
 public class InfrastructureEntityConverter {
@@ -53,7 +56,6 @@ public class InfrastructureEntityConverter {
             domainEntity.setDecentralizedPowerPlantId(
                     new DecentralizedPowerPlantIdVO(jpaEntity.getId())
             );
-
             List<WaterEnergyEntity> waters = new ArrayList<>();
             for (WaterEnergy water : jpaEntity.getWaters()) {
                 waters.add(this.toDomain(water));

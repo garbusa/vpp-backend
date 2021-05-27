@@ -2,8 +2,8 @@ package de.uol.vpp.masterdata.infrastructure.repositories;
 
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
+import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
-import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
 import de.uol.vpp.masterdata.domain.valueobjects.HouseholdIdVO;
 import de.uol.vpp.masterdata.domain.valueobjects.VirtualPowerPlantIdVO;
@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IVirtualPowerPlantRepository}
+ */
 @RequiredArgsConstructor
 @Service
 public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantRepository {

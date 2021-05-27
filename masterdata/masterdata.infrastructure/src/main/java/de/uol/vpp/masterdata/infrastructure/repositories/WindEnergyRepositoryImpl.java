@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.WindEnergyEntity;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IWindEnergyRepository;
-import de.uol.vpp.masterdata.domain.repositories.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.WindEnergyIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IWindEnergyRepository}
+ */
 @RequiredArgsConstructor
 @Service
 public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
@@ -83,16 +86,16 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
     }
 
     @Override
-    public void save(WindEnergyEntity WindEnergyEntity) throws ProducerRepositoryException {
-        WindEnergy jpaEntity = converter.toInfrastructure(WindEnergyEntity);
+    public void save(WindEnergyEntity domainEntity) throws ProducerRepositoryException {
+        WindEnergy jpaEntity = converter.toInfrastructure(domainEntity);
         jpaRepository.save(jpaEntity);
     }
 
     @Override
-    public void assignToDecentralizedPowerPlant(WindEnergyEntity windEnergyEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
+    public void assignToDecentralizedPowerPlant(WindEnergyEntity domainEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
         Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<WindEnergy> wind = jpaRepository.findOneById(windEnergyEntity.getId().getValue());
+            Optional<WindEnergy> wind = jpaRepository.findOneById(domainEntity.getId().getValue());
             if (wind.isPresent()) {
                 if (wind.get().getDecentralizedPowerPlant() == null &&
                         wind.get().getHousehold() == null) {
@@ -102,12 +105,12 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Zuweisung der Windkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", windEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Windkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Windkraftanlage %s konnte nicht gefunden werden", windEnergyEntity.getId().getValue())
+                        String.format("Windkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
                 );
             }
         } else {
@@ -118,10 +121,10 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
     }
 
     @Override
-    public void assignToHousehold(WindEnergyEntity windEnergyEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
+    public void assignToHousehold(WindEnergyEntity domainEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
         Optional<Household> household = householdJpaRepository.findOneById(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<WindEnergy> WindEnergy = jpaRepository.findOneById(windEnergyEntity.getId().getValue());
+            Optional<WindEnergy> WindEnergy = jpaRepository.findOneById(domainEntity.getId().getValue());
             if (WindEnergy.isPresent()) {
                 if (WindEnergy.get().getDecentralizedPowerPlant() == null &&
                         WindEnergy.get().getHousehold() == null) {
@@ -131,12 +134,12 @@ public class WindEnergyRepositoryImpl implements IWindEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Zuweisung der Windkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", windEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Windkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Windkraftanlage %s konnte nicht gefunden werden", windEnergyEntity.getId().getValue())
+                        String.format("Windkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
                 );
             }
         } else {

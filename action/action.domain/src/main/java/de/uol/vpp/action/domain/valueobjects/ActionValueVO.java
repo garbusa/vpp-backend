@@ -3,6 +3,9 @@ package de.uol.vpp.action.domain.valueobjects;
 import de.uol.vpp.action.domain.exceptions.ActionException;
 import lombok.Getter;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.entities.ActionEntity}
+ */
 @Getter
 public class ActionValueVO {
     private Double value;

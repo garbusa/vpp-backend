@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.StorageEntity;
 import de.uol.vpp.masterdata.domain.exceptions.StorageException;
+import de.uol.vpp.masterdata.domain.exceptions.StorageRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IStorageRepository;
-import de.uol.vpp.masterdata.domain.repositories.StorageRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.StorageIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IStorageRepository}
+ */
 @RequiredArgsConstructor
 @Service
 public class StorageRepositoryImpl implements IStorageRepository {
@@ -85,16 +88,16 @@ public class StorageRepositoryImpl implements IStorageRepository {
     }
 
     @Override
-    public void save(StorageEntity storageEntity) throws StorageRepositoryException {
-        Storage jpaEntity = converter.toInfrastructure(storageEntity);
+    public void save(StorageEntity domainEntity) throws StorageRepositoryException {
+        Storage jpaEntity = converter.toInfrastructure(domainEntity);
         jpaRepository.save(jpaEntity);
     }
 
     @Override
-    public void assignToDecentralizedPowerPlant(StorageEntity storageEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws StorageRepositoryException {
+    public void assignToDecentralizedPowerPlant(StorageEntity domainEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws StorageRepositoryException {
         Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<Storage> storage = jpaRepository.findOneById(storageEntity.getStorageId().getValue());
+            Optional<Storage> storage = jpaRepository.findOneById(domainEntity.getStorageId().getValue());
             if (storage.isPresent()) {
                 if (storage.get().getDecentralizedPowerPlant() == null &&
                         storage.get().getHousehold() == null) {
@@ -104,12 +107,12 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new StorageRepositoryException(
-                            String.format("Zuweisung des Speichers %s an ein DK ist fehlgeschlagen, da dieser Speicher bereits zugewiesen wurde.", storageEntity.getStorageId().getValue())
+                            String.format("Zuweisung des Speichers %s an ein DK ist fehlgeschlagen, da dieser Speicher bereits zugewiesen wurde.", domainEntity.getStorageId().getValue())
                     );
                 }
             } else {
                 throw new StorageRepositoryException(
-                        String.format("Abfrage eines Speichers %s ist fehlgeschlagen", storageEntity.getStorageId().getValue())
+                        String.format("Abfrage eines Speichers %s ist fehlgeschlagen", domainEntity.getStorageId().getValue())
                 );
             }
         } else {
@@ -120,10 +123,10 @@ public class StorageRepositoryImpl implements IStorageRepository {
     }
 
     @Override
-    public void assignToHousehold(StorageEntity storageEntity, HouseholdAggregate householdAggregate) throws StorageRepositoryException {
+    public void assignToHousehold(StorageEntity domainEntity, HouseholdAggregate householdAggregate) throws StorageRepositoryException {
         Optional<Household> household = householdJpaRepository.findOneById(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<Storage> storage = jpaRepository.findOneById(storageEntity.getStorageId().getValue());
+            Optional<Storage> storage = jpaRepository.findOneById(domainEntity.getStorageId().getValue());
             if (storage.isPresent()) {
                 if (storage.get().getDecentralizedPowerPlant() == null &&
                         storage.get().getHousehold() == null) {
@@ -133,12 +136,12 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new StorageRepositoryException(
-                            String.format("Zuweisung des Speichers %s an ein Haushalt ist fehlgeschlagen, da dieser Speicher bereits zugewiesen wurde.", storageEntity.getStorageId().getValue())
+                            String.format("Zuweisung des Speichers %s an ein Haushalt ist fehlgeschlagen, da dieser Speicher bereits zugewiesen wurde.", domainEntity.getStorageId().getValue())
                     );
                 }
             } else {
                 throw new StorageRepositoryException(
-                        String.format("Abfrage des Speichers %s ist fehlgeschlagen", storageEntity.getStorageId().getValue())
+                        String.format("Abfrage des Speichers %s ist fehlgeschlagen", domainEntity.getStorageId().getValue())
                 );
             }
         } else {

@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * RabbitMQ (Message Broker) Konfiguration
+ * Beinhaltet die definierten Queues und Exchanges und bindet die Queues an die Exchanges
+ */
 @Configuration
 public class RabbitMQConfig {
 

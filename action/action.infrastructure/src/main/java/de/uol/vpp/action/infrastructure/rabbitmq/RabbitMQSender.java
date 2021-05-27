@@ -7,6 +7,10 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Producer für RabbitMQ Queues,
+ * sendet Nachricht ab, sobald eine neue Maßnahmenabfrage gestartet ist.
+ */
 @Service
 @RequiredArgsConstructor
 @Log4j2

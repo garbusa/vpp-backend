@@ -32,10 +32,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Diese Klasse ist für die Erzeugung der Erzeugungsprognose für eine Maßnahmenabfrage zuständig
+ */
 @Component
 @Log4j2
 public class ProductionScheduler {
 
+    /**
+     * Periode der Prognose im Viertelstundentakt
+     */
     private static final int FORECAST_PERIODS = 24 * 4; //24h in 15minutes;
 
     private final MasterdataRestClient masterdataRestClient;
@@ -58,22 +64,30 @@ public class ProductionScheduler {
     }
 
 
+    /**
+     * Erstellt die Erzeugungswerte der betroffenen Erzeugungsanlagen für eine Maßnahmenabfrage
+     *
+     * @param message Maßnahmenabfragen Nachricht aus der RabbitMQ
+     */
     public void createProduction(ActionRequestMessage message) {
         String vppId = message.getVppId();
         String actionRequestId = message.getActionRequestId();
         try {
+            //Erstellung des aktuellen Zeitstempels
             ZonedDateTime currentZDT = ZonedDateTime.now(ZoneId.of("GMT+2"));
             ZonedDateTime currentWithoutSeconds = ZonedDateTime.of(
                     currentZDT.getYear(), currentZDT.getMonthValue(), currentZDT.getDayOfMonth(), currentZDT.getHour(),
                     currentZDT.getMinute() - (currentZDT.getMinute() % 15),
                     0, 0, ZoneId.of("GMT+2")
             );
+            // Prüfung, ob VK veröffentlicht ist
             if (masterdataRestClient.isActiveVpp(vppId)) {
                 Map<String, List<WeatherDTO>> windWeatherMap = new HashMap<>();
                 Map<String, List<SolarForecastDTO>> solarForecastMap = new HashMap<>();
 
                 Map<StorageManipulationMessage, Pair<Integer, Integer>> storageManipulationToPeriodMap = new HashMap<>();
 
+                // Hole alle Erzeugungsanlagen
                 List<String> householdIds = masterdataRestClient.getAllHouseholdsByVppId(vppId);
                 List<String> dppIds = masterdataRestClient.getAllDppsByVppId(vppId);
                 List<WindEnergyDTO> winds = this.getAllWinds(householdIds, dppIds);
@@ -81,8 +95,9 @@ public class ProductionScheduler {
                 List<SolarEnergyDTO> solars = this.getAllSolars(householdIds, dppIds);
                 List<OtherEnergyDTO> others = this.getAllOthers(householdIds, dppIds);
 
+                // Iteriere Prognosenperiode
                 for (int forecastIndex = 0; forecastIndex <= FORECAST_PERIODS; forecastIndex++) {
-                    //Save Production
+                    // Erstelle Erzeugungsaggregat
                     ProductionAggregate productionAggregate = new ProductionAggregate();
                     productionAggregate.setProductionActionRequestId(
                             new ProductionActionRequestIdVO(actionRequestId)
@@ -93,31 +108,43 @@ public class ProductionScheduler {
                     );
                     productionRepository.saveProduction(productionAggregate);
 
+                    // Erstelle Prognose für den aktuellen Zeitstempel
                     this.processWinds(currentWithoutSeconds, windWeatherMap, productionAggregate, winds, actionRequestId, message.getProducerManipulations());
                     this.processWaters(currentWithoutSeconds, productionAggregate, waters, message.getProducerManipulations());
                     this.processSolars(currentZDT, currentWithoutSeconds, solarForecastMap, forecastIndex, productionAggregate, solars, message.getProducerManipulations());
                     this.processOthers(currentWithoutSeconds, productionAggregate, others, message.getProducerManipulations());
 
-                    //Storage Manipulation
+                    // Berücksichtige Speichermanipulation aus Maßnahmenabfrage
                     this.storageManipulation(message, currentWithoutSeconds, storageManipulationToPeriodMap, productionAggregate);
 
-                    //Grid Manipulation
+                    // Berücksichtige Stromnetzmanipulation aus Maßnahmenabfrage
                     this.gridManipulation(message, currentWithoutSeconds, productionAggregate);
+
+                    // Erstellung nächster Zeitstempel
                     currentWithoutSeconds = currentWithoutSeconds.plusMinutes(15);
                 }
+
+                // Sende Nachricht an Maßnahmen-Service, dass Erzeugungsprognose erfolgreich beendet ist
                 rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
             } else {
-                log.error("Production failed, vpp status is published");
+                log.error("Erstellung der Erzeugungsprognose ist fehlgeschlagen, da VK nicht veröffentlicht ist");
                 rabbitMQSender.sendFailed(actionRequestId);
             }
         } catch (Exception e) {
-            log.error("production failed", e);
+            log.error("Erstellung der Erzeugungsprognose ist fehlgeschlagen, da ein Fehler aufgetreten ist", e);
             rabbitMQSender.sendFailed(actionRequestId);
         }
 
-
     }
 
+    /**
+     * Hole alle Windkraftanlagen durch Daten-Service REST-Client
+     *
+     * @param householdIds Liste der Haushalt Ids eines VK
+     * @param dppIds       Liste der DK Ids eines VK
+     * @return Liste der Windkraftanlagen
+     * @throws MasterdataRestClientException e
+     */
     private List<WindEnergyDTO> getAllWinds(List<String> householdIds, List<String> dppIds) throws MasterdataRestClientException {
         List<WindEnergyDTO> winds = new ArrayList<>();
         for (String householdId : householdIds) {
@@ -129,6 +156,14 @@ public class ProductionScheduler {
         return winds;
     }
 
+    /**
+     * Hole alle Wasserkraftanlagen durch Daten-Service REST-Client
+     *
+     * @param householdIds Liste der Haushalt Ids eines VK
+     * @param dppIds       Liste der DK Ids eines VK
+     * @return Liste der Wasserkraftanlagen
+     * @throws MasterdataRestClientException e
+     */
     private List<WaterEnergyDTO> getAllWaters(List<String> householdIds, List<String> dppIds) throws MasterdataRestClientException {
         List<WaterEnergyDTO> waters = new ArrayList<>();
         for (String householdId : householdIds) {
@@ -140,6 +175,14 @@ public class ProductionScheduler {
         return waters;
     }
 
+    /**
+     * Hole alle Solaranlagen durch Daten-Service REST-Client
+     *
+     * @param householdIds Liste der Haushalt Ids eines VK
+     * @param dppIds       Liste der DK Ids eines VK
+     * @return Liste der Solaranlagen
+     * @throws MasterdataRestClientException e
+     */
     private List<SolarEnergyDTO> getAllSolars(List<String> householdIds, List<String> dppIds) throws MasterdataRestClientException {
         List<SolarEnergyDTO> solars = new ArrayList<>();
         for (String householdId : householdIds) {
@@ -151,7 +194,14 @@ public class ProductionScheduler {
         return solars;
     }
 
-
+    /**
+     * Hole alle alternativen Erzeugungsanlagen durch Daten-Service REST-Client
+     *
+     * @param householdIds Liste der Haushalt Ids eines VK
+     * @param dppIds       Liste der DK Ids eines VK
+     * @return Liste der alternativen Erzeugungsanlagen
+     * @throws MasterdataRestClientException e
+     */
     private List<OtherEnergyDTO> getAllOthers(List<String> householdIds, List<String> dppIds) throws MasterdataRestClientException {
         List<OtherEnergyDTO> others = new ArrayList<>();
         for (String householdId : householdIds) {
@@ -163,10 +213,25 @@ public class ProductionScheduler {
         return others;
     }
 
+    /**
+     * Prognostiziert alle Windkraftanlagen für aktuellen Zeitstempel
+     *
+     * @param currentWithoutSeconds aktueller Zeitstempel
+     * @param windWeatherMap        Wetterdaten aus Wetterschnittstelle
+     * @param productionAggregate   aktuelles Erzeugungsaggregat
+     * @param windEnergyDTOS        Liste der Windkraftanlagen
+     * @param actionRequestId       Id der aktuellen Maßnahmenabfrage
+     * @param producerManipulations Zu berücksichtigende Erzeugungsmanipulationen aus der Maßnahmenabfrage
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     * @throws WeatherRestClientException            e
+     */
     private void processWinds(ZonedDateTime currentWithoutSeconds, Map<String, List<WeatherDTO>> windWeatherMap, ProductionAggregate productionAggregate, List<WindEnergyDTO> windEnergyDTOS, String actionRequestId, List<ProducerManipulationMessage> producerManipulations) throws ProductionException, ProductionProducerRepositoryException, WeatherRestClientException {
+        // Iteriere Windkraftanlagen
         for (WindEnergyDTO windEnergyDTO : windEnergyDTOS) {
             ProducerManipulationMessage producerManipulationMessage = null;
 
+            // Prüfe, im aktuellen aktuellen Zeitstempel eine Manipulation für die aktuelle Windkraftanlage existiert
             for (ProducerManipulationMessage producerManipulation : producerManipulations) {
                 ZonedDateTime start = TimestampUtils.toBerlinTimestamp(producerManipulation.getStartTimestamp(), false);
                 ZonedDateTime end = TimestampUtils.toBerlinTimestamp(producerManipulation.getEndTimestamp(), false);
@@ -184,13 +249,17 @@ public class ProductionScheduler {
                         windEnergyDTO.getLatitude(), windEnergyDTO.getLongitude()
                 ));
             }
+            // Hole korrekte Wetterdaten mithilfe des Zeitstempels
             WeatherDTO weatherDTO = this.getCorrectDTO(windWeatherMap.get(windEnergyDTO.getWindEnergyId()), currentWithoutSeconds);
             if (weatherDTO != null) {
+                // Berechne Erzeugungswert mittels Wetterdaten und Berechnungsformel mit 100% Kapazität
                 Double possibleValue = ProductionsUtils.calculateWind(windEnergyDTO.getRadius(), weatherDTO.getWindSpeed(),
                         windEnergyDTO.getEfficiency());
 
+                // Berechne Erzeugungswert mittels Wetterdaten und Berechnungsformel mit aktueller Kapazität (inkl. Manipulationen)
                 double currentValue = this.producerManipulation(producerManipulationMessage, possibleValue, windEnergyDTO.getCapacity());
 
+                // Erstelle Erzeugungswert-Entität und füge es dem Erzeugungsaggregat hinzu
                 this.createAndAssignProductionProducer(windEnergyDTO.getWindEnergyId(), "WIND",
                         currentValue, possibleValue, currentWithoutSeconds.toEpochSecond(), productionAggregate);
             } else {
@@ -200,9 +269,21 @@ public class ProductionScheduler {
         }
     }
 
+    /**
+     * Prognostiziert alle Wasserkraftwerke für aktuellen Zeitstempel
+     *
+     * @param currentWithoutSeconds aktueller Zeitstempel
+     * @param productionAggregate   aktuelles Erzeugungsaggregat
+     * @param waterEnergyDTOS       Liste der Wasserkraftwerke
+     * @param producerManipulations Zu berücksichtigende Erzeugungsmanipulationen aus der Maßnahmenabfrage
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     */
     private void processWaters(ZonedDateTime currentWithoutSeconds, ProductionAggregate productionAggregate, List<WaterEnergyDTO> waterEnergyDTOS, List<ProducerManipulationMessage> producerManipulations) throws ProductionException, ProductionProducerRepositoryException {
         for (WaterEnergyDTO waterEnergyDTO : waterEnergyDTOS) {
             ProducerManipulationMessage producerManipulationMessage = null;
+
+            // Prüfe, ob es eine Manipulation für das aktuelle Wasserkraftwerk existiert
             for (ProducerManipulationMessage producerManipulation : producerManipulations) {
                 ZonedDateTime start = TimestampUtils.toBerlinTimestamp(producerManipulation.getStartTimestamp(), false);
                 ZonedDateTime end = TimestampUtils.toBerlinTimestamp(producerManipulation.getEndTimestamp(), false);
@@ -215,23 +296,41 @@ public class ProductionScheduler {
                 }
             }
 
-            // Calculate production + forecast for each
+            // Berechne Erzeugung des Wasserkraftwerks mit 100% Kapazität
             Double possibleValue = ProductionsUtils.calculateWater(
                     waterEnergyDTO.getHeight(), waterEnergyDTO.getGravity(), waterEnergyDTO.getDensity(),
                     waterEnergyDTO.getEfficiency(), waterEnergyDTO.getVolumeFlow()
             );
 
+            // Berechne Erzeugung des Wasserkraftwerks mit tatsächlicher Kapazität (inkl. Manipulation)
             double currentValue = this.producerManipulation(producerManipulationMessage, possibleValue, waterEnergyDTO.getCapacity());
 
-            // Save current and forecast production
+            // Speichere Erzeugungswert und weise es dem Aggregat zu
             this.createAndAssignProductionProducer(waterEnergyDTO.getWaterEnergyId(), "WATER",
                     currentValue, possibleValue, currentWithoutSeconds.toEpochSecond(), productionAggregate);
         }
     }
 
+    /**
+     * Prognostiziert alle Solaranlagen für aktuellen Zeitstempel
+     *
+     * @param currentZDT            aktueller Zeitstempel für Solar-REST-Client
+     * @param currentWithoutSeconds aktueller Zeitstempel ohne Sekunden
+     * @param solarForecastMap      Leere Liste oder Liste mit Erzeugungsprognose der Solaranlagen
+     * @param forecastIndex         aktueller Index der Prognosenperiode
+     * @param productionAggregate   Erzeugungsaggregat
+     * @param solarEnergyDTOS       Liste der Solaranlagen
+     * @param producerManipulations Liste der Manipulationen
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     * @throws SolarRestClientException              e
+     */
     private void processSolars(ZonedDateTime currentZDT, ZonedDateTime currentWithoutSeconds, Map<String, List<SolarForecastDTO>> solarForecastMap, int forecastIndex, ProductionAggregate productionAggregate, List<SolarEnergyDTO> solarEnergyDTOS, List<ProducerManipulationMessage> producerManipulations) throws ProductionException, ProductionProducerRepositoryException, SolarRestClientException {
+        // Iteriere Solaranlagen
         for (SolarEnergyDTO solarEnergyDTO : solarEnergyDTOS) {
             ProducerManipulationMessage producerManipulationMessage = null;
+
+            // Prüfe, ob es eine Manipulation für aktuelle Solaranlage im aktuellen Zeitstempel existiert
             for (ProducerManipulationMessage producerManipulation : producerManipulations) {
                 ZonedDateTime start = TimestampUtils.toBerlinTimestamp(producerManipulation.getStartTimestamp(), false);
                 ZonedDateTime end = TimestampUtils.toBerlinTimestamp(producerManipulation.getEndTimestamp(), false);
@@ -244,23 +343,38 @@ public class ProductionScheduler {
                 }
             }
 
-            // Calculate production + forecast for each
+            // Hole Prognose der aktuellen Solaranlage für aktuellen Zeitstempel, falls es noch nicht existiert
             if (!solarForecastMap.containsKey(solarEnergyDTO.getSolarEnergyId())) {
                 solarForecastMap.put(solarEnergyDTO.getSolarEnergyId(), solarRestClient.getSolarForecast(currentZDT, solarEnergyDTO));
             }
+
+            // Hole korrekte Prognose mittels forecastIndex aus der Tagesprognose (100% Kapazität)
             Double possibleValue = solarForecastMap.get(solarEnergyDTO.getSolarEnergyId()).get(forecastIndex).getValue();
 
+            // Erstelle tatsächlichen Erzeugungswert und berücksichtige Manipulation
             double currentValue = this.producerManipulation(producerManipulationMessage, possibleValue, solarEnergyDTO.getCapacity());
 
-            // Save current and forecast production
+            // Speichere Erzeugungswert und weise es dem Aggregat zu
             this.createAndAssignProductionProducer(solarEnergyDTO.getSolarEnergyId(), "SOLAR",
                     currentValue, possibleValue, currentWithoutSeconds.toEpochSecond(), productionAggregate);
         }
     }
 
+    /**
+     * Erstellt Prognose von alternativen Erzeugungsanlagen. Hier finden keine Berechnungen statt, da diese
+     * Form einen festen kW-Nennleistung besitzt, die konstant läuft.
+     *
+     * @param currentWithoutSeconds Zeitstempel ohne Sekunden
+     * @param productionAggregate   Erzeugungsaggregat
+     * @param otherEnergyDTOS       Menge der alternativen Erzeugungsanlagen
+     * @param producerManipulations Menge der Manipulationen
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     */
     private void processOthers(ZonedDateTime currentWithoutSeconds, ProductionAggregate productionAggregate, List<OtherEnergyDTO> otherEnergyDTOS, List<ProducerManipulationMessage> producerManipulations) throws ProductionException, ProductionProducerRepositoryException {
         for (OtherEnergyDTO otherEnergyDTO : otherEnergyDTOS) {
             ProducerManipulationMessage producerManipulationMessage = null;
+            // Prüfe, ob eine Manipulation für aktuellen Zeitstempel und Erzeugungsanlage existiert
             for (ProducerManipulationMessage producerManipulation : producerManipulations) {
                 ZonedDateTime start = TimestampUtils.toBerlinTimestamp(producerManipulation.getStartTimestamp(), false);
                 ZonedDateTime end = TimestampUtils.toBerlinTimestamp(producerManipulation.getEndTimestamp(), false);
@@ -272,12 +386,26 @@ public class ProductionScheduler {
                     producerManipulationMessage = producerManipulation;
                 }
             }
+
+            // Erstelle Erzeugungswert mit Berücksichtigung der Kapazität (inkl. Manipulation)
             double currentValue = this.producerManipulation(producerManipulationMessage, otherEnergyDTO.getRatedCapacity(), otherEnergyDTO.getCapacity());
+            // Erstellung der Erzeugungs-Entität und Zuweisung an Erzeugungsaggregat
             this.createAndAssignProductionProducer(otherEnergyDTO.getOtherEnergyId(), "OTHER",
                     currentValue, otherEnergyDTO.getRatedCapacity(), currentWithoutSeconds.toEpochSecond(), productionAggregate);
         }
     }
 
+    /**
+     * Diese Methode berücksichtigt die Speichermanipulationen der Maßnahmenabfrage und erstellt zusätzliche Erzeugungswerte
+     * um die gesamte Erzeugung zu manipulieren
+     *
+     * @param message                        Maßnahmenabfrage
+     * @param currentWithoutSeconds          Zeitstempel
+     * @param storageManipulationToPeriodMap Manipulationen
+     * @param productionAggregate            Erzeugungsaggregat
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     */
     private void storageManipulation(ActionRequestMessage message, ZonedDateTime currentWithoutSeconds, Map<StorageManipulationMessage, Pair<Integer, Integer>> storageManipulationToPeriodMap, ProductionAggregate productionAggregate) throws ProductionException, ProductionProducerRepositoryException {
         for (StorageManipulationMessage storageManipulation : message.getStorageManipulations()) {
             ZonedDateTime start = TimestampUtils.toBerlinTimestamp(storageManipulation.getStartTimestamp(), false);
@@ -298,6 +426,16 @@ public class ProductionScheduler {
         }
     }
 
+    /**
+     * Diese Methode berücksichtigt die Stromnetzmanipulation der Maßnahmenabfrage und erstellt zusätzliche Erzeugungswerte
+     * um die gesamte Erzeugung zu manipulieren
+     *
+     * @param message               Maßnahmenabfrage
+     * @param currentWithoutSeconds Zeitstempel
+     * @param productionAggregate   Erzeugungsaggregat
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     */
     private void gridManipulation(ActionRequestMessage message, ZonedDateTime currentWithoutSeconds, ProductionAggregate productionAggregate) throws ProductionException, ProductionProducerRepositoryException {
         for (GridManipulationMessage gridManipulation : message.getGridManipulations()) {
             ZonedDateTime start = TimestampUtils.toBerlinTimestamp(gridManipulation.getStartTimestamp(), false);
@@ -317,13 +455,21 @@ public class ProductionScheduler {
         }
     }
 
-    private WeatherDTO getCorrectDTO(List<WeatherDTO> weatherDTOS, ZonedDateTime threadCurrentZDT) {
+    /**
+     * Diese Methode holt die korrekten Wetterdaten mithilfe
+     *
+     * @param weatherDTOS Liste der Wetterdaten
+     * @param currentZDT  aktueller Zeitstempel
+     * @return korrekte Wetterdaten für Zeitstempel
+     */
+    private WeatherDTO getCorrectDTO(List<WeatherDTO> weatherDTOS, ZonedDateTime currentZDT) {
+
         if (!weatherDTOS.isEmpty()) {
             for (WeatherDTO dto : weatherDTOS) {
-                if (dto.getTimestamp().getDayOfWeek() == threadCurrentZDT.getDayOfWeek() &&
-                        dto.getTimestamp().getMonthValue() == threadCurrentZDT.getMonthValue() &&
-                        dto.getTimestamp().getYear() == threadCurrentZDT.getYear() &&
-                        dto.getTimestamp().getHour() == threadCurrentZDT.getHour()) {
+                if (dto.getTimestamp().getDayOfWeek() == currentZDT.getDayOfWeek() &&
+                        dto.getTimestamp().getMonthValue() == currentZDT.getMonthValue() &&
+                        dto.getTimestamp().getYear() == currentZDT.getYear() &&
+                        dto.getTimestamp().getHour() == currentZDT.getHour()) {
                     return dto;
                 }
             }
@@ -334,6 +480,14 @@ public class ProductionScheduler {
 
     }
 
+    /**
+     * Diese Methode manipuliert die tatsächliche Kapazität einer Erzeugungsanlage
+     *
+     * @param producerManipulationMessage Manipulation
+     * @param possibleValue               höchstmögliche Erzeugung der Erzeugungsanlage
+     * @param capacity                    tatsächliche Kapazität der Erzeugungsanlage
+     * @return (manipulierter) Erzeugungswert
+     */
     private double producerManipulation(ProducerManipulationMessage producerManipulationMessage, Double possibleValue, Double capacity) {
         if (producerManipulationMessage != null) {
             if (producerManipulationMessage.getType().equals("PRODUCER_UP")) {
@@ -345,6 +499,18 @@ public class ProductionScheduler {
         return possibleValue / 100 * capacity;
     }
 
+    /**
+     * Diese Methode erstellt eine Erzeugungswert-Entität und weist es dem Erzeugungsaggregat zu
+     *
+     * @param producerId          Id der Erzeugungsanlage
+     * @param type                Art der Erzeugungsanlage
+     * @param currentValue        tatsächlicher Erzeugungswert
+     * @param possibleValue       höchstmöglicher Erzeugungswert
+     * @param timestamp           aktueller Zeitstempel
+     * @param productionAggregate Erzeugungsaggregat
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     */
     private void createAndAssignProductionProducer(String producerId, String type, Double currentValue, Double possibleValue, long timestamp, ProductionAggregate productionAggregate) throws ProductionException, ProductionProducerRepositoryException {
         ProductionProducerEntity productionProducerEntity = new ProductionProducerEntity();
         productionProducerEntity.setProducerId(
@@ -364,6 +530,17 @@ public class ProductionScheduler {
         productionProducerRepository.assignToInternal(internalId, productionAggregate);
     }
 
+    /**
+     * Diese Methode manipuliert die Aggregation, indem es eine Erzeugungswert-Entität mit der Nennleistung aus der
+     * Speichermanipulation erstellt. Wenn ein ein Speicher z.B. beladen wird, wird ein Erzeugungswert mit einer
+     * negativen Zahl erzeugt
+     *
+     * @param currentWithoutSeconds aktueller Zeitstempel
+     * @param productionAggregate   Erzeugungsaggregat
+     * @param storageManipulation   Speichermanipulation
+     * @throws ProductionException                   e
+     * @throws ProductionProducerRepositoryException e
+     */
     private void storageManipulation(ZonedDateTime currentWithoutSeconds, ProductionAggregate productionAggregate, StorageManipulationMessage storageManipulation) throws ProductionException, ProductionProducerRepositoryException {
         if (storageManipulation.getType().equals("STORAGE_LOAD")) {
             this.createAndAssignProductionProducer(storageManipulation.getStorageId(), "STORAGE",

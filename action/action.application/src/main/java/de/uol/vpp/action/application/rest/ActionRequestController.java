@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Schnittstelle für die Erstellung und Abfrage von Maßnahmenabfragen
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/action", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -24,6 +27,12 @@ public class ActionRequestController {
     private final IActionRequestService actionRequestService;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Hole alle Maßnahmenabfragen durch Id des VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return Maßnahmenabfragen
+     */
     @GetMapping(path = "/by/vpp/{virtualPowerPlantId}")
     public ResponseEntity<?> getAllActionRequestsByVppId(@PathVariable String virtualPowerPlantId) {
         try {
@@ -45,6 +54,12 @@ public class ActionRequestController {
         }
     }
 
+    /**
+     * Hole einzelne Maßnahmenabfrage durch Id
+     *
+     * @param actionRequestId Id der Maßnahmenabfrage
+     * @return Maßnahmenabfrage
+     */
     @GetMapping(path = "/{actionRequestId}")
     public ResponseEntity<?> getActionRequestById(@PathVariable String actionRequestId) {
         try {
@@ -62,6 +77,12 @@ public class ActionRequestController {
         }
     }
 
+    /**
+     * Startet die Erzeugung und den Prozess der Maßnahmenabfrage
+     *
+     * @param dto Datentransferobjekt der Maßnahmenabfrage
+     * @return Austauschobjekt
+     */
     @PostMapping()
     public ResponseEntity<?> scheduleActionRequest(@RequestBody ActionRequestDTO dto) {
         try {

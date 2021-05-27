@@ -3,6 +3,9 @@ package de.uol.vpp.action.domain.valueobjects;
 import de.uol.vpp.action.domain.exceptions.ManipulationException;
 import lombok.Data;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.entities.ProducerManipulationEntity}
+ */
 @Data
 public class ProducerManipulationProducerIdVO {
     private String value;

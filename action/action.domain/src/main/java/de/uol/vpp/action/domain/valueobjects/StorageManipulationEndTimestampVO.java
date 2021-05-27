@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.entities.StorageManipulationEntity}
+ */
 @Getter
 public class StorageManipulationEndTimestampVO {
     private ZonedDateTime value;

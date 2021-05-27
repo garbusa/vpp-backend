@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * RabbitMQ Austauschobjekt
+ * Wird in der Queue für den Maßnahmen-Service abgelegt, sobald Erzeugungsprognose erfolgreich beendet ist
+ */
 @Data
 @NoArgsConstructor
 public class ProductionMessage implements Serializable {

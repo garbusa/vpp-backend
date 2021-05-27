@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Siehe {@link de.uol.vpp.load.domain.entities.LoadHouseholdEntity}
+ */
 @Getter
 @Setter
 public class LoadHouseholdStartTimestampVO {

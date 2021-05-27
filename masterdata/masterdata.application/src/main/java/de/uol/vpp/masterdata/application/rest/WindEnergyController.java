@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.WindEnergyDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerServiceException;
 import de.uol.vpp.masterdata.domain.services.IWindEnergyService;
-import de.uol.vpp.masterdata.domain.services.ProducerServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Ressource für Windkraftanlagen
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/wind", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,6 +26,12 @@ public class WindEnergyController {
     private final IWindEnergyService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Hole alle Windkraftanlagen eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste Windkraftanlagen
+     */
     @GetMapping(path = "/by/dpp/{" +
             "decentralizedPowerPlantId}")
     public ResponseEntity<?> getAllWindEnergysByDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
@@ -43,6 +52,12 @@ public class WindEnergyController {
         }
     }
 
+    /**
+     * Hole alle Windkraftanlagen eines Haushalts
+     *
+     * @param householdId Id des Haushalts
+     * @return Liste von Windkraftanlagen
+     */
     @GetMapping(path = "/by/household/{" +
             "householdId}")
     public ResponseEntity<?> getAllWindEnergysByHousehold(@PathVariable String householdId) {
@@ -63,6 +78,12 @@ public class WindEnergyController {
         }
     }
 
+    /**
+     * Hole eine spezifische Windkraftanlage
+     *
+     * @param windEnergyId Id der Windkraftanlage
+     * @return Windkraftanlage
+     */
     @GetMapping(path = "/{windEnergyId}")
     public ResponseEntity<?> getOneWindEnergy(@PathVariable String windEnergyId) {
         try {
@@ -80,7 +101,13 @@ public class WindEnergyController {
         }
     }
 
-    //todo wenn vpp schon ein windEnergy hat, aber published => error (selbe für storage)
+    /**
+     * Persistiert Windkraftanlage und weist es einem DK zu
+     *
+     * @param dto                       zu speichernde Windkraftanlage
+     * @param decentralizedPowerPlantId Id des DK
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/dpp/{decentralizedPowerPlantId}")
     public ResponseEntity<?> saveWindEnergyWithDecentralizedPowerPlant(@RequestBody WindEnergyDTO dto, @PathVariable String decentralizedPowerPlantId) {
         try {
@@ -98,6 +125,13 @@ public class WindEnergyController {
         }
     }
 
+    /**
+     * Persistiert Windkraftanlage und weist es einem Haushalt zu
+     *
+     * @param dto         zu speichernde Windkraftanlage
+     * @param householdId Id des Haushalts
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/household/{householdId}")
     public ResponseEntity<?> saveWindEnergyWithHousehold(@RequestBody WindEnergyDTO dto,
                                                          @PathVariable String householdId) {
@@ -116,6 +150,13 @@ public class WindEnergyController {
         }
     }
 
+    /**
+     * Löscht Windkraftanlage
+     *
+     * @param windEnergyId        Id der Windkraftanlage
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{windEnergyId}")
     public ResponseEntity<?> deleteWindEnergy(@PathVariable String windEnergyId, @RequestParam String virtualPowerPlantId) {
         try {
@@ -133,6 +174,14 @@ public class WindEnergyController {
         }
     }
 
+    /**
+     * Aktualisiert Windkraftanlage
+     *
+     * @param windEnergyId        Id der Windkraftanlage
+     * @param newDto              aktualisierte Daten
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{windEnergyId}")
     public ResponseEntity<?> updateWindEnergy(@PathVariable String windEnergyId, @RequestBody WindEnergyDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {

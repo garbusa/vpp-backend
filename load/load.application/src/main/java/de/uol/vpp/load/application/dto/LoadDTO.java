@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Datentransferobjekt für Lastenwerte-Aggregation
+ */
 @Data
 public class LoadDTO {
     private String actionRequestId;

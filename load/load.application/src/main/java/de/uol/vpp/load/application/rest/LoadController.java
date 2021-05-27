@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Schnittstele für das holen der Lastenwerte einer bestimmten Maßnahmenabfrage
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/load", produces = MediaType.APPLICATION_JSON_VALUE)

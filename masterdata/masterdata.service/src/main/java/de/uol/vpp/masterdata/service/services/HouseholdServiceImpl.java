@@ -2,13 +2,9 @@ package de.uol.vpp.masterdata.service.services;
 
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
-import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
-import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
-import de.uol.vpp.masterdata.domain.repositories.HouseholdRepositoryException;
+import de.uol.vpp.masterdata.domain.exceptions.*;
 import de.uol.vpp.masterdata.domain.repositories.IHouseholdRepository;
 import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
-import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
-import de.uol.vpp.masterdata.domain.services.HouseholdServiceException;
 import de.uol.vpp.masterdata.domain.services.IHouseholdService;
 import de.uol.vpp.masterdata.domain.utils.IPublishUtil;
 import de.uol.vpp.masterdata.domain.utils.PublishException;
@@ -21,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IHouseholdService}
+ */
 @Transactional(rollbackFor = HouseholdServiceException.class)
 @RequiredArgsConstructor
 @Service

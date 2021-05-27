@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Siehe {@link de.uol.vpp.load.domain.aggregates.LoadAggregate}
+ */
 @Getter
 @Setter
 public class LoadStartTimestampVO {

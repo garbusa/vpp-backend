@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Schnittstelle für die Abfrage der Erzeugungsprognose einer Maßnahmenabfrage
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/production", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -26,8 +29,14 @@ public class ProductionController {
     private final IProductionService productionService;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Gibt Erzeugungswerte einer Maßnahmenabfrage aus
+     *
+     * @param actionRequestId Id der Maßnahmenabfrage
+     * @return ApiResponse mit Erzeugungswerten
+     */
     @GetMapping(path = "/{actionRequestId}")
-    public ResponseEntity<?> getAllProductionsByVirtualPowerPlantIdAndTimestamp(@PathVariable String actionRequestId) {
+    public ResponseEntity<?> getAllProductionsByActionRequestId(@PathVariable String actionRequestId) {
         try {
             return new ResponseEntity<>(
                     new ApiResponse(true, false, "Abfrage aller Stromerzeugungen war erfolgreich",

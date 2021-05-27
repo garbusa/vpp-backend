@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.SolarEnergyDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerServiceException;
 import de.uol.vpp.masterdata.domain.services.ISolarEnergyService;
-import de.uol.vpp.masterdata.domain.services.ProducerServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Ressource für Solaranlagen
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/solar", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,6 +26,12 @@ public class SolarEnergyController {
     private final ISolarEnergyService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Hole alle Solaranlagen eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste Solaranlagen
+     */
     @GetMapping(path = "/by/dpp/{" +
             "decentralizedPowerPlantId}")
     public ResponseEntity<?> getAllSolarEnergysByDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
@@ -43,6 +52,12 @@ public class SolarEnergyController {
         }
     }
 
+    /**
+     * Hole alle Solaranlagen eines Haushalts
+     *
+     * @param householdId Id des Haushalts
+     * @return Liste von Solaranlagen
+     */
     @GetMapping(path = "/by/household/{" +
             "householdId}")
     public ResponseEntity<?> getAllSolarEnergysByHousehold(@PathVariable String householdId) {
@@ -63,6 +78,12 @@ public class SolarEnergyController {
         }
     }
 
+    /**
+     * Hole eine spezifische Solaranlage
+     *
+     * @param solarEnergyId Id der Solaranlage
+     * @return Solaranlage
+     */
     @GetMapping(path = "/{solarEnergyId}")
     public ResponseEntity<?> getOneSolarEnergy(@PathVariable String solarEnergyId) {
         try {
@@ -80,7 +101,13 @@ public class SolarEnergyController {
         }
     }
 
-    //todo wenn vpp schon ein solarEnergy hat, aber published => error (selbe für storage)
+    /**
+     * Persistiert Solaranlage und weist es einem DK zu
+     *
+     * @param dto                       zu speichernde Solaranlage
+     * @param decentralizedPowerPlantId Id des DK
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/dpp/{decentralizedPowerPlantId}")
     public ResponseEntity<?> saveSolarEnergyWithDecentralizedPowerPlant(@RequestBody SolarEnergyDTO dto, @PathVariable String decentralizedPowerPlantId) {
         try {
@@ -98,6 +125,13 @@ public class SolarEnergyController {
         }
     }
 
+    /**
+     * Persistiert Solaranlage und weist es einem Haushalt zu
+     *
+     * @param dto         zu speichernde Solaranlage
+     * @param householdId Id des Haushalts
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/household/{householdId}")
     public ResponseEntity<?> saveSolarEnergyWithHousehold(@RequestBody SolarEnergyDTO dto,
                                                           @PathVariable String householdId) {
@@ -116,6 +150,13 @@ public class SolarEnergyController {
         }
     }
 
+    /**
+     * Löscht Solaranlage
+     *
+     * @param solarEnergyId       Id der Solaranlage
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{solarEnergyId}")
     public ResponseEntity<?> deleteSolarEnergy(@PathVariable String solarEnergyId, @RequestParam String virtualPowerPlantId) {
         try {
@@ -133,6 +174,14 @@ public class SolarEnergyController {
         }
     }
 
+    /**
+     * Aktualisiert Solaranlage
+     *
+     * @param solarEnergyId       Id der Solaranlage
+     * @param newDto              aktualisierte Daten
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{solarEnergyId}")
     public ResponseEntity<?> updateSolarEnergy(@PathVariable String solarEnergyId, @RequestBody SolarEnergyDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {

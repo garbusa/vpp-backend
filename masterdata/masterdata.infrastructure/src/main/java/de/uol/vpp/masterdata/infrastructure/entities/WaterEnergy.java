@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+/**
+ * Datenbank-Entität der Wasserkraftanlagen {@link de.uol.vpp.masterdata.domain.entities.WaterEnergyEntity}
+ */
 @Entity
 @Data
 public class WaterEnergy {

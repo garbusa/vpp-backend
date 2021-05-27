@@ -1,13 +1,16 @@
 package de.uol.vpp.action.infrastructure.entities;
 
-import de.uol.vpp.action.domain.enums.ProducerManipulationTypeEnum;
+import de.uol.vpp.action.domain.enums.ManipulationTypeEnum;
+import de.uol.vpp.action.infrastructure.entities.embedded.ManipulationPrimaryKey;
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 
+/**
+ * Datenbank-Entität der Erzeugungsmanipulation
+ */
 @Entity
 @Data
 public class ProducerManipulation {
@@ -17,7 +20,7 @@ public class ProducerManipulation {
 
     @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL)
-    private ProducerManipulationTypeEnum manipulationType;
+    private ManipulationTypeEnum manipulationType;
 
     @Column(nullable = false)
     private Double capacity;
@@ -29,34 +32,26 @@ public class ProducerManipulation {
     @NoArgsConstructor
     public static class ProducerManipulationPrimaryKey implements Serializable {
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "action_request_id", referencedColumnName = "actionRequestId")
-        private ActionRequest actionRequest;
-
-        @Column(nullable = false)
-        private ZonedDateTime startTimestamp;
-
-        @Column(nullable = false)
-        private ZonedDateTime endTimestamp;
+        @Embedded
+        private ManipulationPrimaryKey manipulationPrimaryKey;
 
         @Column(nullable = false)
         private String producerId;
-
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ProducerManipulationPrimaryKey that = (ProducerManipulationPrimaryKey) o;
-            return Objects.equals(actionRequest.getActionRequestId(), that.actionRequest.getActionRequestId()) &&
-                    Objects.equals(startTimestamp, that.startTimestamp) &&
-                    Objects.equals(endTimestamp, that.endTimestamp) &&
+            return Objects.equals(manipulationPrimaryKey.getActionRequest().getActionRequestId(), that.getManipulationPrimaryKey().getActionRequest().getActionRequestId()) &&
+                    Objects.equals(manipulationPrimaryKey.getStartTimestamp(), that.getManipulationPrimaryKey().getStartTimestamp()) &&
+                    Objects.equals(manipulationPrimaryKey.getEndTimestamp(), that.getManipulationPrimaryKey().getEndTimestamp()) &&
                     Objects.equals(producerId, that.producerId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(actionRequest.getActionRequestId(), startTimestamp, endTimestamp, producerId);
+            return Objects.hash(manipulationPrimaryKey.getActionRequest().getActionRequestId(), manipulationPrimaryKey.getStartTimestamp(), manipulationPrimaryKey.getEndTimestamp(), producerId);
         }
     }
 

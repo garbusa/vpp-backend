@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.WaterEnergyEntity;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IWaterEnergyRepository;
-import de.uol.vpp.masterdata.domain.repositories.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.WaterEnergyIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IWaterEnergyRepository}
+ */
 @RequiredArgsConstructor
 @Service
 public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
@@ -83,16 +86,16 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
     }
 
     @Override
-    public void save(WaterEnergyEntity WaterEnergyEntity) throws ProducerRepositoryException {
-        WaterEnergy jpaEntity = converter.toInfrastructure(WaterEnergyEntity);
+    public void save(WaterEnergyEntity domainEntity) throws ProducerRepositoryException {
+        WaterEnergy jpaEntity = converter.toInfrastructure(domainEntity);
         jpaRepository.save(jpaEntity);
     }
 
     @Override
-    public void assignToDecentralizedPowerPlant(WaterEnergyEntity WaterEnergyEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
+    public void assignToDecentralizedPowerPlant(WaterEnergyEntity domainEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
         Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<WaterEnergy> Water = jpaRepository.findOneById(WaterEnergyEntity.getId().getValue());
+            Optional<WaterEnergy> Water = jpaRepository.findOneById(domainEntity.getId().getValue());
             if (Water.isPresent()) {
                 if (Water.get().getDecentralizedPowerPlant() == null &&
                         Water.get().getHousehold() == null) {
@@ -102,12 +105,12 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", WaterEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", WaterEnergyEntity.getId().getValue())
+                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
                 );
             }
         } else {
@@ -118,10 +121,10 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
     }
 
     @Override
-    public void assignToHousehold(WaterEnergyEntity WaterEnergyEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
+    public void assignToHousehold(WaterEnergyEntity domainEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
         Optional<Household> household = householdJpaRepository.findOneById(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<WaterEnergy> WaterEnergy = jpaRepository.findOneById(WaterEnergyEntity.getId().getValue());
+            Optional<WaterEnergy> WaterEnergy = jpaRepository.findOneById(domainEntity.getId().getValue());
             if (WaterEnergy.isPresent()) {
                 if (WaterEnergy.get().getDecentralizedPowerPlant() == null &&
                         WaterEnergy.get().getHousehold() == null) {
@@ -131,12 +134,12 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", WaterEnergyEntity.getId().getValue())
+                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", WaterEnergyEntity.getId().getValue())
+                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
                 );
             }
         } else {

@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Konvertierungsklasse zwischen Infrastruktur und Domänen-Schicht
+ */
 @Service
 public class InfrastructureDomainConverter {
 
@@ -30,7 +33,7 @@ public class InfrastructureDomainConverter {
         return domainEntity;
     }
 
-    public LoadHouseholdEntity toDomain(ELoadHousehold jpaEntity) throws LoadException {
+    private LoadHouseholdEntity toDomain(ELoadHousehold jpaEntity) throws LoadException {
         LoadHouseholdEntity domainEntity = new LoadHouseholdEntity();
         domainEntity.setLoadHouseholdId(new LoadHouseholdIdVO(jpaEntity.getHouseholdId()));
         domainEntity.setLoadHouseholdStartTimestamp(new LoadHouseholdStartTimestampVO(jpaEntity.getTimestamp().toEpochSecond()));

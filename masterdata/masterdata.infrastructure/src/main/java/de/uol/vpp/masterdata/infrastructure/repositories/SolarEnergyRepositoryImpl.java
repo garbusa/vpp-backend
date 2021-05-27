@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.SolarEnergyEntity;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.ISolarEnergyRepository;
-import de.uol.vpp.masterdata.domain.repositories.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.SolarEnergyIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
@@ -83,16 +83,16 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
     }
 
     @Override
-    public void save(SolarEnergyEntity SolarEnergyEntity) throws ProducerRepositoryException {
-        SolarEnergy jpaEntity = converter.toInfrastructure(SolarEnergyEntity);
+    public void save(SolarEnergyEntity domainEntity) throws ProducerRepositoryException {
+        SolarEnergy jpaEntity = converter.toInfrastructure(domainEntity);
         jpaRepository.save(jpaEntity);
     }
 
     @Override
-    public void assignToDecentralizedPowerPlant(SolarEnergyEntity SolarEnergyEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
+    public void assignToDecentralizedPowerPlant(SolarEnergyEntity domainEntity, DecentralizedPowerPlantAggregate decentralizedPowerPlantAggregate) throws ProducerRepositoryException {
         Optional<DecentralizedPowerPlant> dpp = decentralizedPowerPlantJpaRepository.findOneById(decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue());
         if (dpp.isPresent()) {
-            Optional<SolarEnergy> Solar = jpaRepository.findOneById(SolarEnergyEntity.getId().getValue());
+            Optional<SolarEnergy> Solar = jpaRepository.findOneById(domainEntity.getId().getValue());
             if (Solar.isPresent()) {
                 if (Solar.get().getDecentralizedPowerPlant() == null &&
                         Solar.get().getHousehold() == null) {
@@ -102,26 +102,26 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Solaranlage %s konnte DK nicht zugewiesen werden, da Solaranlage bereits zugewiesen wurde", SolarEnergyEntity.getId().getValue())
+                            String.format("Solaranlage %s konnte DK nicht zugewiesen werden, da Solaranlage bereits zugewiesen wurde", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Solaranlage %s konnte nicht gefunden werden", SolarEnergyEntity.getId().getValue())
+                        String.format("Solaranlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Solaranlage %s konnte nicht zugewiesen werden, da DK %s nicht gefunden wurde", SolarEnergyEntity.getId().getValue(), decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("Solaranlage %s konnte nicht zugewiesen werden, da DK %s nicht gefunden wurde", domainEntity.getId().getValue(), decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
 
     @Override
-    public void assignToHousehold(SolarEnergyEntity SolarEnergyEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
+    public void assignToHousehold(SolarEnergyEntity domainEntity, HouseholdAggregate householdAggregate) throws ProducerRepositoryException {
         Optional<Household> household = householdJpaRepository.findOneById(householdAggregate.getHouseholdId().getValue());
         if (household.isPresent()) {
-            Optional<SolarEnergy> SolarEnergy = jpaRepository.findOneById(SolarEnergyEntity.getId().getValue());
+            Optional<SolarEnergy> SolarEnergy = jpaRepository.findOneById(domainEntity.getId().getValue());
             if (SolarEnergy.isPresent()) {
                 if (SolarEnergy.get().getDecentralizedPowerPlant() == null &&
                         SolarEnergy.get().getHousehold() == null) {
@@ -131,17 +131,17 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Solaranlage %s konnte Haushalt nicht zugewiesen werden, da Solaranlage bereits zugewiesen wurde", SolarEnergyEntity.getId().getValue())
+                            String.format("Solaranlage %s konnte Haushalt nicht zugewiesen werden, da Solaranlage bereits zugewiesen wurde", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Solaranlage %s konnte nicht gefunden werden", SolarEnergyEntity.getId().getValue())
+                        String.format("Solaranlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Solaranlage %s konnte nicht zugewiesen werden, da Haushalt %s nicht gefunden wurde", SolarEnergyEntity.getId().getValue(), householdAggregate.getHouseholdId().getValue())
+                    String.format("Solaranlage %s konnte nicht zugewiesen werden, da Haushalt %s nicht gefunden wurde", domainEntity.getId().getValue(), householdAggregate.getHouseholdId().getValue())
             );
         }
     }

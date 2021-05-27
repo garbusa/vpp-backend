@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.VirtualPowerPlantDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
+import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantServiceException;
 import de.uol.vpp.masterdata.domain.services.IVirtualPowerPlantService;
-import de.uol.vpp.masterdata.domain.services.VirtualPowerPlantServiceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +26,11 @@ public class VirtualPowerPlantController {
     private final IVirtualPowerPlantService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Hole alle virtuellen Kraftwerke
+     *
+     * @return Liste aller VK
+     */
     @GetMapping
     public ResponseEntity<?> getAllVirtualPowerPlants() {
         try {
@@ -45,6 +50,11 @@ public class VirtualPowerPlantController {
         }
     }
 
+    /**
+     * Hole alle veröffentlichte VK
+     *
+     * @return Liste veröffentlichter VK
+     */
     @GetMapping("/active")
     public ResponseEntity<?> getAllActiveVirtualPowerPlants() {
         try {
@@ -64,6 +74,12 @@ public class VirtualPowerPlantController {
         }
     }
 
+    /**
+     * Hole spezifisches VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return VK
+     */
     @GetMapping(path = "/{virtualPowerPlantId}")
     public ResponseEntity<?> getOneVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
@@ -81,6 +97,12 @@ public class VirtualPowerPlantController {
         }
     }
 
+    /**
+     * Peristiert ein VK
+     *
+     * @param dto zu speichernde Daten
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping
     public ResponseEntity<?> saveVirtualPowerPlant(@RequestBody VirtualPowerPlantDTO dto) {
         try {
@@ -102,6 +124,12 @@ public class VirtualPowerPlantController {
         }
     }
 
+    /**
+     * Löscht ein VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{virtualPowerPlantId}")
     public ResponseEntity<?> deleteVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
@@ -119,6 +147,12 @@ public class VirtualPowerPlantController {
         }
     }
 
+    /**
+     * Veröffentlicht ein VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiReponse ohne Daten
+     */
     @GetMapping(path = "/{virtualPowerPlantId}/publish")
     public ResponseEntity<?> publishVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
@@ -137,6 +171,12 @@ public class VirtualPowerPlantController {
 
     }
 
+    /**
+     * Macht die Veröffentlichung rückgängig
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @GetMapping(path = "/{virtualPowerPlantId}/unpublish")
     public ResponseEntity<?> unpublishVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
@@ -154,6 +194,13 @@ public class VirtualPowerPlantController {
         }
     }
 
+    /**
+     * Aktualisiert ein VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @param newDto              aktualisierte Daten
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{virtualPowerPlantId}")
     public ResponseEntity<?> updateVirtualPowerPlant(@PathVariable String virtualPowerPlantId, @RequestBody VirtualPowerPlantDTO newDto) {
         try {

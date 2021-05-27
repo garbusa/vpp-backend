@@ -3,7 +3,7 @@ package de.uol.vpp.masterdata.infrastructure.repositories;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
-import de.uol.vpp.masterdata.domain.repositories.HouseholdRepositoryException;
+import de.uol.vpp.masterdata.domain.exceptions.HouseholdRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IHouseholdRepository;
 import de.uol.vpp.masterdata.domain.valueobjects.HouseholdIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IHouseholdRepository}
+ */
 @Service
 @RequiredArgsConstructor
 public class HouseholdRepositoryImpl implements IHouseholdRepository {

@@ -7,6 +7,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
+/**
+ * Web Security Konfiguration
+ * Deaktiviert CORS und CSRF, und gibt REST-Ressourcen frei
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(

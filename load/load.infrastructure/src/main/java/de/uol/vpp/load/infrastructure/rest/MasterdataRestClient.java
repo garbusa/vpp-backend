@@ -14,10 +14,20 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * REST-Client um Daten aus dem Daten-Service zu beziehen
+ */
 @Component
 @Log4j2
 public class MasterdataRestClient {
 
+    /**
+     * Prüft, ob angefragtes VK veröffentlicht ist
+     *
+     * @param vppId Id des VK
+     * @return true/false
+     * @throws MasterdataRestClientException e
+     */
     public boolean isActiveVpp(String vppId) throws MasterdataRestClientException {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -40,6 +50,13 @@ public class MasterdataRestClient {
         throw new MasterdataRestClientException("something went wrong while request vpp published status");
     }
 
+    /**
+     * Hole alle Haushalt Ids durch Id des VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return Liste der Haushalt Ids
+     * @throws MasterdataRestClientException e
+     */
     public List<String> getAllHouseholdsByVppId(String virtualPowerPlantId) throws MasterdataRestClientException {
         try {
             List<String> ids = new ArrayList<>();
@@ -63,6 +80,13 @@ public class MasterdataRestClient {
         }
     }
 
+    /**
+     * Hole Anzahl der Haushaltsmitglieder aus aktuellem Haushalt
+     *
+     * @param householdId Id des Haushalts
+     * @return Anzahl der Haushaltsmitglieder
+     * @throws MasterdataRestClientException e
+     */
     public int getHouseholdMemberAmountById(String householdId) throws MasterdataRestClientException {
         try {
             RestTemplate restTemplate = new RestTemplate();

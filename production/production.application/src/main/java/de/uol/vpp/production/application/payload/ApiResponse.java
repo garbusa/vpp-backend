@@ -1,5 +1,9 @@
 package de.uol.vpp.production.application.payload;
 
+/**
+ * Antwortobjekt für REST-Anfragen
+ * Beinhaltet Status ob Anfrage erfolgreich war, eine Nachricht und ggf. angefragte Daten
+ */
 public class ApiResponse {
     private Boolean success;
     private Boolean returnBack;

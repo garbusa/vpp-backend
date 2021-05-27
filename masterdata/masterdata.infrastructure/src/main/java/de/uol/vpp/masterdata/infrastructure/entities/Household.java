@@ -5,6 +5,9 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Datenbank-Entität der Haushalte {@link de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate}
+ */
 @Entity
 @Data
 public class Household {

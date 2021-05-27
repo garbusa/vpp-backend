@@ -7,6 +7,9 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
+/**
+ * Datenbank-Entität der Maßnmahmenabfrage
+ */
 @Entity
 @Data
 public class ActionRequest {
@@ -29,13 +32,13 @@ public class ActionRequest {
     @OneToMany(mappedBy = "actionCatalogPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<ActionCatalog> catalogs;
 
-    @OneToMany(mappedBy = "producerManipulationPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "producerManipulationPrimaryKey.manipulationPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<ProducerManipulation> producerManipulations;
 
-    @OneToMany(mappedBy = "storageManipulationPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "storageManipulationPrimaryKey.manipulationPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<StorageManipulation> storageManipulations;
 
-    @OneToMany(mappedBy = "gridManipulationPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "manipulationPrimaryKey.actionRequest", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<GridManipulation> gridManipulations;
 
     @Column(nullable = false)

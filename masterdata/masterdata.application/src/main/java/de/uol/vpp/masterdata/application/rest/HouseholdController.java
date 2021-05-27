@@ -4,7 +4,7 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.HouseholdDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
-import de.uol.vpp.masterdata.domain.services.HouseholdServiceException;
+import de.uol.vpp.masterdata.domain.exceptions.HouseholdServiceException;
 import de.uol.vpp.masterdata.domain.services.IHouseholdService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * Rest-Ressource für Haushalte
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/household", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,6 +26,12 @@ public class HouseholdController {
     private final IHouseholdService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Holt alle Haushalte eines VK
+     *
+     * @param virtualPowerPlantId Id des VK
+     * @return Liste aller Haushalte
+     */
     @GetMapping(path = "/by/vpp/{virtualPowerPlantId}")
     public ResponseEntity<?> getAllHouseholdsByVirtualPowerPlantId(@PathVariable String virtualPowerPlantId) {
         try {
@@ -42,6 +51,12 @@ public class HouseholdController {
         }
     }
 
+    /**
+     * Holt ein spezifisches Haushalt
+     *
+     * @param householdId Id des Haushalts
+     * @return Haushalt
+     */
     @GetMapping(path = "/{householdId}")
     public ResponseEntity<?> getOneHousehold(@PathVariable String householdId) {
         try {
@@ -60,6 +75,13 @@ public class HouseholdController {
         }
     }
 
+    /**
+     * Persistiert ein Haushalt und weist es einem VK zu
+     *
+     * @param dto                 zu speicherndes Haushalt
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/vpp/{virtualPowerPlantId}")
     public ResponseEntity<?> saveHousehold(@RequestBody HouseholdDTO dto,
                                            @PathVariable String virtualPowerPlantId) {
@@ -79,6 +101,13 @@ public class HouseholdController {
 
     }
 
+    /**
+     * Löscht ein Haushalt
+     *
+     * @param householdId         Id des Haushalts
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{householdId}")
     public ResponseEntity<?> deleteHousehold(@PathVariable String householdId, String virtualPowerPlantId) {
         try {
@@ -95,6 +124,14 @@ public class HouseholdController {
         }
     }
 
+    /**
+     * Aktualisiert ein Haushalt
+     *
+     * @param householdId         Id des Haushalts
+     * @param newDto              aktualisierte Daten
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{householdId}")
     public ResponseEntity<?> updateHousehold(@PathVariable String householdId, @RequestBody HouseholdDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {

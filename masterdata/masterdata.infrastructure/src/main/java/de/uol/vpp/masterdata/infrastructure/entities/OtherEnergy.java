@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+/**
+ * Datenbank-Entität der alternativen Erzeugungsanlagen {@link de.uol.vpp.masterdata.domain.entities.OtherEnergyEntity}
+ */
 @Entity
 @Data
 public class OtherEnergy {

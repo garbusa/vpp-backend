@@ -3,6 +3,9 @@ package de.uol.vpp.action.domain.valueobjects;
 import de.uol.vpp.action.domain.exceptions.ManipulationException;
 import lombok.Getter;
 
+/**
+ * Siehe {@link de.uol.vpp.action.domain.entities.ProducerManipulationEntity}
+ */
 @Getter
 public class ProducerManipulationCapacityVO {
     private Double value;

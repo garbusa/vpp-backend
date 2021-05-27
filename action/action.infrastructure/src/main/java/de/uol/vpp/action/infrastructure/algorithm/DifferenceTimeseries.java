@@ -6,8 +6,11 @@ import lombok.Data;
 
 import java.util.TreeSet;
 
+/**
+ * Zwischenklasse für die Erstellung von Handlungsempfehlungskataloge
+ */
 @Data
-public class DifferenceTimeseries {
+class DifferenceTimeseries {
     private String actionRequestId;
     private String virtualPowerPlantId;
     private TreeSet<Long> timestamps;

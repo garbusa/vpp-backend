@@ -6,6 +6,9 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Abstraktes DTO, children besitzen Erzeugungsanlagen und Speicheranlagen
+ */
 @Data
 public abstract class DtoHasProducersAndStorages {
     private List<SolarEnergyDTO> solars = new ArrayList<>();

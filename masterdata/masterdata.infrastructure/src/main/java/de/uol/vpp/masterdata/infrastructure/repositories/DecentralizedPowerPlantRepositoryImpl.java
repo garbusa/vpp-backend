@@ -3,9 +3,9 @@ package de.uol.vpp.masterdata.infrastructure.repositories;
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
-import de.uol.vpp.masterdata.domain.repositories.DecentralizedPowerPlantRepositoryException;
+import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantRepositoryException;
+import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IDecentralizedPowerPlantRepository;
-import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IDecentralizedPowerPlantRepository}
+ */
 @RequiredArgsConstructor
 @Service
 public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowerPlantRepository {
@@ -33,7 +36,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
     private final InfrastructureEntityConverter converter;
 
     @Override
-    public List<DecentralizedPowerPlantAggregate> getAllByVppKey(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws DecentralizedPowerPlantRepositoryException {
+    public List<DecentralizedPowerPlantAggregate> getAllByVppId(VirtualPowerPlantAggregate virtualPowerPlantAggregate) throws DecentralizedPowerPlantRepositoryException {
         try {
             Optional<VirtualPowerPlant> virtualPowerPlantOptional = virtualPowerPlantJpaRepository.findOneById(virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue());
             if (virtualPowerPlantOptional.isPresent()) {

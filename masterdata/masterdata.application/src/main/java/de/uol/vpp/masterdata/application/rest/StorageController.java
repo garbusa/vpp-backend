@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.StorageDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.StorageException;
+import de.uol.vpp.masterdata.domain.exceptions.StorageServiceException;
 import de.uol.vpp.masterdata.domain.services.IStorageService;
-import de.uol.vpp.masterdata.domain.services.StorageServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * Rest-Ressource für Speicheranlage
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/storage", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,6 +26,12 @@ public class StorageController {
     private final IStorageService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Hole alle Speicheranlagen eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste von Speicheranlagen
+     */
     @GetMapping(path = "/by/dpp/{" +
             "decentralizedPowerPlantId}")
     public ResponseEntity<?> getAllStoragesByDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
@@ -43,6 +52,12 @@ public class StorageController {
         }
     }
 
+    /**
+     * Hole alle Speicheranlagen eines Haushalts
+     *
+     * @param householdId Id des Haushalts
+     * @return Liste von Speicheranlagen
+     */
     @GetMapping(path = "/by/household/{" +
             "householdId}")
     public ResponseEntity<?> getAllStoragesByHousehold(@PathVariable String householdId) {
@@ -63,6 +78,12 @@ public class StorageController {
         }
     }
 
+    /**
+     * Hole eine spezifische Speicheranlage
+     *
+     * @param storageId Id der Speicheranlage
+     * @return Speicheranlage
+     */
     @GetMapping(path = "/{storageId}")
     public ResponseEntity<?> getOneStorage(@PathVariable String storageId) {
         try {
@@ -80,6 +101,13 @@ public class StorageController {
         }
     }
 
+    /**
+     * Persistiert Speicheranlage und weist es einem DK zu
+     *
+     * @param dto                       zu speichernde Daten
+     * @param decentralizedPowerPlantId Id des DK
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/dpp/{decentralizedPowerPlantId}")
     public ResponseEntity<?> saveStorageWithDecentralizedPowerPlant(@RequestBody StorageDTO dto,
                                                                     @PathVariable String decentralizedPowerPlantId) {
@@ -98,6 +126,13 @@ public class StorageController {
         }
     }
 
+    /**
+     * Persistiert Speicheranlage und weist es einem Haushalt zu
+     *
+     * @param dto         zu speichernde Daten
+     * @param householdId Id des Haushalts
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/household/{householdId}")
     public ResponseEntity<?> saveStorageWithHousehold(@RequestBody StorageDTO dto,
                                                       @PathVariable String householdId) {
@@ -116,6 +151,13 @@ public class StorageController {
         }
     }
 
+    /**
+     * Löscht eine Speicheranlage
+     *
+     * @param storageId           Id der Speicheranlage
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{storageId}")
     public ResponseEntity<?> deleteStorage(@PathVariable String storageId, @RequestParam String virtualPowerPlantId) {
         try {
@@ -132,6 +174,14 @@ public class StorageController {
         }
     }
 
+    /**
+     * Aktualisiert eine Speicheranlage
+     *
+     * @param storageId           Id der Speicheranlage
+     * @param newDto              aktualisierte Daten
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{storageId}")
     public ResponseEntity<?> updateStorage(@PathVariable String storageId, @RequestBody StorageDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {

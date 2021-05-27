@@ -2,6 +2,10 @@ package de.uol.vpp.masterdata.domain.utils;
 
 import de.uol.vpp.masterdata.domain.valueobjects.*;
 
+/**
+ * Diese Schnittstellendefinition beschreibt die Funktionen, die die Editierbarkeit von Komponenten eine VK prüft.
+ * Die Komponenten eines VK, sind nämlich nur editierbar, wenn das VK nicht veröffentlicht ist.
+ */
 public interface IPublishUtil {
 
     boolean isEditable(VirtualPowerPlantIdVO virtualPowerPlantId, DecentralizedPowerPlantIdVO decentralizedPowerPlantId) throws PublishException;

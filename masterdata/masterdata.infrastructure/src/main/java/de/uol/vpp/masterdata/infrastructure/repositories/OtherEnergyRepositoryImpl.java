@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.entities.OtherEnergyEntity;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.repositories.IOtherEnergyRepository;
-import de.uol.vpp.masterdata.domain.repositories.ProducerRepositoryException;
 import de.uol.vpp.masterdata.domain.valueobjects.OtherEnergyIdVO;
 import de.uol.vpp.masterdata.infrastructure.InfrastructureEntityConverter;
 import de.uol.vpp.masterdata.infrastructure.entities.DecentralizedPowerPlant;
@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IOtherEnergyRepository}
+ */
 @RequiredArgsConstructor
 @Service
 public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {

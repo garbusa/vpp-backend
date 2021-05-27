@@ -4,13 +4,12 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.entities.StorageEntity;
-import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
-import de.uol.vpp.masterdata.domain.exceptions.HouseholdException;
-import de.uol.vpp.masterdata.domain.exceptions.StorageException;
-import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
-import de.uol.vpp.masterdata.domain.repositories.*;
+import de.uol.vpp.masterdata.domain.exceptions.*;
+import de.uol.vpp.masterdata.domain.repositories.IDecentralizedPowerPlantRepository;
+import de.uol.vpp.masterdata.domain.repositories.IHouseholdRepository;
+import de.uol.vpp.masterdata.domain.repositories.IStorageRepository;
+import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
 import de.uol.vpp.masterdata.domain.services.IStorageService;
-import de.uol.vpp.masterdata.domain.services.StorageServiceException;
 import de.uol.vpp.masterdata.domain.utils.IPublishUtil;
 import de.uol.vpp.masterdata.domain.utils.PublishException;
 import de.uol.vpp.masterdata.domain.valueobjects.DecentralizedPowerPlantIdVO;
@@ -24,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IStorageService}
+ */
 @Transactional(rollbackFor = StorageServiceException.class)
 @Service
 @RequiredArgsConstructor

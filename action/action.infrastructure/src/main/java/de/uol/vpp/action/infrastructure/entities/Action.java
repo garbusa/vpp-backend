@@ -7,6 +7,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Datenbank-Entität der Handlungsempfehlungen
+ */
 @Entity
 @Data
 public class Action {

@@ -8,6 +8,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Datenbank-Entität des Erzeugungsaggregat
+ * Siehe {@link de.uol.vpp.production.domain.aggregates.ProductionAggregate}
+ */
 @Entity
 @Data
 public class Production {

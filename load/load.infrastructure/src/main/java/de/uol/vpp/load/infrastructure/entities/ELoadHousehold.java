@@ -5,6 +5,9 @@ import lombok.Data;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 
+/**
+ * Datenbank-Entität der Haushaltslast {@link de.uol.vpp.load.domain.entities.LoadHouseholdEntity}
+ */
 @Entity
 @Data
 public class ELoadHousehold {

@@ -5,6 +5,9 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Datenbank-Entität der VK {@link de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate}
+ */
 @Entity
 @Data
 public class VirtualPowerPlant {

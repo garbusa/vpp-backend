@@ -1,13 +1,16 @@
 package de.uol.vpp.action.infrastructure.entities;
 
-import de.uol.vpp.action.domain.enums.StorageManipulationEnum;
+import de.uol.vpp.action.domain.enums.ManipulationTypeEnum;
+import de.uol.vpp.action.infrastructure.entities.embedded.ManipulationPrimaryKey;
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 
+/**
+ * Datenbank-Entität der Speichermanipulation
+ */
 @Entity
 @Data
 public class StorageManipulation {
@@ -23,7 +26,8 @@ public class StorageManipulation {
 
     @Column(nullable = false)
     @Enumerated(EnumType.ORDINAL)
-    private StorageManipulationEnum manipulationType;
+    private ManipulationTypeEnum manipulationType;
+
 
     @Embeddable
     @Getter
@@ -32,15 +36,8 @@ public class StorageManipulation {
     @NoArgsConstructor
     public static class StorageManipulationPrimaryKey implements Serializable {
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "action_request_id", referencedColumnName = "actionRequestId")
-        private ActionRequest actionRequest;
-
-        @Column(nullable = false)
-        private ZonedDateTime startTimestamp;
-
-        @Column(nullable = false)
-        private ZonedDateTime endTimestamp;
+        @Embedded
+        private ManipulationPrimaryKey manipulationPrimaryKey;
 
         @Column(nullable = false)
         private String storageId;
@@ -51,15 +48,15 @@ public class StorageManipulation {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             StorageManipulationPrimaryKey that = (StorageManipulationPrimaryKey) o;
-            return Objects.equals(actionRequest.getActionRequestId(), that.actionRequest.getActionRequestId()) &&
-                    Objects.equals(startTimestamp, that.startTimestamp) &&
-                    Objects.equals(endTimestamp, that.endTimestamp) &&
+            return Objects.equals(manipulationPrimaryKey.getActionRequest().getActionRequestId(), that.getManipulationPrimaryKey().getActionRequest().getActionRequestId()) &&
+                    Objects.equals(manipulationPrimaryKey.getStartTimestamp(), that.getManipulationPrimaryKey().getStartTimestamp()) &&
+                    Objects.equals(manipulationPrimaryKey.getEndTimestamp(), that.getManipulationPrimaryKey().getEndTimestamp()) &&
                     Objects.equals(storageId, that.storageId);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(actionRequest.getActionRequestId(), startTimestamp, endTimestamp, storageId);
+            return Objects.hash(manipulationPrimaryKey.getActionRequest().getActionRequestId(), manipulationPrimaryKey.getStartTimestamp(), manipulationPrimaryKey.getEndTimestamp(), storageId);
         }
     }
 

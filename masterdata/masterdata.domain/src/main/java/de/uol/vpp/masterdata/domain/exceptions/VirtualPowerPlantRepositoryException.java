@@ -1,4 +1,4 @@
-package de.uol.vpp.masterdata.domain.repositories;
+package de.uol.vpp.masterdata.domain.exceptions;
 
 public class VirtualPowerPlantRepositoryException extends Exception {
 

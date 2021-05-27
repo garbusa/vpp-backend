@@ -4,6 +4,7 @@ import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.HouseholdAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.entities.*;
+import de.uol.vpp.masterdata.domain.exceptions.*;
 import de.uol.vpp.masterdata.domain.repositories.*;
 import de.uol.vpp.masterdata.domain.utils.IPublishUtil;
 import de.uol.vpp.masterdata.domain.utils.PublishException;
@@ -13,6 +14,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Die Methoden dieser Klasse prüfen die Editierbarkeit der einzelnen Komponenten eines virtuellen Kraftwerks.
+ * Ein VK ist nur dann editierbar, wenn es nicht veröffentlicht ist.
+ */
 @Service
 @RequiredArgsConstructor
 public class PublishUtilImpl implements IPublishUtil {

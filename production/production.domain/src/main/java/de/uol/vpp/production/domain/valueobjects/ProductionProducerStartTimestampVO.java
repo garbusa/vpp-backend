@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Siehe {@link de.uol.vpp.production.domain.entities.ProductionProducerEntity}
+ */
 @Getter
 @Setter
 public class ProductionProducerStartTimestampVO {

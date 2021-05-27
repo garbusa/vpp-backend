@@ -4,8 +4,8 @@ import de.uol.vpp.masterdata.application.ApplicationDomainConverter;
 import de.uol.vpp.masterdata.application.dto.OtherEnergyDTO;
 import de.uol.vpp.masterdata.application.payload.ApiResponse;
 import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
+import de.uol.vpp.masterdata.domain.exceptions.ProducerServiceException;
 import de.uol.vpp.masterdata.domain.services.IOtherEnergyService;
-import de.uol.vpp.masterdata.domain.services.ProducerServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
+/**
+ * REST-Ressource für alternative Erzeugungsanlagen
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/other", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -23,6 +26,12 @@ public class OtherEnergyController {
     private final IOtherEnergyService service;
     private final ApplicationDomainConverter converter;
 
+    /**
+     * Hole alle alternativen Erzeugungsanlage eines DK
+     *
+     * @param decentralizedPowerPlantId Id des DK
+     * @return Liste alternativer Erzeugungsanlagen
+     */
     @GetMapping(path = "/by/dpp/{" +
             "decentralizedPowerPlantId}")
     public ResponseEntity<?> getAllOtherEnergysByDecentralizedPowerPlant(@PathVariable String decentralizedPowerPlantId) {
@@ -43,6 +52,12 @@ public class OtherEnergyController {
         }
     }
 
+    /**
+     * Hole alle alternativen Erzeugungsanlagen eines Haushalts
+     *
+     * @param householdId Id des Haushalts
+     * @return Liste alternative Erzeugungsanlagen
+     */
     @GetMapping(path = "/by/household/{" +
             "householdId}")
     public ResponseEntity<?> getAllOtherEnergysByHousehold(@PathVariable String householdId) {
@@ -63,6 +78,12 @@ public class OtherEnergyController {
         }
     }
 
+    /**
+     * Hole eine spezifische alternative Erzeugungsanlage
+     *
+     * @param otherEnergyId Id der alternativen Erzeugungsanlage
+     * @return alternative Erzeugungsanlage
+     */
     @GetMapping(path = "/{otherEnergyId}")
     public ResponseEntity<?> getOneOtherEnergy(@PathVariable String otherEnergyId) {
         try {
@@ -80,7 +101,13 @@ public class OtherEnergyController {
         }
     }
 
-    //todo wenn vpp schon ein otherEnergy hat, aber published => error (selbe für storage)
+    /**
+     * Persistiert Erzeugungsanlage und weist es einem DK zu
+     *
+     * @param dto                       zu speichernde Erzeugungsanlage
+     * @param decentralizedPowerPlantId Id des DK
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/dpp/{decentralizedPowerPlantId}")
     public ResponseEntity<?> saveOtherEnergyWithDecentralizedPowerPlant(@RequestBody OtherEnergyDTO dto, @PathVariable String decentralizedPowerPlantId) {
         try {
@@ -98,6 +125,13 @@ public class OtherEnergyController {
         }
     }
 
+    /**
+     * Persistiert Erzeugungsanlage und weist es einem Haushalt zu
+     *
+     * @param dto         zu speichernde Erzeugungsanlage
+     * @param householdId Id des Haushalts
+     * @return ApiResponse ohne Daten
+     */
     @PostMapping("/by/household/{householdId}")
     public ResponseEntity<?> saveOtherEnergyWithHousehold(@RequestBody OtherEnergyDTO dto,
                                                           @PathVariable String householdId) {
@@ -116,6 +150,13 @@ public class OtherEnergyController {
         }
     }
 
+    /**
+     * Löscht alternative Erzeugungsanlage
+     *
+     * @param otherEnergyId       Id der alternativen Erzeugungsanlage
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @DeleteMapping(path = "/{otherEnergyId}")
     public ResponseEntity<?> deleteOtherEnergy(@PathVariable String otherEnergyId, @RequestParam String virtualPowerPlantId) {
         try {
@@ -133,6 +174,14 @@ public class OtherEnergyController {
         }
     }
 
+    /**
+     * Aktualisiert alternative Erzeugungsanlage
+     *
+     * @param otherEnergyId       Id der alternativen Erzeugungsanlage
+     * @param newDto              aktualisierte Daten
+     * @param virtualPowerPlantId Id des VK
+     * @return ApiResponse ohne Daten
+     */
     @PutMapping(path = "/{otherEnergyId}")
     public ResponseEntity<?> updateOtherEnergy(@PathVariable String otherEnergyId, @RequestBody OtherEnergyDTO newDto, @RequestParam String virtualPowerPlantId) {
         try {

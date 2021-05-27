@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * RabbitMQ Austauschobjekt
+ * Wird vom Maßnahmen-Service entgegen genommen, wenn eine Maßnahmenabfrage gestartet ist.
+ */
 @Data
 @NoArgsConstructor
 public class ActionRequestMessage implements Serializable {

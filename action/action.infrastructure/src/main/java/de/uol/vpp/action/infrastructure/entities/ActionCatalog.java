@@ -9,6 +9,9 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Datenbank-Entität der Handlungsempfehlungskataloge
+ */
 @Entity
 @Data
 public class ActionCatalog {
@@ -21,7 +24,7 @@ public class ActionCatalog {
     private ProblemTypeEnum problemType;
 
     @Column(nullable = false)
-    private Double cumulativeGap;
+    private Double averageGap;
 
     @OneToMany(mappedBy = "actionPrimaryKey.actionCatalog", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Action> actions;

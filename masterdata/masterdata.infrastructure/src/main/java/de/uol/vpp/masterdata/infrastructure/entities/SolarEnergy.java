@@ -4,6 +4,9 @@ import lombok.Data;
 
 import javax.persistence.*;
 
+/**
+ * Datenbank-Entität der Solaranlagen {@link de.uol.vpp.masterdata.domain.entities.SolarEnergyEntity}
+ */
 @Entity
 @Data
 public class SolarEnergy {

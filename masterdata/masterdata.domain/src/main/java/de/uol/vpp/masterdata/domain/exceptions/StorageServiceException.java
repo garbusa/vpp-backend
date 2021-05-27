@@ -1,4 +1,4 @@
-package de.uol.vpp.masterdata.domain.services;
+package de.uol.vpp.masterdata.domain.exceptions;
 
 public class StorageServiceException extends Exception {
 

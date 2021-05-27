@@ -6,6 +6,10 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Datentransferobjekt zw. Benutzeroberfläche und Planungssystem
+ * Siehe {@link de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate}
+ */
 @Data
 public class VirtualPowerPlantDTO {
     private String virtualPowerPlantId;

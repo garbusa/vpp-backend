@@ -4,6 +4,10 @@ import de.uol.vpp.masterdata.domain.exceptions.ProducerException;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Ein Value Object ist für die Validierung der Attribute zuständig.
+ * Für eine Definition des Objektes siehe {@link de.uol.vpp.masterdata.domain.entities.WindEnergyEntity}
+ */
 @Getter
 @Setter
 public class WindEnergyIdVO {

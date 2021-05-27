@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Datentransferobjekt für Maßnahmenabfragen
+ */
 @Data
 public class ActionRequestDTO {
     private String actionRequestId;

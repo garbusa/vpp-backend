@@ -2,13 +2,9 @@ package de.uol.vpp.masterdata.service.services;
 
 import de.uol.vpp.masterdata.domain.aggregates.DecentralizedPowerPlantAggregate;
 import de.uol.vpp.masterdata.domain.aggregates.VirtualPowerPlantAggregate;
-import de.uol.vpp.masterdata.domain.exceptions.DecentralizedPowerPlantException;
-import de.uol.vpp.masterdata.domain.exceptions.VirtualPowerPlantException;
-import de.uol.vpp.masterdata.domain.repositories.DecentralizedPowerPlantRepositoryException;
+import de.uol.vpp.masterdata.domain.exceptions.*;
 import de.uol.vpp.masterdata.domain.repositories.IDecentralizedPowerPlantRepository;
 import de.uol.vpp.masterdata.domain.repositories.IVirtualPowerPlantRepository;
-import de.uol.vpp.masterdata.domain.repositories.VirtualPowerPlantRepositoryException;
-import de.uol.vpp.masterdata.domain.services.DecentralizedPowerPlantServiceException;
 import de.uol.vpp.masterdata.domain.services.IDecentralizedPowerPlantService;
 import de.uol.vpp.masterdata.domain.utils.IPublishUtil;
 import de.uol.vpp.masterdata.domain.utils.PublishException;
@@ -21,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementierung der Schnittstellendefinition {@link IDecentralizedPowerPlantService}
+ */
 @Transactional(rollbackFor = DecentralizedPowerPlantServiceException.class)
 @RequiredArgsConstructor
 @Service
@@ -36,7 +35,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional;
             virtualPowerPlantOptional = virtualPowerPlantRepository.getById(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             if (virtualPowerPlantOptional.isPresent()) {
-                return repository.getAllByVppKey(virtualPowerPlantOptional.get());
+                return repository.getAllByVppId(virtualPowerPlantOptional.get());
             }
             throw new DecentralizedPowerPlantServiceException(
                     String.format("VK %s konnte nicht gefunden werden um DKs abzufragen", virtualPowerPlantId)
