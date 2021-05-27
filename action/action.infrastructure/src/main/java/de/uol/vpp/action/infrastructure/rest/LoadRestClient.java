@@ -8,6 +8,7 @@ import de.uol.vpp.action.infrastructure.rest.dto.LoadDTO;
 import de.uol.vpp.action.infrastructure.rest.dto.LoadHouseholdDTO;
 import de.uol.vpp.action.infrastructure.rest.exceptions.LoadRestClientException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -20,11 +21,14 @@ import java.util.List;
 @Log4j2
 public class LoadRestClient {
 
+    @Value("${vpp.load.api}")
+    private String LOAD_URL;
+
     public boolean isHealthy() {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8082/load/api/actuator/health";
+                    = LOAD_URL + "/actuator/health";
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -43,7 +47,7 @@ public class LoadRestClient {
             List<LoadDTO> loads = new ArrayList<>();
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8082/load/api/load/" + actionRequestId;
+                    = LOAD_URL + "/load/" + actionRequestId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {

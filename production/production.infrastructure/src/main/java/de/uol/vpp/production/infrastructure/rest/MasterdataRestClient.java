@@ -10,6 +10,7 @@ import de.uol.vpp.production.infrastructure.rest.dto.WaterEnergyDTO;
 import de.uol.vpp.production.infrastructure.rest.dto.WindEnergyDTO;
 import de.uol.vpp.production.infrastructure.rest.exceptions.MasterdataRestClientException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -25,6 +26,8 @@ import java.util.List;
 @Log4j2
 public class MasterdataRestClient {
 
+    @Value("${vpp.masterdata.api}")
+    private String MASTERDATA_URL;
 
     /**
      * Prüft, ob angefragte VK veröffentlich ist
@@ -37,7 +40,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/vpp/" + virtualPowerPlantId;
+                    = MASTERDATA_URL + "/vpp/" + virtualPowerPlantId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -66,7 +69,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/household/by/vpp/";
+                    = MASTERDATA_URL + "/household/by/vpp/";
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl + virtualPowerPlantId, String.class);
             if (response != null && response.getBody() != null) {
@@ -96,7 +99,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/dpp/by/vpp/";
+                    = MASTERDATA_URL + "/dpp/by/vpp/";
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl + virtualPowerPlantId, String.class);
             if (response != null && response.getBody() != null) {
@@ -126,7 +129,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/water/by/dpp/";
+                    = MASTERDATA_URL + "/water/by/dpp/";
             this.addWaterDTO(decentralizedPowerPlantId, waters, restTemplate, fooResourceUrl);
             return waters;
         } catch (RestClientException | JsonProcessingException e) {
@@ -180,7 +183,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/water/by/household/";
+                    = MASTERDATA_URL + "/water/by/household/";
             this.addWaterDTO(householdId, waters, restTemplate, fooResourceUrl);
             return waters;
         } catch (RestClientException | JsonProcessingException e) {
@@ -200,7 +203,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/wind/by/dpp/";
+                    = MASTERDATA_URL + "/wind/by/dpp/";
             addWindDTO(decentralizedPowerPlantId, winds, restTemplate, fooResourceUrl);
             return winds;
         } catch (RestClientException | JsonProcessingException e) {
@@ -254,7 +257,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/wind/by/household/";
+                    = MASTERDATA_URL + "/wind/by/household/";
             addWindDTO(householdId, winds, restTemplate, fooResourceUrl);
             return winds;
         } catch (RestClientException | JsonProcessingException e) {
@@ -274,7 +277,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/solar/by/dpp/";
+                    = MASTERDATA_URL + "/solar/by/dpp/";
             addSolarDTO(decentralizedPowerPlantId, solars, restTemplate, fooResourceUrl);
             return solars;
         } catch (RestClientException | JsonProcessingException e) {
@@ -328,7 +331,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/other/by/dpp/";
+                    = MASTERDATA_URL + "/other/by/dpp/";
             addOtherDTO(decentralizedPowerPlantId, others, restTemplate, fooResourceUrl);
             return others;
         } catch (RestClientException | JsonProcessingException e) {
@@ -378,7 +381,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/other/by/household/";
+                    = MASTERDATA_URL + "/other/by/household/";
             addOtherDTO(householdId, others, restTemplate, fooResourceUrl);
             return others;
         } catch (RestClientException | JsonProcessingException e) {
@@ -398,7 +401,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/solar/by/household/";
+                    = MASTERDATA_URL + "/solar/by/household/";
             addSolarDTO(householdId, solars, restTemplate, fooResourceUrl);
             return solars;
         } catch (RestClientException | JsonProcessingException e) {

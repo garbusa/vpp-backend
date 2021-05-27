@@ -8,6 +8,7 @@ import de.uol.vpp.action.infrastructure.rest.dto.HouseholdDTO;
 import de.uol.vpp.action.infrastructure.rest.dto.VirtualPowerPlantDTO;
 import de.uol.vpp.action.infrastructure.rest.exceptions.MasterdataRestClientException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -20,11 +21,14 @@ import java.util.List;
 @Log4j2
 public class MasterdataRestClient {
 
+    @Value("${vpp.masterdata.api}")
+    private String MASTERDATA_URL;
+
     public boolean isHealthy() {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/actuator/health";
+                    = MASTERDATA_URL + "/actuator/health";
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -42,7 +46,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/vpp/" + virtualPowerPlantId;
+                    = MASTERDATA_URL + "/vpp/" + virtualPowerPlantId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -68,7 +72,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/household/by/vpp/" + virtualPowerPlantId;
+                    = MASTERDATA_URL + "/household/by/vpp/" + virtualPowerPlantId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -95,7 +99,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/dpp/by/vpp/" + virtualPowerPlantId;
+                    = MASTERDATA_URL + "/dpp/by/vpp/" + virtualPowerPlantId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {

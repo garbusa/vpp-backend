@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import de.uol.vpp.load.infrastructure.rest.exceptions.MasterdataRestClientException;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
@@ -21,6 +22,9 @@ import java.util.List;
 @Log4j2
 public class MasterdataRestClient {
 
+    @Value("${vpp.masterdata.api}")
+    private String MASTERDATA_URL;
+
     /**
      * Prüft, ob angefragtes VK veröffentlicht ist
      *
@@ -32,7 +36,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/vpp/" + vppId;
+                    = MASTERDATA_URL + "/vpp/" + vppId;
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl, String.class);
             if (response != null && response.getBody() != null) {
@@ -62,7 +66,7 @@ public class MasterdataRestClient {
             List<String> ids = new ArrayList<>();
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/household/by/vpp/";
+                    = MASTERDATA_URL + "/household/by/vpp/";
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl + virtualPowerPlantId, String.class);
             if (response != null && response.getBody() != null) {
@@ -91,7 +95,7 @@ public class MasterdataRestClient {
         try {
             RestTemplate restTemplate = new RestTemplate();
             String fooResourceUrl
-                    = "http://localhost:8081/masterdata/api/household/";
+                    = MASTERDATA_URL + "/household/";
             ResponseEntity<String> response
                     = restTemplate.getForEntity(fooResourceUrl + householdId, String.class);
             if (response != null && response.getBody() != null) {
