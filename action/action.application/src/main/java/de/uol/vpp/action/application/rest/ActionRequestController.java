@@ -49,7 +49,7 @@ public class ActionRequestController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -72,7 +72,7 @@ public class ActionRequestController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -95,7 +95,7 @@ public class ActionRequestController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }

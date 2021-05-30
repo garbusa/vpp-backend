@@ -35,7 +35,7 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> getAllVirtualPowerPlants() {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "Abfrage aller VKs war erfolgreich",
+                    new ApiResponse(true, false, "Die VK wurden erfolgreich abgefragt.",
                             service.getAll().stream().map(converter::toApplication).collect(Collectors.toList()))
                     , HttpStatus.OK);
         } catch (VirtualPowerPlantServiceException e) {
@@ -45,7 +45,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -59,7 +59,7 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> getAllActiveVirtualPowerPlants() {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "Abfrage aller veröffentlichen VKs war erfolgreich",
+                    new ApiResponse(true, false, "Die aktiven VK wurden erfolgreich angefragt.",
                             service.getAllActives().stream().map(converter::toApplication).collect(Collectors.toList()))
                     , HttpStatus.OK);
         } catch (VirtualPowerPlantServiceException e) {
@@ -69,7 +69,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -84,7 +84,7 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> getOneVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "Abfrage eines VKs war erfolgreich",
+                    new ApiResponse(true, false, String.format("Das VK %s wurde erfolgreich angefragt.", virtualPowerPlantId),
                             converter.toApplication(service.get(virtualPowerPlantId)))
                     , HttpStatus.OK);
         } catch (VirtualPowerPlantServiceException e) {
@@ -92,7 +92,7 @@ public class VirtualPowerPlantController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -107,11 +107,11 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> saveVirtualPowerPlant(@RequestBody VirtualPowerPlantDTO dto) {
         try {
             if (dto.isPublished()) {
-                throw new VirtualPowerPlantException("Ein VK kann nicht intial veröffentlicht sein");
+                throw new VirtualPowerPlantException("Ein VK kann nicht intial veröffentlicht sein.");
             }
             service.save(converter.toDomain(dto));
             return ResponseEntity.ok().body(new ApiResponse(true, false, "" +
-                    "VK wurde erfolgreich angelegt", null));
+                    String.format("Das VK %s wurde erfolgreich angelegt", dto.getVirtualPowerPlantId()), null));
         } catch (VirtualPowerPlantServiceException | VirtualPowerPlantException e) {
             log.error(e);
             return new ResponseEntity<>(new ApiResponse(
@@ -119,7 +119,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -134,7 +134,8 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> deleteVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
             service.delete(virtualPowerPlantId);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "Alle VKs wurden erfolgreich gelöscht", null));
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    String.format("Das VK %s wurde erfolgreich gelöscht.", virtualPowerPlantId), null));
         } catch (VirtualPowerPlantServiceException e) {
             log.error(e);
             return new ResponseEntity<>(new ApiResponse(
@@ -142,7 +143,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -157,7 +158,8 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> publishVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
             service.publish(virtualPowerPlantId);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "VK wurde erfolgreich veröffentlicht",
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    String.format("Das VK %s wurde erfolgreich veröffentlicht.", virtualPowerPlantId),
                     null));
         } catch (VirtualPowerPlantServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -165,7 +167,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
 
@@ -181,7 +183,8 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> unpublishVirtualPowerPlant(@PathVariable String virtualPowerPlantId) {
         try {
             service.unpublish(virtualPowerPlantId);
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "VK wurde erfolgreich unveröffentlicht",
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    String.format("Die Veröffentlichung des VK %s wurde erfolgreich rückgängig gemacht.", virtualPowerPlantId),
                     null));
         } catch (VirtualPowerPlantServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -189,7 +192,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
@@ -205,7 +208,8 @@ public class VirtualPowerPlantController {
     public ResponseEntity<?> updateVirtualPowerPlant(@PathVariable String virtualPowerPlantId, @RequestBody VirtualPowerPlantDTO newDto) {
         try {
             service.update(virtualPowerPlantId, converter.toDomain(newDto));
-            return ResponseEntity.ok().body(new ApiResponse(true, false, "VK wurde erfolgreich aktualisiert",
+            return ResponseEntity.ok().body(new ApiResponse(true, false,
+                    String.format("Das VK %s wurde erfolgreich aktualisiert.", virtualPowerPlantId),
                     null));
         } catch (VirtualPowerPlantServiceException | VirtualPowerPlantException e) {
             return new ResponseEntity<>(new ApiResponse(
@@ -213,7 +217,7 @@ public class VirtualPowerPlantController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }
