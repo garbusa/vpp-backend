@@ -54,10 +54,10 @@ public class WeatherRestClient {
                     });
                 }
             } else {
-                throw new WeatherRestClientException("Es ist ein Fehler bei der Abfrage des Wetters geschehen");
+                throw new WeatherRestClientException("Es ist ein Fehler bei der Abfrage des Wetters geschehen.");
             }
         } catch (RestClientException | JsonProcessingException e) {
-            throw new WeatherRestClientException("Es ist ein Fehler bei der Abfrage des Wetters geschehen", e);
+            throw new WeatherRestClientException("Es ist ein Fehler bei der Abfrage des Wetters geschehen.", e);
         }
 
         return result;

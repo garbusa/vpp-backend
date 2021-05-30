@@ -13,7 +13,7 @@ public class ProductionActionRequestIdVO {
 
     public ProductionActionRequestIdVO(String value) throws ProductionException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new ProductionException("actionRequestId", "Production");
+            throw new ProductionException("actionRequestId", "Erzeugungsaggregat");
         }
         this.value = value;
     }

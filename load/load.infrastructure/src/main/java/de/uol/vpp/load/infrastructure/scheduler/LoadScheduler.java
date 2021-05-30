@@ -63,7 +63,7 @@ public class LoadScheduler {
             HSSFWorkbook workbook = new HSSFWorkbook(classPathResource.getInputStream());
             sheet = workbook.getSheetAt(0);
         } catch (IOException e) {
-            log.error("failed to load excel file", e);
+            log.error("Das Laden des Standardlastprofils H0 ist fehlgeschlagen.", e);
         }
     }
 

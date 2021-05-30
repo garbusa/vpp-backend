@@ -14,7 +14,7 @@ public class LoadHouseholdValueVO {
 
     public LoadHouseholdValueVO(Double value) throws LoadException {
         if (value == null || value < 0) {
-            throw new LoadException("value", "LoadHousehold");
+            throw new LoadException("value", "Haushaltslast");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

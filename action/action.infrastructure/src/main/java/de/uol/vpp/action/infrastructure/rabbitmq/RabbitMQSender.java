@@ -30,6 +30,6 @@ public class RabbitMQSender {
     public void sendActionRequest(ActionRequestMessage message) {
         rabbitTemplate.convertAndSend(actionRequestExchange, actionToLoadKey, message);
         rabbitTemplate.convertAndSend(actionRequestExchange, actionToProductionKey, message);
-        log.info("sendActionRequest: {}, {}", message.getActionRequestId(), message.getVppId());
+        log.info("Maßnahmenabfrage wurde erstellt und versendet: Maßnahmenabfrage {}, VK {}", message.getActionRequestId(), message.getVppId());
     }
 }

@@ -36,7 +36,7 @@ public class RabbitMQConsumer {
 
     @RabbitListener(queues = "${vpp.rabbitmq.queue.load.to.action.failed}")
     public void receivedActionFailedMessage(ActionRequestFailedMessage actionRequestFailedMessage) {
-        log.info("receivedActionFailedMessage {}", actionRequestFailedMessage.getActionRequestId());
+        log.info("Der Prozess der Maßnahmenabfrage {} ist fehlgeschlagen.", actionRequestFailedMessage.getActionRequestId());
         actionCatalogInfrastructureService.actionFailed(actionRequestFailedMessage.getActionRequestId());
     }
 
@@ -50,7 +50,7 @@ public class RabbitMQConsumer {
         } catch (ActionRepositoryException | ActionException e) {
             log.error(e);
         }
-        log.info("receivedLoadMessage: {}, {}", loadMessage.getActionRequestId(), loadMessage.getTimestamp());
+        log.info("Lastprognose erhalten: Maßnahmenabfrage {},  Zeitstempel {}", loadMessage.getActionRequestId(), loadMessage.getTimestamp());
     }
 
     private synchronized void incrementAndCheck(String actionRequestId) {
@@ -62,45 +62,43 @@ public class RabbitMQConsumer {
 
         if (actionRequestIdCounterMap.get(actionRequestId) == 2) {
             actionRequestIdCounterMap.remove(actionRequestId);
-            log.info("Both messages for {} received", actionRequestId);
+            log.info("Die Prognosen für die Maßnahmenabfrage {} wurden entgegengenommen.", actionRequestId);
             try {
                 actionCatalogInfrastructureService.createActionCatalogs(actionRequestId);
             } catch (ActionException | ActionRepositoryException | MasterdataRestClientException | LoadRestClientException | ProductionRestClientException e) {
-                log.error("createActionCatalogs failed", e);
+                log.error("Bei der Erstellung der Maßnahmenabfrage ist ein Fehler aufgetreten.", e);
                 actionCatalogInfrastructureService.actionFailed(actionRequestId);
             }
         } else if (actionRequestIdCounterMap.get(actionRequestId) == 1) {
-            log.info("First Message for {} received. Waiting for second...", actionRequestId);
+            log.info("Die erste Prognose für die Maßnahmenabfrage {} wurde entgegengenommen. Zweite Prognose wird erwartet...", actionRequestId);
             new Thread(() -> {
-                log.info("numberOfMessage Monitoring Thread for {} started", actionRequestId);
+                log.info("Das Warten für die zweite Prognose für die Maßnahmenabfrage {} hat begonnen.", actionRequestId);
                 if (actionRequestIdCounterMap.get(actionRequestId) == 1) {
                     try {
                         TimeUnit.MINUTES.sleep(5);
                     } catch (InterruptedException e) {
-                        log.info("Something went wrong for {} while sleeping thread", actionRequestId);
+                        log.info("Während des Wartens auf die Prognosen ist ein Fehler auftreten. (Maßnahmenabfrage {})", actionRequestId);
                         actionCatalogInfrastructureService.actionFailed(actionRequestId);
                     } finally {
                         if (actionRequestIdCounterMap.get(actionRequestId) != null) {
                             if (actionRequestIdCounterMap.get(actionRequestId) == 1) {
-                                log.info("Can't catch second message for {}. Resetting numberOfMessages", actionRequestId);
+                                log.info("Während des Wartens auf die zweite Prognose ist ein Fehler aufgetreten. (Maßnahmenabfrage {})", actionRequestId);
                                 actionRequestIdCounterMap.remove(actionRequestId);
-                            } else if (actionRequestIdCounterMap.get(actionRequestId) == 0) {
-                                log.info("Everything is fine for {}, numberOfMessages is 0", actionRequestId);
                             }
                         }
-                        log.info("Monitoring Thread for {} ended", actionRequestId);
+                        log.info("Das Warten auf die Prognosen wurde beendet. (Maßnahmenabfrage {})", actionRequestId);
                     }
                 }
             }).start();
         } else {
-            log.info("Something went wrong (numberOfMessages) for {}", actionRequestId);
+            log.info("Bei Empfangen der Prognosen ist etwas fehlgeschlagen. (Maßnahmenabfrage {})", actionRequestId);
             actionCatalogInfrastructureService.actionFailed(actionRequestId);
         }
     }
 
     @RabbitListener(queues = "${vpp.rabbitmq.queue.production.to.action}")
     public void receivedProductionMessage(ProductionMessage productionMessage) {
-        log.info("receivedLoadMessage: {}, {}", productionMessage.getActionRequestId(), productionMessage.getTimestamp());
+        log.info("Erzeugungsprognose erhalten: Maßnahmenabfrage {}, Zeitstempel {}", productionMessage.getActionRequestId(), productionMessage.getTimestamp());
         this.incrementAndCheck(productionMessage.getActionRequestId());
     }
 

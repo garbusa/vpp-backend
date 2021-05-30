@@ -46,7 +46,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
                 }
                 return result;
             } else {
-                throw new StorageRepositoryException(String.format("DK mit der ID %s konnte nicht gefunden werden um alle Speicher zu laden", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
+                throw new StorageRepositoryException(String.format("Das DK %s konnte nicht gefunden werden, um dessen Speicheranlagen abzufragen.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
@@ -66,7 +66,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
                 }
                 return result;
             } else {
-                throw new StorageRepositoryException(String.format("Haushalt mit der ID %s konnte nicht gefunden werden um alle Speicher zu laden", householdAggregate.getHouseholdId().getValue()));
+                throw new StorageRepositoryException(String.format("Der Haushalt %s konnte nicht gefunden werden um dessen Speicheranlagen abzufragen.", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (StorageException e) {
             throw new StorageRepositoryException(e.getMessage(), e);
@@ -107,17 +107,17 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new StorageRepositoryException(
-                            String.format("Zuweisung des Speichers %s an ein DK ist fehlgeschlagen, da dieser Speicher bereits zugewiesen wurde.", domainEntity.getStorageId().getValue())
+                            String.format("Die Speicheranlage %s konnte dem DK nicht zugewiesen werden, da die Speicheranlage bereits einer Entität zugewiesen wurde.", domainEntity.getStorageId().getValue())
                     );
                 }
             } else {
                 throw new StorageRepositoryException(
-                        String.format("Abfrage eines Speichers %s ist fehlgeschlagen", domainEntity.getStorageId().getValue())
+                        String.format("Die Speicheranlage %s konnte für die Zuweisung nicht gefunden werden.", domainEntity.getStorageId().getValue())
                 );
             }
         } else {
             throw new StorageRepositoryException(
-                    String.format("DK %s konnte nicht gefunden werden um Speicher zu laden", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("Das DK %s konnte für die Zuweisung der Speicheranlage nicht gefunden werden.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
@@ -136,17 +136,17 @@ public class StorageRepositoryImpl implements IStorageRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new StorageRepositoryException(
-                            String.format("Zuweisung des Speichers %s an ein Haushalt ist fehlgeschlagen, da dieser Speicher bereits zugewiesen wurde.", domainEntity.getStorageId().getValue())
+                            String.format("Die Speicheranlage %s konnte dem Haushalt nicht zugewiesen werden, da die Speicheranlage bereits einer Entität zugewiesen wurde.", domainEntity.getStorageId().getValue())
                     );
                 }
             } else {
                 throw new StorageRepositoryException(
-                        String.format("Abfrage des Speichers %s ist fehlgeschlagen", domainEntity.getStorageId().getValue())
+                        String.format("Die Speicheranlage %s konnte für die Zuweisung nicht gefunden werden.", domainEntity.getStorageId().getValue())
                 );
             }
         } else {
             throw new StorageRepositoryException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um alle Speicher abzufragen", householdAggregate.getHouseholdId().getValue())
+                    String.format("Der Haushalt %s konnte für die Zuweisung der Speicheranlage nicht gefunden werden.", householdAggregate.getHouseholdId().getValue())
             );
         }
     }
@@ -158,7 +158,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new StorageRepositoryException(
-                    String.format("Speicher %s konnte nicht gefunden werden um den Speicher zu löschen", id.getValue())
+                    String.format("Die Speicheranlage %s konnte nicht gelöscht werden, da die Speicheranlage nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -176,7 +176,7 @@ public class StorageRepositoryImpl implements IStorageRepository {
             jpaEntity.setLoadTimeHour(updated.getLoadTimeHour());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new StorageRepositoryException(String.format("Speicher %s konnte nicht gefunden werden um Speicher zu aktualisieren", id.getValue()));
+            throw new StorageRepositoryException(String.format("Die Speicheranlage %s konnte nicht aktualisiert werden, da die Speicheranlage nicht gefunden wurde.", id.getValue()));
         }
     }
 }

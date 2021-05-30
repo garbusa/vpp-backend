@@ -127,11 +127,11 @@ public class ProductionScheduler {
                 // Sende Nachricht an Maßnahmen-Service, dass Erzeugungsprognose erfolgreich beendet ist
                 rabbitMQSender.send(actionRequestId, currentWithoutSeconds.toEpochSecond());
             } else {
-                log.error("Erstellung der Erzeugungsprognose ist fehlgeschlagen, da VK nicht veröffentlicht ist");
+                log.error("Die Erstellung der Erzeugungsprognose ist fehlgeschlagen, da das {} VK nicht veröffentlicht ist", vppId);
                 rabbitMQSender.sendFailed(actionRequestId);
             }
         } catch (Exception e) {
-            log.error("Erstellung der Erzeugungsprognose ist fehlgeschlagen, da ein Fehler aufgetreten ist", e);
+            log.error("Die Erstellung der Erzeugungsprognose ist fehlgeschlagen.", e);
             rabbitMQSender.sendFailed(actionRequestId);
         }
 
@@ -263,7 +263,7 @@ public class ProductionScheduler {
                 this.createAndAssignProductionProducer(windEnergyDTO.getWindEnergyId(), "WIND",
                         currentValue, possibleValue, currentWithoutSeconds.toEpochSecond(), productionAggregate);
             } else {
-                log.error("Production failed, weather api error");
+                log.error("Die Erstellung eines Erzeugungswert ist fehlgeschlagen, da die Wetterdaten fehlerhaft sind.");
                 rabbitMQSender.sendFailed(actionRequestId);
             }
         }

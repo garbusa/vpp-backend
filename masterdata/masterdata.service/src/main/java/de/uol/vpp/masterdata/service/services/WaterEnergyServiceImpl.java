@@ -45,7 +45,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
                 return repository.getAllByDecentralizedPowerPlant(dpp.get());
             }
             throw new ProducerServiceException(
-                    String.format("DK %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", decentralizedPowerPlantId)
+                    String.format("Das DK %s konnte nicht gefunden werden, um dessen Wasserkraftanlagen abzufragen.", decentralizedPowerPlantId)
             );
         } catch (ProducerRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
                 return repository.getAllByHousehold(household.get());
             }
             throw new ProducerServiceException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", householdId)
+                    String.format("Der Haushalt %s konnte nicht gefunden werden, um dessen Wasserkraftanlagen abzufragen.", householdId)
             );
         } catch (ProducerRepositoryException | HouseholdException | HouseholdRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -73,9 +73,9 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
         try {
             return repository.getById(new WaterEnergyIdVO(waterEnergyId))
                     .orElseThrow(() -> new ProducerServiceException(
-                            String.format("Wasserkraftanlage %s konnte nicht gefunden werden", waterEnergyId)));
+                            String.format("Die Wasserkraftanlage %s konnte nicht gefunden werden.", waterEnergyId)));
         } catch (ProducerException | ProducerRepositoryException e) {
-            throw new ProducerServiceException(String.format("Wasserkraftanlage %s konnte nicht gefunden werden", waterEnergyId));
+            throw new ProducerServiceException(String.format("Die Wasserkraftanlage %s konnte nicht gefunden werden.", waterEnergyId));
         }
 
     }
@@ -85,7 +85,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Wasserkraftanlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die Wasserkraftanlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
                     new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId)
@@ -97,7 +97,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         dpp.getDecentralizedPowerPlantId())) {
                     throw new ProducerServiceException(
-                            String.format("Wasserkraftanlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die Wasserkraftanlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -105,7 +105,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Wasserkraftanlage %s konnte dem DK %s nicht zugewiesen werden, da DK nicht gefunden wurde", domainEntity.getId().getValue(),
+                        String.format("Die Wasserkraftanlage %s konnte dem DK %s nicht zugewiesen werden, da das DK nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 decentralizedPowerPlantId)
                 );
             }
@@ -119,7 +119,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Wasserkraftanlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die Wasserkraftanlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
                     new HouseholdIdVO(householdId)
@@ -131,7 +131,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         household.getHouseholdId())) {
                     throw new ProducerServiceException(
-                            String.format("Wasserkraftanlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die Wasserkraftanlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -139,7 +139,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Wasserkraftanlage %s konnte dem Haushalt %s nicht zugewiesen werden, da Haushalt nicht gefunden wurde", domainEntity.getId().getValue(),
+                        String.format("Die Wasserkraftanlage %s konnte dem Haushalt %s nicht zugewiesen werden, da der Haushalt nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 householdId)
                 );
             }
@@ -154,7 +154,7 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
             if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new WaterEnergyIdVO(waterEnergyId))) {
                 repository.deleteById(new WaterEnergyIdVO(waterEnergyId));
             } else {
-                throw new ProducerServiceException("Wasserkraftanlage %s konnte nicht gelöscht werden, da VK veröffentlicht ist");
+                throw new ProducerServiceException(String.format("Die Wasserkraftanlage %s konnte nicht gelöscht werden, da das VK %s veröffentlicht ist", waterEnergyId, virtualPowerPlantId));
             }
         } catch (ProducerRepositoryException | ProducerException | VirtualPowerPlantException | PublishException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -167,7 +167,8 @@ public class WaterEnergyServiceImpl implements IWaterEnergyService {
             if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new WaterEnergyIdVO(waterEnergyId))) {
                 repository.update(new WaterEnergyIdVO(waterEnergyId), domainEntity);
             } else {
-                throw new ProducerServiceException("Wasserkraftanlage %s konnte nicht bearbeitet werden, da VK veröffentlicht ist");
+                throw new ProducerServiceException(String.format("Die Wasserkraftanlage %s konnte nicht bearbeitet werden, da das VK %s veröffentlicht ist.",
+                        waterEnergyId, virtualPowerPlantId));
             }
         } catch (PublishException | VirtualPowerPlantException | ProducerException | ProducerRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);

@@ -165,7 +165,7 @@ public class PublishUtilImpl implements IPublishUtil {
                 if (hasOther) {
                     return !vpp.getPublished().isValue();
                 } else {
-                    throw new PublishException(DOES_NOT_BELONG_PREFIX + "alternative Energieanlage" + DOES_NOT_BELONG_POSTFIX);
+                    throw new PublishException(DOES_NOT_BELONG_PREFIX + "alternative Erzeugungsanlage" + DOES_NOT_BELONG_POSTFIX);
                 }
             } else {
                 throw new PublishException(DOES_NOT_EXIST);

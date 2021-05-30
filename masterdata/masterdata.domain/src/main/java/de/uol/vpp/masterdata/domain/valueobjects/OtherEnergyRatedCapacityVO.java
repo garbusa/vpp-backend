@@ -13,7 +13,7 @@ public class OtherEnergyRatedCapacityVO {
 
     public OtherEnergyRatedCapacityVO(Double value) throws ProducerException {
         if (value == null || value < 0.) {
-            throw new ProducerException("ratedCapacity", "OtherEnergy");
+            throw new ProducerException("ratedCapacity", "alternative Erzeugungsanlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

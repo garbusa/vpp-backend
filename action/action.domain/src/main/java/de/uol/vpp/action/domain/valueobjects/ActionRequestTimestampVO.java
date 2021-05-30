@@ -15,13 +15,13 @@ public class ActionRequestTimestampVO {
 
     public ActionRequestTimestampVO(Long ts) throws ActionException {
         if (ts == null) {
-            throw new ActionException("timestamp", "ActionRequest");
+            throw new ActionException("timestamp", "Maßnahmenabfrage");
         }
 
         try {
             this.value = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
-            throw new ActionException("timestamp", "ActionRequest", e);
+            throw new ActionException("timestamp", "Maßnahmenabfrage", e);
         }
     }
 

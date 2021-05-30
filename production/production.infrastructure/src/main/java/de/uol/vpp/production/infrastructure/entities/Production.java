@@ -64,7 +64,7 @@ public class Production {
 
         @Override
         public String toString() {
-            return "ActionRequestTimestamp{" +
+            return "MaßnahmenabfrageTimestamp{" +
                     "actionRequestId='" + actionRequestId + '\'' +
                     ", timestamp=" + timestamp +
                     '}';

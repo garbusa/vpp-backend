@@ -45,7 +45,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
                 return repository.getAllByDecentralizedPowerPlant(dpp.get());
             }
             throw new ProducerServiceException(
-                    String.format("DK %s konnte nicht gefunden werden um Windkraftanlage abzufragen", decentralizedPowerPlantId)
+                    String.format("Das DK %s konnte nicht gefunden werden, um dessen Windkraftanlagen abzufragen.", decentralizedPowerPlantId)
             );
         } catch (ProducerRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
                 return repository.getAllByHousehold(household.get());
             }
             throw new ProducerServiceException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um Windkraftanlage abzufragen", householdId)
+                    String.format("Der Haushalt %s konnte nicht gefunden werden, um dessen Windkraftanlagen abzufragen.", householdId)
             );
         } catch (ProducerRepositoryException | HouseholdException | HouseholdRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -72,9 +72,9 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
     public WindEnergyEntity get(String windEnergyId) throws ProducerServiceException {
         try {
             return repository.getById(new WindEnergyIdVO(windEnergyId))
-                    .orElseThrow(() -> new ProducerServiceException(String.format("Windkraftanlage %s konnte nicht gefunden werden", windEnergyId)));
+                    .orElseThrow(() -> new ProducerServiceException(String.format("Die Windkraftanlage %s konnte nicht gefunden werden.", windEnergyId)));
         } catch (ProducerException | ProducerRepositoryException e) {
-            throw new ProducerServiceException(String.format("Windkraftanlage %s konnte nicht gefunden werden", windEnergyId));
+            throw new ProducerServiceException(String.format("Die Windkraftanlage %s konnte nicht gefunden werden.", windEnergyId));
         }
 
     }
@@ -84,7 +84,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Windkraftanlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die Windkraftanlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
                     new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId)
@@ -96,7 +96,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         dpp.getDecentralizedPowerPlantId())) {
                     throw new ProducerServiceException(
-                            String.format("Windkraftanlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die Windkraftanlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -104,7 +104,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Windkraftanlage %s konnte dem DK %s nicht zugewiesen werden, da DK nicht gefunden wurde", domainEntity.getId().getValue(),
+                        String.format("Die Windkraftanlage %s konnte dem DK %s nicht zugewiesen werden, da das DK nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 decentralizedPowerPlantId)
                 );
             }
@@ -118,7 +118,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Windkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue()));
+                        String.format("Die Windkraftanlage %s konnte nicht gefunden werden.", domainEntity.getId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
                     new HouseholdIdVO(householdId)
@@ -130,7 +130,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         household.getHouseholdId())) {
                     throw new ProducerServiceException(
-                            String.format("Windkraftanlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die Windkraftanlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -138,7 +138,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Windkraftanlage %s konnte dem Haushalt %s nicht zugewiesen werden, da Haushalt nicht gefunden wurde", domainEntity.getId().getValue(),
+                        String.format("Die Windkraftanlage %s konnte dem Haushalt %s nicht zugewiesen werden, da der Haushalt nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 householdId)
                 );
             }
@@ -153,7 +153,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
             if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new WindEnergyIdVO(windEnergyId))) {
                 repository.deleteById(new WindEnergyIdVO(windEnergyId));
             } else {
-                throw new ProducerServiceException(String.format("Windkraftanlage %s konnte nicht gelöscht werden da VK veröffentlicht ist", windEnergyId));
+                throw new ProducerServiceException(String.format("Die Windkraftanlage %s konnte nicht gelöscht werden, da das VK veröffentlicht ist.", windEnergyId));
             }
         } catch (ProducerRepositoryException | ProducerException | VirtualPowerPlantException | PublishException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -166,7 +166,7 @@ public class WindEnergyServiceImpl implements IWindEnergyService {
             if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new WindEnergyIdVO(windEnergyId))) {
                 repository.update(new WindEnergyIdVO(windEnergyId), domainEntity);
             } else {
-                throw new ProducerServiceException(String.format("Windkraftanlage %s konnte nicht bearbeitet werden da VK veröffentlicht ist", windEnergyId));
+                throw new ProducerServiceException(String.format("Die Windkraftanlage %s konnte nicht aktualisiert werden, da das VK veröffentlicht ist.", windEnergyId));
             }
         } catch (PublishException | VirtualPowerPlantException | ProducerException | ProducerRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);

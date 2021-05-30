@@ -14,7 +14,7 @@ public class ProductionIsOutdatedVO {
 
     public ProductionIsOutdatedVO(Boolean value) throws ProductionException {
         if (value == null) {
-            throw new ProductionException("isOutdated", "Production");
+            throw new ProductionException("isOutdated", "Erzeugungsaggregat");
         }
         this.value = value;
     }

@@ -63,7 +63,7 @@ public class ELoad {
 
         @Override
         public String toString() {
-            return "ActionRequestTimestamp{" +
+            return "MaßnahmenabfrageTimestamp{" +
                     "actionRequestId='" + actionRequestId + '\'' +
                     ", timestamp=" + timestamp +
                     '}';

@@ -15,7 +15,7 @@ public class LoadActionRequestIdVO {
 
     public LoadActionRequestIdVO(String id) throws LoadException {
         if (id == null || id.isEmpty() || id.isBlank()) {
-            throw new LoadException("actionRequestId", "Load");
+            throw new LoadException("actionRequestId", "Last");
         }
         this.id = id.toUpperCase();
     }

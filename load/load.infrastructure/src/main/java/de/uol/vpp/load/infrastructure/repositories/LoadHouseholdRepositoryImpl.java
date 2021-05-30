@@ -40,17 +40,17 @@ public class LoadHouseholdRepositoryImpl implements ILoadHouseholdRepository {
                     loadJpaRepository.save(loadJpa.get());
                 } else {
                     throw new LoadHouseholdRepositoryException(
-                            String.format("Haushaltslast konnte dem Lastaggregat %s nicht zugewiesen werden, da die Haushaltslast bereits zugewiesen wurde", load.getLoadActionRequestId().getId())
+                            String.format("Die Haushaltslast konnte dem Lastaggregat %s nicht zugewiesen werden, da die Haushaltslast bereits zugewiesen wurde.", load.getLoadActionRequestId().getId())
                     );
                 }
             } else {
                 throw new LoadHouseholdRepositoryException(
-                        String.format("Haushaltslast %s (Zeistempel: %s) konnte nicht gefunden werden", load.getLoadActionRequestId(), load.getLoadStartTimestamp().getTimestamp().toEpochSecond())
+                        String.format("Die Haushaltslast %s (Zeistempel: %s) konnte nicht gefunden werden.", load.getLoadActionRequestId(), load.getLoadStartTimestamp().getTimestamp().toEpochSecond())
                 );
             }
         } else {
             throw new LoadHouseholdRepositoryException(
-                    String.format("Haushaltslast konnte dem Lastaggregat %s nicht zugeiwesen werden, da Last nicht gefunden wurde", load.getLoadActionRequestId().getId())
+                    String.format("Die Haushaltslast konnte dem Lastaggregat %s nicht zugewiesen werden, da das Lastaggregat nicht gefunden wurde.", load.getLoadActionRequestId().getId())
             );
         }
     }

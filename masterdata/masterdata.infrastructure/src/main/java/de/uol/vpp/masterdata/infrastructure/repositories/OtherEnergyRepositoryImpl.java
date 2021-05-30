@@ -45,7 +45,7 @@ public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("DK %s konnte nicht gefunden werden um alternative Energieanlagen abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
+                throw new ProducerRepositoryException(String.format("Das DK %s konnte nicht gefunden werden, um die alternativen Erzeugungsanlagen abzufragen.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -64,7 +64,7 @@ public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Haushalt %s konnte nicht gefunden werden um alternative Energieanlagen abzufragen", householdAggregate.getHouseholdId().getValue()));
+                throw new ProducerRepositoryException(String.format("Der Haushalt %s konnte nicht gefunden werden, um die alternativen Erzeugungsanlagen abzufragen.", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -105,17 +105,17 @@ public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Alternative Energieanlage %s konnte DK nicht zugewiesen werden, da alternative Energieanlage bereits zugewiesen ist ", otherEnergyEntity.getId().getValue())
+                            String.format("Die alternative Erzeugungsanlage %s konnte dem DK nicht zugewiesen werden, da die alternative Erzeugungsanlage bereits einer Entität zugewiesen ist.", otherEnergyEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Alternative Energieanlage %s konnte nicht gefunden werden", otherEnergyEntity.getId().getValue())
+                        String.format("Die alternative Erzeugungsanlage %s konnte nicht gefunden werden.", otherEnergyEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("DK %s konnte nicht gefunden werden", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("Das DK %s konnte für die Zuweisung der alternativen Erzeugungeanlage nicht gefunden werden.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
@@ -134,17 +134,17 @@ public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Alternative Energieanlage %s konnte Haushalt nicht zugewiesen werden, da alternative Energieanlage bereits zugewiesen ist ", otherEnergyEntity.getId().getValue())
+                            String.format("Die alternative Erzeugungsanlage %s konnte dem Haushalt nicht zugewiesen werden, da die alternative Erzeugungsanlage bereits einer Entität zugewiesen ist.", otherEnergyEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Alternative Energieanlage %s konnte nicht gefunden werden", otherEnergyEntity.getId().getValue())
+                        String.format("Die alternative Erzeugungsanlage %s konnte nicht gefunden werden.", otherEnergyEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("DK %s konnte nicht gefunden werden", householdAggregate.getHouseholdId().getValue())
+                    String.format("Das DK %s konnte für die Zuweisung der alternativen Erzeugungsanlage nicht gefunden werden.", householdAggregate.getHouseholdId().getValue())
             );
         }
     }
@@ -156,7 +156,7 @@ public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Alternative Energieanlage %s konnte nicht gelöscht werden, da alternative Energieanlage nicht gefunden wurde", id.getValue())
+                    String.format("Die alternative Erzeugungsanlage %s konnte nicht gelöscht werden, da die alternative Erzeugungsanlage nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -172,7 +172,7 @@ public class OtherEnergyRepositoryImpl implements IOtherEnergyRepository {
             jpaEntity.setCapacity(updated.getCapacity());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new ProducerRepositoryException("Alternative Energieanlage konnte nicht aktualisiert werden, da alternative Energieanlage nicht gefunden wurde");
+            throw new ProducerRepositoryException("Die alternative Erzeugungsanlage konnte nicht aktualisiert werden, da die alternative Erzeugungsanlage nicht gefunden wurde.");
         }
     }
 

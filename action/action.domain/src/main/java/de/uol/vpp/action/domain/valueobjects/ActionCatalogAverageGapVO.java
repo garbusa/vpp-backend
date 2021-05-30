@@ -12,7 +12,7 @@ public class ActionCatalogAverageGapVO {
 
     public ActionCatalogAverageGapVO(Double value) throws ActionException {
         if (value == null || value < 0.) {
-            throw new ActionException("averageGap", "Action");
+            throw new ActionException("averageGap", "Handlungsempfehlung");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

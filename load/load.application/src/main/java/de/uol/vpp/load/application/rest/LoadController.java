@@ -33,7 +33,7 @@ public class LoadController {
     public ResponseEntity<?> getAllLoadsByActionRequestId(@PathVariable String actionRequestId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "Abfrage der Stromlast war erfolgreich",
+                    new ApiResponse(true, false, "Die Abfrage der Last war erfolgreich.",
                             loadService.getLoadsByActionRequestId(actionRequestId)
                                     .stream()
                                     .map(converter::toApplication)
@@ -45,7 +45,7 @@ public class LoadController {
             ), HttpStatus.NOT_FOUND);
         } catch (DataIntegrityViolationException sqlException) {
             return new ResponseEntity<>(new ApiResponse(
-                    false, false, "Es ist ein Datenintegritätsfehler geschehen", null
+                    false, false, "Es ist ein Datenintegritätsfehler aufgetreten.", null
             ), HttpStatus.NOT_FOUND);
         }
     }

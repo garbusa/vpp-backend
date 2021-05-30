@@ -15,7 +15,7 @@ public class SolarEnergyCapacityVO {
 
     public SolarEnergyCapacityVO(Double value) throws ProducerException {
         if (value == null || value < 0. || value > 100.) {
-            throw new ProducerException("capacity", "SolarEnergy");
+            throw new ProducerException("capacity", "Solaranlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

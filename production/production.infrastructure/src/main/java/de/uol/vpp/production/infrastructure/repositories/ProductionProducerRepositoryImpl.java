@@ -39,16 +39,16 @@ public class ProductionProducerRepositoryImpl implements IProductionProducerRepo
                     productionJpaRepository.save(productionJpa.get());
                 } else {
                     throw new ProductionProducerRepositoryException(
-                            String.format("Erzeugungsanlage konnte Erzeugungsaggregat %s nicht zugewiesen werden, da Erzeugungsanlage bereits zugewiesen ist",
+                            String.format("Der Erzeugungswert konnte dem Erzeugungsaggregat %s nicht zugewiesen werden, da der Erzeugungswert bereits zugewiesen ist.",
                                     production.getProductionActionRequestId().getValue())
                     );
                 }
             } else {
-                throw new ProductionProducerRepositoryException("Erzeugungsanlage konnte nicht gefunden werden");
+                throw new ProductionProducerRepositoryException("Der Erzeugungswert konnte nicht gefunden werden.");
             }
         } else {
             throw new ProductionProducerRepositoryException(
-                    String.format("Erzeugungsaggregat %s (Zeitstempel %s) konnte nicht gefunden werden", production.getProductionActionRequestId().getValue(),
+                    String.format("Das Erzeugungsaggregat %s (Zeitstempel %s) konnte für die Zuweisung des Erzeugungswert nicht gefunden werden.", production.getProductionActionRequestId().getValue(),
                             production.getProductionStartTimestamp().getTimestamp().toEpochSecond())
             );
         }

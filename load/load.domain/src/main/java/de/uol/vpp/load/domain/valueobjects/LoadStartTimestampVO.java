@@ -18,13 +18,13 @@ public class LoadStartTimestampVO {
 
     public LoadStartTimestampVO(Long ts) throws LoadException {
         if (ts == null) {
-            throw new LoadException("startTimestamp", "Load");
+            throw new LoadException("startTimestamp", "Last");
         }
 
         try {
             this.timestamp = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
-            throw new LoadException("startTimestamp", "Load");
+            throw new LoadException("startTimestamp", "Last");
         }
     }
 

@@ -14,7 +14,7 @@ public class ProductionProducerIdVO {
 
     public ProductionProducerIdVO(String value) throws ProductionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ProductionException("producerId", "ProductionProducer");
+            throw new ProductionException("producerId", "Erzeugungswert");
         }
         this.value = value;
     }

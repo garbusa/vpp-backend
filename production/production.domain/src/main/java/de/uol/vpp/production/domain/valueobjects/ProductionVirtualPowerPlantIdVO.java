@@ -14,7 +14,7 @@ public class ProductionVirtualPowerPlantIdVO {
 
     public ProductionVirtualPowerPlantIdVO(String value) throws ProductionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ProductionException("virtualPowerPlantId", "Production");
+            throw new ProductionException("virtualPowerPlantId", "Erzeugungsaggregat");
         }
         this.value = value;
     }

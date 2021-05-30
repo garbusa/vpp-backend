@@ -15,7 +15,7 @@ public class WaterEnergyDensityVO {
 
     public WaterEnergyDensityVO(Double value) throws ProducerException {
         if (value == null || value < 0) {
-            throw new ProducerException("density", "WaterEnergy");
+            throw new ProducerException("density", "Wasserkraftanlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

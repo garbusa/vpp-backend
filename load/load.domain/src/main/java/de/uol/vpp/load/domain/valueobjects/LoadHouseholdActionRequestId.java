@@ -12,7 +12,7 @@ public class LoadHouseholdActionRequestId {
 
     public LoadHouseholdActionRequestId(String id) throws LoadException {
         if (id == null || id.isBlank() || id.isEmpty()) {
-            throw new LoadException("actionRequestId", "LoadHousehold");
+            throw new LoadException("actionRequestId", "Haushaltslast");
         }
         this.id = id;
     }

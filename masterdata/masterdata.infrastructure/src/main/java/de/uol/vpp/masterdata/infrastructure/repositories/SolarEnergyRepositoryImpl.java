@@ -42,7 +42,7 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("DK %s konnte nicht gefunden werden um Solaranlagen abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
+                throw new ProducerRepositoryException(String.format("Das DK %s konnte nicht gefunden werden, um dessen Solaranlagen abzufragen.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Haushalt %s konnte nicht gefunden werden um Solaranlagen abzufragen", householdAggregate.getHouseholdId().getValue()));
+                throw new ProducerRepositoryException(String.format("Der Haushalt %s konnte nicht gefunden werden, um dessen Solaranlagen abzufragen.", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -102,17 +102,17 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Solaranlage %s konnte DK nicht zugewiesen werden, da Solaranlage bereits zugewiesen wurde", domainEntity.getId().getValue())
+                            String.format("Die Solaranlage %s konnte dem DK nicht zugewiesen werden, da die Solaranlage bereits zugewiesen wurde.", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Solaranlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
+                        String.format("Die Solaranlage %s konnte für die Zuweisung nicht gefunden werden.", domainEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Solaranlage %s konnte nicht zugewiesen werden, da DK %s nicht gefunden wurde", domainEntity.getId().getValue(), decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("Die Solaranlage %s konnte nicht zugewiesen werden, da das DK %s nicht gefunden wurde.", domainEntity.getId().getValue(), decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
@@ -131,17 +131,17 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Solaranlage %s konnte Haushalt nicht zugewiesen werden, da Solaranlage bereits zugewiesen wurde", domainEntity.getId().getValue())
+                            String.format("Die Solaranlage %s konnte dem Haushalt nicht zugewiesen werden, da die Solaranlage bereits einer Entität zugewiesen wurde.", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Solaranlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
+                        String.format("Die Solaranlage %s konnte für die Zuweisung nicht gefunden werden.", domainEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Solaranlage %s konnte nicht zugewiesen werden, da Haushalt %s nicht gefunden wurde", domainEntity.getId().getValue(), householdAggregate.getHouseholdId().getValue())
+                    String.format("Die Solaranlage %s konnte nicht zugewiesen werden, da der Haushalt %s nicht gefunden wurde.", domainEntity.getId().getValue(), householdAggregate.getHouseholdId().getValue())
             );
         }
     }
@@ -153,7 +153,7 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Solaranlage %s konnte nicht gelöscht werden, da Solaranlage nicht gefunden wurde", id.getValue())
+                    String.format("Die Solaranlage %s konnte nicht gelöscht werden, da die Solaranlage nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -172,7 +172,7 @@ public class SolarEnergyRepositoryImpl implements ISolarEnergyRepository {
             jpaRepository.save(jpaEntity);
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Solaranlage %s konnte nicht aktualisiert werden, da Solaranlage nicht gefunden wurde", id.getValue())
+                    String.format("Die Solaranlage %s konnte nicht aktualisiert werden, da die Solaranlage nicht gefunden wurde.", id.getValue())
             );
         }
     }

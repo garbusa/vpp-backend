@@ -38,7 +38,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
                 return repository.getAllByVirtualPowerPlant(virtualPowerPlantOptional.get());
             }
             throw new HouseholdServiceException(
-                    String.format("VK %s konnte nicht gefunden werden um Haushalte abzufragen", virtualPowerPlantId)
+                    String.format("Das VK %s konnte nicht gefunden werden, um dessen Haushalte abzufragen.", virtualPowerPlantId)
             );
         } catch (HouseholdRepositoryException | VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new HouseholdServiceException(e.getMessage(), e);
@@ -50,7 +50,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
     public HouseholdAggregate get(String householdId) throws HouseholdServiceException {
         try {
             return repository.getById(new HouseholdIdVO(householdId))
-                    .orElseThrow(() -> new HouseholdServiceException(String.format("Haushalt %s konnte nicht gefunden werden", householdId)));
+                    .orElseThrow(() -> new HouseholdServiceException(String.format("Der Haushalt %s konnte nicht gefunden werden.", householdId)));
         } catch (HouseholdException | HouseholdRepositoryException e) {
             throw new HouseholdServiceException(e.getMessage(), e);
         }
@@ -62,7 +62,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
         try {
             if (repository.getById(domainEntity.getHouseholdId()).isPresent()) {
                 throw new HouseholdServiceException(
-                        String.format("Haushalt %s existiert bereits", domainEntity.getHouseholdId().getValue()));
+                        String.format("Der Haushalt %s existiert bereits.", domainEntity.getHouseholdId().getValue()));
             }
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional = virtualPowerPlantRepository.getById(
                     new VirtualPowerPlantIdVO(virtualPowerPlantId)
@@ -73,7 +73,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
                 if (!publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId),
                         domainEntity.getHouseholdId())) {
                     throw new HouseholdServiceException(
-                            String.format("Haushalt %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getHouseholdId().getValue(),
+                            String.format("Der Haushalt %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getHouseholdId().getValue(),
                                     virtualPowerPlantId)
                     );
                 }
@@ -83,7 +83,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
                 repository.assign(domainEntity, virtualPowerPlant);
             } else {
                 throw new HouseholdServiceException(
-                        String.format("Haushalt %s konnte VK %s nicht zugewiesen werden, da Haushalt bereits zugewiesen wurde", domainEntity.getHouseholdId().getValue(),
+                        String.format("Der Haushalt %s konnte dem VK %s nicht zugewiesen werden, da der Haushalt bereits einem VK zugewiesen wurde.", domainEntity.getHouseholdId().getValue(),
                                 virtualPowerPlantId)
                 );
             }
@@ -99,7 +99,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
                 repository.deleteById(new HouseholdIdVO(householdId));
             } else {
                 throw new HouseholdServiceException(
-                        String.format("Haushalt %s konnte nicht gelöscht werden, da VK veröffentlicht ist", householdId)
+                        String.format("Der Haushalt %s konnte nicht gelöscht werden, da das VK veröffentlicht ist.", householdId)
                 );
             }
 
@@ -115,7 +115,7 @@ public class HouseholdServiceImpl implements IHouseholdService {
                 repository.update(new HouseholdIdVO(householdId), domainEntity);
             } else {
                 throw new HouseholdServiceException(
-                        String.format("Haushalt %s konnte nicht bearbeitet werden, da VK veröffentlicht ist", householdId)
+                        String.format("Der Haushalt %s konnte nicht bearbeitet werden, da das VK veröffentlicht ist.", householdId)
                 );
             }
         } catch (PublishException | VirtualPowerPlantException | HouseholdException | HouseholdRepositoryException e) {

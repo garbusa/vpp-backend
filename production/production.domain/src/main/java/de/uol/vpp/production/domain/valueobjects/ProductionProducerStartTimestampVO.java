@@ -17,13 +17,13 @@ public class ProductionProducerStartTimestampVO {
 
     public ProductionProducerStartTimestampVO(Long ts) throws ProductionException {
         if (ts == null) {
-            throw new ProductionException("startTimestamp", "ProductionProducer");
+            throw new ProductionException("startTimestamp", "Erzeugungswert");
         }
 
         try {
             this.timestamp = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
-            throw new ProductionException("startTimestamp", "ProductionProducer", e);
+            throw new ProductionException("startTimestamp", "Erzeugungswert", e);
         }
     }
 

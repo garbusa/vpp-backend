@@ -45,7 +45,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("DK %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
+                throw new ProducerRepositoryException(String.format("Das DK %s konnte nicht gefunden werden, um dessen Wasserkraftanlagen abzufragen.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -64,7 +64,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                 }
                 return result;
             } else {
-                throw new ProducerRepositoryException(String.format("Haushalt %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", householdAggregate.getHouseholdId().getValue()));
+                throw new ProducerRepositoryException(String.format("Das Haushalt %s konnte nicht gefunden werden, um dessen Wasserkraftanlagen abzufragen.", householdAggregate.getHouseholdId().getValue()));
             }
         } catch (ProducerException e) {
             throw new ProducerRepositoryException(e.getMessage(), e);
@@ -105,17 +105,17 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                     decentralizedPowerPlantJpaRepository.save(dpp.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da die Anlage bereits zugewiesen ist", domainEntity.getId().getValue())
+                            String.format("Die Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da die Wasserkraftanlage bereits einer Entität zugewiesen ist.", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
+                        String.format("Die Wasserkraftanlage %s konnte für die Zuweisung nicht gefunden werden.", domainEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("DK %s konnte nicht gefunden werden um Wasserkraftanlagen abzufragen", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
+                    String.format("Das DK %s konnte für die Zuweisung der Wasserkraftanlage nicht gefunden werden.", decentralizedPowerPlantAggregate.getDecentralizedPowerPlantId().getValue())
             );
         }
     }
@@ -134,17 +134,17 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
                     householdJpaRepository.save(household.get());
                 } else {
                     throw new ProducerRepositoryException(
-                            String.format("Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da dieser Anlage bereits zugewiesen ist", domainEntity.getId().getValue())
+                            String.format("Die Zuweisung der Wasserkraftanlage %s ist fehlgeschlagen, da die Wasserkraftanlage bereits einer Entität zugewiesen ist.", domainEntity.getId().getValue())
                     );
                 }
             } else {
                 throw new ProducerRepositoryException(
-                        String.format("Wasserkraftanlage %s konnte nicht gefunden werden", domainEntity.getId().getValue())
+                        String.format("Die Wasserkraftanlage %s konnte für die Zuweisung nicht gefunden werden.", domainEntity.getId().getValue())
                 );
             }
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um Wasserkraftanlage abzufragen", householdAggregate.getHouseholdId().getValue())
+                    String.format("Der Haushalt %s konnte für die Zuweisung der Wasserkraftanlage nicht gefunden werden.", householdAggregate.getHouseholdId().getValue())
             );
         }
     }
@@ -156,7 +156,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
             jpaRepository.delete(jpaEntity.get());
         } else {
             throw new ProducerRepositoryException(
-                    String.format("Wasserkraftanlage %s konnte nicht gelöscht werden, da Wasserkraftanlage nicht gefunden werden konnte", id.getValue())
+                    String.format("Die Wasserkraftanlage %s konnte nicht gelöscht werden, da die Wasserkraftanlage nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -176,7 +176,7 @@ public class WaterEnergyRepositoryImpl implements IWaterEnergyRepository {
             jpaEntity.setVolumeFlow(updated.getVolumeFlow());
             jpaRepository.save(jpaEntity);
         } else {
-            throw new ProducerRepositoryException("Wasserkraftanlage %s konnte nicht aktualisiert werden, da Wasserkraftanlage nicht gefunden wurde");
+            throw new ProducerRepositoryException("Die Wasserkraftanlage %s konnte nicht aktualisiert werden, da Wasserkraftanlage nicht gefunden wurde.");
         }
     }
 

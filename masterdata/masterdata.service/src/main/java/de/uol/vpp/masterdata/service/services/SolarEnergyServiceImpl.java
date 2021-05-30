@@ -45,7 +45,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 return repository.getAllByDecentralizedPowerPlant(dpp.get());
             }
             throw new ProducerServiceException(
-                    String.format("DK %s konnte nicht gefunden werden um Solaranlagen abzufragen", decentralizedPowerPlantId)
+                    String.format("Das DK %s konnte nicht gefunden werden, um dessen Solaranlagen abzufragen.", decentralizedPowerPlantId)
             );
         } catch (ProducerRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 return repository.getAllByHousehold(household.get());
             }
             throw new ProducerServiceException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um Solaranlagen abzufragen", householdId)
+                    String.format("Der Haushalt %s konnte nicht gefunden werden, um dessen Solaranlagen abzufragen.", householdId)
             );
         } catch (ProducerRepositoryException | HouseholdException | HouseholdRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -72,9 +72,9 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
     public SolarEnergyEntity get(String solarEnergyId) throws ProducerServiceException {
         try {
             return repository.getById(new SolarEnergyIdVO(solarEnergyId))
-                    .orElseThrow(() -> new ProducerServiceException(String.format("Solaranlage %s konnte nicht gefunden werden", solarEnergyId)));
+                    .orElseThrow(() -> new ProducerServiceException(String.format("Die Solaranlage %s konnte nicht gefunden werden.", solarEnergyId)));
         } catch (ProducerException | ProducerRepositoryException e) {
-            throw new ProducerServiceException(String.format("Solaranlage %s konnte nicht gefunden werden", solarEnergyId));
+            throw new ProducerServiceException(String.format("Die Solaranlage %s konnte nicht gefunden werden.", solarEnergyId));
         }
 
     }
@@ -84,7 +84,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Solaranlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die Solaranlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
                     new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId)
@@ -96,7 +96,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         dpp.getDecentralizedPowerPlantId())) {
                     throw new ProducerServiceException(
-                            String.format("Solaranlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die Solaranlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -104,7 +104,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Solaranlage %s konnte nicht zugewiesen werden, da DK %s nicht gefunden wurde", domainEntity.getId().getValue(),
+                        String.format("Die Solaranlage %s konnte nicht zugewiesen werden, da DK %s nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 decentralizedPowerPlantId)
                 );
             }
@@ -118,7 +118,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Solaranlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die Solaranlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
                     new HouseholdIdVO(householdId)
@@ -130,7 +130,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         household.getHouseholdId())) {
                     throw new ProducerServiceException(
-                            String.format("Solaranlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die Solaranlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -139,7 +139,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Solaranlage %s konnte nicht zugewiesen werden, da Haushalt %s nicht gefunden wurde", domainEntity.getId().getValue(),
+                        String.format("Die Solaranlage %s konnte nicht zugewiesen werden, da der Haushalt %s nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 householdId)
                 );
             }
@@ -155,7 +155,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 repository.deleteById(new SolarEnergyIdVO(solarEnergyId));
             } else {
                 throw new ProducerServiceException(
-                        String.format("Solaranlage %s konnte nicht gelöscht werden, VK %s veröffentlicht ist", solarEnergyId, virtualPowerPlantId)
+                        String.format("Die Solaranlage %s konnte nicht gelöscht werden, das VK %s veröffentlicht ist.", solarEnergyId, virtualPowerPlantId)
                 );
             }
         } catch (ProducerRepositoryException | ProducerException | VirtualPowerPlantException | PublishException e) {
@@ -170,7 +170,7 @@ public class SolarEnergyServiceImpl implements ISolarEnergyService {
                 repository.update(new SolarEnergyIdVO(solarEnergyId), domainEntity);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Solaranlage %s konnte nicht bearbeitet werden, VK %s veröffentlicht ist", solarEnergyId, virtualPowerPlantId)
+                        String.format("Die Solaranlage %s konnte nicht bearbeitet werden, das VK %s veröffentlicht ist.", solarEnergyId, virtualPowerPlantId)
                 );
             }
         } catch (PublishException | VirtualPowerPlantException | ProducerException | ProducerRepositoryException e) {

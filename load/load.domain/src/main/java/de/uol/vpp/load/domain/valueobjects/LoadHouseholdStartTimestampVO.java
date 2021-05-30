@@ -17,13 +17,13 @@ public class LoadHouseholdStartTimestampVO {
 
     public LoadHouseholdStartTimestampVO(Long ts) throws LoadException {
         if (ts == null) {
-            throw new LoadException("startTimestamp", "LoadHousehold");
+            throw new LoadException("startTimestamp", "Haushaltslast");
         }
 
         try {
             this.timestamp = TimestampUtils.toBerlinTimestamp(ts, false);
         } catch (Exception e) {
-            throw new LoadException("startTimestamp", "LoadHousehold", e);
+            throw new LoadException("startTimestamp", "Haushaltslast", e);
         }
     }
 

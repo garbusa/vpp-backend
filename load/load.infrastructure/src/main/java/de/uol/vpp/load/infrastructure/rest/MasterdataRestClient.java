@@ -49,9 +49,9 @@ public class MasterdataRestClient {
 
             }
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException("Die Prüfung des Veröffentlichtenstatus mittels des Datenservices ist fehlgeschlagen.", e);
         }
-        throw new MasterdataRestClientException("something went wrong while request vpp published status");
+        throw new MasterdataRestClientException("Die Prüfung des Veröffentlichtenstatus mittels des Datenservices ist fehlgeschlagen.");
     }
 
     /**
@@ -80,7 +80,7 @@ public class MasterdataRestClient {
             }
             return ids;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException("Die Anfrage der Haushalte aus dem Datenservice ist fehlgeschlagen.", e);
         }
     }
 
@@ -108,9 +108,9 @@ public class MasterdataRestClient {
 
             }
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException("Die Abfrage der Haushaltsmitglieder aus dem Datenservice ist fehlgeschlagen.", e);
         }
-        throw new MasterdataRestClientException("something went wrong while request household member amount");
+        throw new MasterdataRestClientException("Die Abfrage der Haushaltsmitglieder aus dem Datenservice ist fehlgeschlagen.");
     }
 
 

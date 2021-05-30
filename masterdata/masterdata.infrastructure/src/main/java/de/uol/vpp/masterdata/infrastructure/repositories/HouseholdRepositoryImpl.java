@@ -45,7 +45,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
                 return result;
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("VK %s konnte nicht gefunden werden um Haushälte abzufragen", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
+                        String.format("Das VK %s konnte nicht gefunden werden, um dessen Haushalte abzufragen.", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
                 );
             }
         } catch (HouseholdException e) {
@@ -87,7 +87,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
             jpaRepository.delete(household);
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("Haushalt %s konnte nicht gelöscht werden, da Haushalt nicht gefunden wurde", id.getValue())
+                    String.format("Der Haushalt %s konnte nicht gelöscht werden, da der Haushalt nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -106,13 +106,13 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
                 virtualPowerPlantJpaRepository.save(virtualPowerPlantJpaEntity);
             } else {
                 throw new HouseholdRepositoryException(
-                        String.format("Haushalt %s konnte VK %s nicht zu gewiesen werden, da Haushalt bereits zugewiesen wurde", entity.getHouseholdId().getValue(),
+                        String.format("Der Haushalt %s konnte dem VK %s nicht zu gewiesen werden, da der Haushalt bereits einer Entität zugewiesen wurde.", entity.getHouseholdId().getValue(),
                                 jpaEntity.getVirtualPowerPlant().getId())
                 );
             }
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("Haushalt %s konnte VK %s nicht zugewiesen werden", entity.getHouseholdId().getValue(),
+                    String.format("Der Haushalt %s konnte dem VK %s nicht zugewiesen werden.", entity.getHouseholdId().getValue(),
                             virtualPowerPlant.getVirtualPowerPlantId().getValue())
             );
         }
@@ -129,7 +129,7 @@ public class HouseholdRepositoryImpl implements IHouseholdRepository {
             jpaRepository.save(jpaEntity);
         } else {
             throw new HouseholdRepositoryException(
-                    String.format("Haushalt %s konnte nicht aktualisiert werden, da Haushalt nicht gefunden wurde", id.getValue())
+                    String.format("Der Haushalt %s konnte nicht aktualisiert werden, da der Haushalt nicht gefunden wurde.", id.getValue())
             );
         }
     }

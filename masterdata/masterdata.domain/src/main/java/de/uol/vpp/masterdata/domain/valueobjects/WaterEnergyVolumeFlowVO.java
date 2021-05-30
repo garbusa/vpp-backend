@@ -15,7 +15,7 @@ public class WaterEnergyVolumeFlowVO {
 
     public WaterEnergyVolumeFlowVO(Double value) throws ProducerException {
         if (value == null || value < 0) {
-            throw new ProducerException("volumeFlow", "WaterEnergy");
+            throw new ProducerException("volumeFlow", "Wasserkraftanlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

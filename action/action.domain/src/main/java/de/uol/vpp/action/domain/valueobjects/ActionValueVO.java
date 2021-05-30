@@ -12,7 +12,7 @@ public class ActionValueVO {
 
     public ActionValueVO(Double value) throws ActionException {
         if (value == null || value < 0.) {
-            throw new ActionException("value", "Action");
+            throw new ActionException("value", "Handlungsempfehlung");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

@@ -15,7 +15,7 @@ public class SolarEnergySlopeVO {
 
     public SolarEnergySlopeVO(Double value) throws ProducerException {
         if (value == null || value < 0 || value > 360) {
-            throw new ProducerException("slope", "SolarEnergy");
+            throw new ProducerException("slope", "Solaranlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

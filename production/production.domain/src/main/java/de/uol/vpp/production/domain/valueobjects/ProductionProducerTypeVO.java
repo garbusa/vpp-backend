@@ -18,7 +18,7 @@ public class ProductionProducerTypeVO {
                 !value.equals("OTHER") &&
                 !value.equals("STORAGE") &&
                 !value.equals("GRID"))) {
-            throw new ProductionException("producerType", "ProductionProducer");
+            throw new ProductionException("producerType", "Erzeugungswert");
         }
         this.value = value;
     }

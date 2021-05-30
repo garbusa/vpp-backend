@@ -38,7 +38,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
                 return repository.getAllByVppId(virtualPowerPlantOptional.get());
             }
             throw new DecentralizedPowerPlantServiceException(
-                    String.format("VK %s konnte nicht gefunden werden um DKs abzufragen", virtualPowerPlantId)
+                    String.format("Das VK %s konnte nicht gefunden werden, um dessen DK abzufragen", virtualPowerPlantId)
             );
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new DecentralizedPowerPlantServiceException(e.getMessage(), e);
@@ -52,7 +52,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
             if (dpp.isPresent()) {
                 return dpp.get();
             } else {
-                throw new DecentralizedPowerPlantServiceException(String.format("DK %s konnte nicht gefunden werden", decentralizedPowerPlantId));
+                throw new DecentralizedPowerPlantServiceException(String.format("Das DK %s konnte nicht gefunden werden.", decentralizedPowerPlantId));
             }
         } catch (DecentralizedPowerPlantRepositoryException | DecentralizedPowerPlantException e) {
             throw new DecentralizedPowerPlantServiceException(e.getMessage(), e);
@@ -64,7 +64,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
         try {
             if (repository.getById(domainEntity.getDecentralizedPowerPlantId()).isPresent()) {
                 throw new DecentralizedPowerPlantServiceException(
-                        String.format("DK %s existiert bereits", domainEntity.getDecentralizedPowerPlantId().getValue()));
+                        String.format("Das DK %s existiert bereits.", domainEntity.getDecentralizedPowerPlantId().getValue()));
             }
             Optional<VirtualPowerPlantAggregate> virtualPowerPlantOptional = virtualPowerPlantRepository.getById(
                     new VirtualPowerPlantIdVO(virtualPowerPlantId)
@@ -74,7 +74,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
                 if (!publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId),
                         domainEntity.getDecentralizedPowerPlantId())) {
                     throw new DecentralizedPowerPlantServiceException(
-                            String.format("DK %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getDecentralizedPowerPlantId().getValue(),
+                            String.format("Das DK %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getDecentralizedPowerPlantId().getValue(),
                                     virtualPowerPlantId)
                     );
                 }
@@ -84,7 +84,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
                 repository.assign(domainEntity, virtualPowerPlant);
             } else {
                 throw new DecentralizedPowerPlantServiceException(
-                        String.format("DK %s konnte VK %s nicht zugewiesen werden, da DK bereits zugewiesen wurde", domainEntity.getDecentralizedPowerPlantId().getValue(),
+                        String.format("Das DK %s konnte dem VK %s nicht zugewiesen werden, da das DK bereits einem VK zugewiesen wurde.", domainEntity.getDecentralizedPowerPlantId().getValue(),
                                 virtualPowerPlantId)
                 );
             }
@@ -101,7 +101,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
                 repository.deleteById(new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId));
             } else {
                 throw new DecentralizedPowerPlantServiceException(
-                        String.format("DK %s konnte nicht gelöscht werden, da VK veröffentlicht ist", decentralizedPowerPlantId)
+                        String.format("Das DK %s konnte nicht gelöscht werden, da das VK veröffentlicht ist.", decentralizedPowerPlantId)
                 );
             }
         } catch (DecentralizedPowerPlantRepositoryException | DecentralizedPowerPlantException | VirtualPowerPlantException | PublishException e) {
@@ -116,7 +116,7 @@ public class DecentralizedPowerPlantServiceImpl implements IDecentralizedPowerPl
                 repository.update(new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId), domainEntity);
             } else {
                 throw new DecentralizedPowerPlantServiceException(
-                        String.format("DK %s konnte nicht bearbeitet werden, da VK veröffentlicht ist", decentralizedPowerPlantId)
+                        String.format("Das DK %s konnte nicht bearbeitet werden, da das VK veröffentlicht ist.", decentralizedPowerPlantId)
                 );
             }
         } catch (PublishException | VirtualPowerPlantException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {

@@ -12,7 +12,7 @@ public class ActionProducerOrStorageIdVO {
 
     public ActionProducerOrStorageIdVO(String value) throws ActionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ActionException("producerOrStorage", "Action");
+            throw new ActionException("producerOrStorage", "Handlungsempfehlung");
         }
         this.value = value;
     }

@@ -12,7 +12,7 @@ public class ActionRequestOverflowThresholdVO {
 
     public ActionRequestOverflowThresholdVO(Double value) throws ActionException {
         if (value == null || value < 0.) {
-            throw new ActionException("overflowThreshold", "ActionRequest");
+            throw new ActionException("overflowThreshold", "Maßnahmenabfrage");
         }
         this.value = value;
     }

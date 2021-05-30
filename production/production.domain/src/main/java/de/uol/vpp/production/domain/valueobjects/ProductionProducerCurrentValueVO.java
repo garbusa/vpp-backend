@@ -14,7 +14,7 @@ public class ProductionProducerCurrentValueVO {
 
     public ProductionProducerCurrentValueVO(Double value) throws ProductionException {
         if (value == null) {
-            throw new ProductionException("currentValue", "ProductionProducer");
+            throw new ProductionException("currentValue", "Erzeugungswert");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

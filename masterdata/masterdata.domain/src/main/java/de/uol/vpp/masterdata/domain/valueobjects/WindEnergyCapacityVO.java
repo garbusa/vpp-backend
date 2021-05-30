@@ -15,7 +15,7 @@ public class WindEnergyCapacityVO {
 
     public WindEnergyCapacityVO(Double value) throws ProducerException {
         if (value == null || value < 0. || value > 100.) {
-            throw new ProducerException("capacity", "WindEnergy");
+            throw new ProducerException("capacity", "Windkraftanlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

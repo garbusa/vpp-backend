@@ -13,7 +13,7 @@
         <module name="action.infrastructure" />
         <module name="load.infrastructure" />
         <module name="masterdata.domain" />
-        <module name="load.application" />
+        <module name="production.service" />
         <module name="load.service" />
         <module name="masterdata.service" />
         <module name="production.domain" />
@@ -21,7 +21,7 @@
         <module name="production.infrastructure" />
         <module name="action.domain" />
         <module name="action.service" />
-        <module name="production.service" />
+        <module name="load.application" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

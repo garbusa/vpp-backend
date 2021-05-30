@@ -584,7 +584,7 @@ public class ActionCatalogInfrastructureService {
                 actionRequest.setStatus(new ActionRequestStatusVO(StatusEnum.FAILED));
                 actionRequestRepository.saveActionRequest(actionRequest, false);
             } else {
-                log.error("Set action status failed. ActionRequest does not exist?");
+                log.error("Beim Setzen des Maßnahmenabfragenstatus auf FAILED ist ein Fehler aufgetreten.");
             }
 
         } catch (ActionRepositoryException | ActionException e) {

@@ -85,7 +85,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             jpaRepository.delete(result.get());
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("VK %s kann nicht gelöscht werden da VK nicht gefunden werden kann", id.getValue())
+                    String.format("Das VK %s kann nicht gelöscht werden, da das VK nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -99,7 +99,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             jpaRepository.save(vpp);
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("VK %s kann nicht veröffentlicht werden, da VK nicht gefunden wurde", id.getValue())
+                    String.format("Das VK %s kann nicht veröffentlicht werden, da das VK nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -113,7 +113,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             jpaRepository.save(vpp);
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("VK %s kann nicht unveröffentlich werden, da VK nicht gefunden wurde", id.getValue())
+                    String.format("Die Veröffentlichung des VK %s kann nicht rückgängig gemacht werden, da das VK nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -124,7 +124,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
         if (vpp.isPresent()) {
             return vpp.get().getPublished().isValue();
         } else {
-            throw new VirtualPowerPlantRepositoryException(String.format("VK %s konnte nicht gefunden werden", id.getValue()));
+            throw new VirtualPowerPlantRepositoryException(String.format("Das VK %s konnte nicht veröffentlicht werden, da VK nicht gefunden wurde.", id.getValue()));
         }
     }
 
@@ -161,7 +161,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
         }
         throw new VirtualPowerPlantRepositoryException(
-                String.format("Es ist ein Fehler beim abrufen eines VK durch DK %s aufgetreten", decentralizedPowerPlantId.getValue())
+                String.format("Beim Aufrufen eines VK mittels dem DK %s ist ein Fehler aufgetreten.", decentralizedPowerPlantId.getValue())
         );
     }
 
@@ -181,7 +181,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             throw new VirtualPowerPlantRepositoryException(e.getMessage(), e);
         }
         throw new VirtualPowerPlantRepositoryException(
-                String.format("Es ist ein Fehler beim abrufen eines VK durch Haushalt %s aufgetreten", householdId.getValue())
+                String.format("Beim Aufrufen eines VK mittels dem Haushalt %s ist ein Fehler aufgetreten.", householdId.getValue())
         );
     }
 
@@ -195,7 +195,7 @@ public class VirtualPowerPlantRepositoryImpl implements IVirtualPowerPlantReposi
             jpaRepository.save(jpaEntity);
         } else {
             throw new VirtualPowerPlantRepositoryException(
-                    String.format("VK %s konnte nicht aktualisiert werden, da VK nicht gefunden wurde", id.getValue())
+                    String.format("Das VK %s konnte nicht aktualisiert werden, da das VK nicht gefunden wurde.", id.getValue())
             );
         }
     }

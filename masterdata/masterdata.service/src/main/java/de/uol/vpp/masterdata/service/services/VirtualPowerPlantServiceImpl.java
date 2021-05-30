@@ -51,7 +51,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
         try {
             if (repository.getById(domainEntity.getVirtualPowerPlantId()).isPresent()) {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("VK %s existiert bereits", domainEntity.getVirtualPowerPlantId().getValue()));
+                        String.format("Das VK %s existiert bereits.", domainEntity.getVirtualPowerPlantId().getValue()));
             }
             repository.save(domainEntity);
         } catch (VirtualPowerPlantRepositoryException e) {
@@ -67,7 +67,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                 repository.deleteById(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             } else {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("VK %s konnte nicht gelöscht werden, da VK veröffentlich ist", virtualPowerPlantId)
+                        String.format("Das VK %s konnte nicht gelöscht werden, da das VK veröffentlich ist.", virtualPowerPlantId)
                 );
             }
 
@@ -93,18 +93,18 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                     }
                     if (!hasProducer.get()) {
                         throw new VirtualPowerPlantServiceException(
-                                String.format("VK %s konnte nicht veröffentlicht werden. VK benötigt min. eine Erzeugungsanlage", virtualPowerPlantId)
+                                String.format("Das VK %s konnte nicht veröffentlicht werden, da das VK min. eine Erzeugungsanlage benötigt.", virtualPowerPlantId)
                         );
                     }
                     repository.publish(new VirtualPowerPlantIdVO(virtualPowerPlantId));
                 } else {
                     throw new VirtualPowerPlantServiceException(
-                            String.format("VK %s konnte nicht veröffentlicht werden. VK benötigt min. ein Haushalt", virtualPowerPlantId)
+                            String.format("Das VK %s konnte nicht veröffentlicht werden, da das VK min. ein Haushalt benötigt.", virtualPowerPlantId)
                     );
                 }
             } else {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("VK %s ist bereits veröffentlicht", virtualPowerPlantId)
+                        String.format("Das VK %s ist bereits veröffentlicht.", virtualPowerPlantId)
                 );
             }
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
@@ -117,7 +117,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
         try {
             Optional<VirtualPowerPlantAggregate> result = repository.getById(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             return result.orElseThrow(() -> new VirtualPowerPlantServiceException(
-                    String.format("VK %s konnte nicht gefunden werden", virtualPowerPlantId)
+                    String.format("Das VK %s konnte nicht gefunden werden.", virtualPowerPlantId)
             ));
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
             throw new VirtualPowerPlantServiceException(e.getMessage(), e);
@@ -151,7 +151,7 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                 repository.unpublish(new VirtualPowerPlantIdVO(virtualPowerPlantId));
             } else {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("VK %s ist bereits unveröffentlicht", virtualPowerPlantId)
+                        String.format("Das VK %s ist bereits unveröffentlicht.", virtualPowerPlantId)
                 );
             }
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {
@@ -168,12 +168,12 @@ public class VirtualPowerPlantServiceImpl implements IVirtualPowerPlantService {
                     repository.update(new VirtualPowerPlantIdVO(virtualPowerPlantId), domainEntity);
                 } else {
                     throw new VirtualPowerPlantServiceException(
-                            "Der Name eines VK kann nicht geändert werden"
+                            "Der Name eines VK kann nicht geändert werden."
                     );
                 }
             } else {
                 throw new VirtualPowerPlantServiceException(
-                        String.format("VK %s konnte nicht aktualisiert werden, da VK veröffentlicht ist", virtualPowerPlantId)
+                        String.format("Das VK %s konnte nicht aktualisiert werden, da das VK veröffentlicht ist.", virtualPowerPlantId)
                 );
             }
         } catch (VirtualPowerPlantRepositoryException | VirtualPowerPlantException e) {

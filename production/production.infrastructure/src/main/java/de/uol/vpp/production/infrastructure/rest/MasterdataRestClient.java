@@ -52,9 +52,9 @@ public class MasterdataRestClient {
                 }
             }
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage des Veröffentlichenstatus des VK %s mittels dem Datenservice ist fehlgeschlagen.", virtualPowerPlantId), e);
         }
-        throw new MasterdataRestClientException("Something went wrong while requesting for vpp published status");
+        throw new MasterdataRestClientException(String.format("Die Abfrage des Veröffentlichenstatus des VK %s mittels dem Datenservice ist fehlgeschlagen.", virtualPowerPlantId));
     }
 
     /**
@@ -83,7 +83,7 @@ public class MasterdataRestClient {
             }
             return ids;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Haushalte des VK %s mittels dem Datenservice ist fehlgeschlagen.", virtualPowerPlantId), e);
         }
     }
 
@@ -113,7 +113,7 @@ public class MasterdataRestClient {
             }
             return ids;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der DK des VK %s mittels dem Datenservice ist fehlgeschlagen.", virtualPowerPlantId), e);
         }
     }
 
@@ -133,7 +133,7 @@ public class MasterdataRestClient {
             this.addWaterDTO(decentralizedPowerPlantId, waters, restTemplate, fooResourceUrl);
             return waters;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Wasserkraftwerke eines DK %s mittels dem Datenservice ist fehlgeschlagen.", decentralizedPowerPlantId), e);
         }
     }
 
@@ -187,7 +187,7 @@ public class MasterdataRestClient {
             this.addWaterDTO(householdId, waters, restTemplate, fooResourceUrl);
             return waters;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Wasserkraftwerke eines Haushaltes %s mittels dem Datenservice ist fehlgeschlagen.", householdId), e);
         }
     }
 
@@ -207,7 +207,7 @@ public class MasterdataRestClient {
             addWindDTO(decentralizedPowerPlantId, winds, restTemplate, fooResourceUrl);
             return winds;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Windkraftanlagen eines DK %s mittels dem Datenservice ist fehlgeschlagen.", decentralizedPowerPlantId), e);
         }
     }
 
@@ -261,7 +261,7 @@ public class MasterdataRestClient {
             addWindDTO(householdId, winds, restTemplate, fooResourceUrl);
             return winds;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Wasserkraftwerke eines Haushaltes %s mittels dem Datenservice ist fehlgeschlagen.", householdId), e);
         }
     }
 
@@ -281,7 +281,7 @@ public class MasterdataRestClient {
             addSolarDTO(decentralizedPowerPlantId, solars, restTemplate, fooResourceUrl);
             return solars;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Solaranlagen eines DK %s mittels dem Datenservice ist fehlgeschlagen.", decentralizedPowerPlantId), e);
         }
     }
 
@@ -335,7 +335,7 @@ public class MasterdataRestClient {
             addOtherDTO(decentralizedPowerPlantId, others, restTemplate, fooResourceUrl);
             return others;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der alternativen Erzeugungsanlagen eines DK %s mittels dem Datenservice ist fehlgeschlagen.", decentralizedPowerPlantId), e);
         }
     }
 
@@ -385,7 +385,7 @@ public class MasterdataRestClient {
             addOtherDTO(householdId, others, restTemplate, fooResourceUrl);
             return others;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der alternativen Erzeugungsanlagen eines Haushaltes %s mittels dem Datenservice ist fehlgeschlagen.", householdId), e);
         }
     }
 
@@ -405,7 +405,7 @@ public class MasterdataRestClient {
             addSolarDTO(householdId, solars, restTemplate, fooResourceUrl);
             return solars;
         } catch (RestClientException | JsonProcessingException e) {
-            throw new MasterdataRestClientException("masterdata rest client exception occured while executing request", e);
+            throw new MasterdataRestClientException(String.format("Die Abfrage der Solaranlagen eines Haushaltes %s mittels dem Datenservice ist fehlgeschlagen.", householdId), e);
         }
     }
 

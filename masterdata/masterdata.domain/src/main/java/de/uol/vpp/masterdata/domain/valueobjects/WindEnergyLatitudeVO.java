@@ -16,7 +16,7 @@ public class WindEnergyLatitudeVO {
 
     public WindEnergyLatitudeVO(Double value) throws ProducerException {
         if (value == null || value < -90. || value > 90.) {
-            throw new ProducerException("latitude", "WindEnergy");
+            throw new ProducerException("latitude", "Windkraftanlage");
         }
         this.value = value;
     }

@@ -13,7 +13,7 @@ public class OtherEnergyIdVO {
 
     public OtherEnergyIdVO(String value) throws ProducerException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ProducerException("otherEnergyId", "OtherEnergy");
+            throw new ProducerException("otherEnergyId", "alternative Erzeugungsanlage");
         }
         this.value = value.toUpperCase();
     }

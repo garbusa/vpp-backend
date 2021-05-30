@@ -16,7 +16,7 @@ public class LoadHouseholdIdVO {
 
     public LoadHouseholdIdVO(String id) throws LoadException {
         if (id == null || id.isBlank() || id.isEmpty()) {
-            throw new LoadException("householdId", "LoadHousehold");
+            throw new LoadException("householdId", "Haushaltslast");
         }
         this.id = id;
     }

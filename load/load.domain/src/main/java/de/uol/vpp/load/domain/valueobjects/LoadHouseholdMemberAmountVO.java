@@ -15,7 +15,7 @@ public class LoadHouseholdMemberAmountVO {
 
     public LoadHouseholdMemberAmountVO(Integer amount) throws LoadException {
         if (amount == null || amount < 1) {
-            throw new LoadException("householdMemberAmount", "LoadHousehold");
+            throw new LoadException("householdMemberAmount", "Haushaltslast");
         }
         this.amount = amount;
     }

@@ -45,7 +45,7 @@ public class StorageServiceImpl implements IStorageService {
                 return repository.getAllByDecentralizedPowerPlant(dpp.get());
             }
             throw new StorageServiceException(
-                    String.format("DK %s konnte nicht gefunden werden um Speicher abzufragen", decentralizedPowerPlantId)
+                    String.format("Das DK %s konnte nicht gefunden werden, um dessen Speicheranlagen abzufragen.", decentralizedPowerPlantId)
             );
         } catch (StorageRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new StorageServiceException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class StorageServiceImpl implements IStorageService {
                 return repository.getAllByHousehold(household.get());
             }
             throw new StorageServiceException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um Speicher abzufragen", householdId)
+                    String.format("Der Haushalt %s konnte nicht gefunden werden, um dessen Speicheranlagen abzufragen.", householdId)
             );
         } catch (StorageRepositoryException | HouseholdException | HouseholdRepositoryException e) {
             throw new StorageServiceException(e.getMessage(), e);
@@ -73,9 +73,9 @@ public class StorageServiceImpl implements IStorageService {
         try {
             return repository.getById(new StorageIdVO(storageId))
                     .orElseThrow(() -> new StorageServiceException(String.format(
-                            "Speicher %s konnte nicht gefunden werden", storageId)));
+                            "Die Speicheranlage %s konnte nicht gefunden werden.", storageId)));
         } catch (StorageException | StorageRepositoryException e) {
-            throw new StorageServiceException(String.format("Speicher %s konnte nicht gefunden werden", storageId));
+            throw new StorageServiceException(String.format("Die Speicheranlage %s konnte nicht gefunden werden.", storageId));
         }
 
     }
@@ -85,7 +85,7 @@ public class StorageServiceImpl implements IStorageService {
         try {
             if (repository.getById(domainEntity.getStorageId()).isPresent()) {
                 throw new StorageServiceException(
-                        String.format("Speicher %s existiert bereits", domainEntity.getStorageId().getValue()));
+                        String.format("Die Speicheranlage %s existiert bereits.", domainEntity.getStorageId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
                     new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId)
@@ -96,7 +96,7 @@ public class StorageServiceImpl implements IStorageService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         dpp.getDecentralizedPowerPlantId())) {
                     throw new StorageServiceException(
-                            String.format("Speicher %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getStorageId().getValue(),
+                            String.format("Die Speicheranlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getStorageId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -104,7 +104,7 @@ public class StorageServiceImpl implements IStorageService {
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new StorageServiceException(
-                        String.format("Zuweisung des Speichers %s zum DK %s ist fehlgeschlagen. DK konnte nicht gefunden werden", domainEntity.getStorageId().getValue(),
+                        String.format("Die Zuweisung der Speicheranlage %s zum DK %s ist fehlgeschlagen, da das DK nicht gefunden wurde.", domainEntity.getStorageId().getValue(),
                                 decentralizedPowerPlantId)
                 );
             }
@@ -118,7 +118,7 @@ public class StorageServiceImpl implements IStorageService {
         try {
             if (repository.getById(domainEntity.getStorageId()).isPresent()) {
                 throw new StorageServiceException(
-                        String.format("Speicher %s existiert bereits", domainEntity.getStorageId().getValue()));
+                        String.format("Die Speicheranlage %s existiert bereits.", domainEntity.getStorageId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
                     new HouseholdIdVO(householdId)
@@ -129,7 +129,7 @@ public class StorageServiceImpl implements IStorageService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         household.getHouseholdId())) {
                     throw new StorageServiceException(
-                            String.format("Speicher %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getStorageId().getValue(),
+                            String.format("Die Speicheranlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getStorageId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -137,7 +137,7 @@ public class StorageServiceImpl implements IStorageService {
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new StorageServiceException(
-                        String.format("Zuweisung des Speichers %s zum Haushalt %s ist fehlgeschlagen. Haushalt konnte nicht gefunden werden", domainEntity.getStorageId().getValue(),
+                        String.format("Die Zuweisung des Speichers %s zum Haushalt %s ist fehlgeschlagen, da der Haushalt nicht gefunden wurde.", domainEntity.getStorageId().getValue(),
                                 householdId)
                 );
             }
@@ -152,7 +152,7 @@ public class StorageServiceImpl implements IStorageService {
             if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new StorageIdVO(storageId))) {
                 repository.deleteById(new StorageIdVO(storageId));
             } else {
-                throw new StorageServiceException("Speicher konnte nicht gelöscht werden, da VK veröffentlicht ist");
+                throw new StorageServiceException(String.format("Die Speicheranlage %s konnte nicht gelöscht werden, da das VK %s veröffentlicht ist.", storageId, virtualPowerPlantId));
             }
 
         } catch (StorageRepositoryException | StorageException | VirtualPowerPlantException | PublishException e) {
@@ -166,7 +166,7 @@ public class StorageServiceImpl implements IStorageService {
             if (publishUtil.isEditable(new VirtualPowerPlantIdVO(virtualPowerPlantId), new StorageIdVO(storageId))) {
                 repository.update(new StorageIdVO(storageId), domainEntity);
             } else {
-                throw new StorageServiceException("Speicher konnte nicht bearbeitet werden, da VK veröffentlicht ist");
+                throw new StorageServiceException(String.format("Die Speicheranlage %s konnte nicht bearbeitet werden, da das VK %s veröffentlicht ist", storageId, virtualPowerPlantId));
             }
         } catch (PublishException | VirtualPowerPlantException | StorageException | StorageRepositoryException e) {
             throw new StorageServiceException(e.getMessage(), e);

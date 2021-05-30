@@ -72,17 +72,17 @@ public class SolarRestClient {
                     }
                 } else {
                     throw new SolarRestClientException(
-                            String.format("Die Solaranlage %s konnte nicht prognostiziert werden", dto.getSolarEnergyId())
+                            String.format("Die Solaranlage %s konnte mittels der Meteomatics-API nicht prognostiziert werden.", dto.getSolarEnergyId())
                     );
                 }
             } else {
                 throw new SolarRestClientException(
-                        String.format("Die Solaranlage %s konnte nicht prognostiziert werden", dto.getSolarEnergyId())
+                        String.format("Die Solaranlage %s konnte mittels der Meteomatics-API nicht prognostiziert werden.", dto.getSolarEnergyId())
                 );
             }
         } catch (RestClientException | JsonProcessingException e) {
             throw new SolarRestClientException(
-                    String.format("Die Solaranlage %s konnte nicht prognostiziert werden", dto.getSolarEnergyId())
+                    String.format("Die Solaranlage %s konnte mittels der Meteomatics-API nicht prognostiziert werden.", dto.getSolarEnergyId())
             );
         }
         return null;

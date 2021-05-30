@@ -48,7 +48,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
                 return result;
             } else {
                 throw new VirtualPowerPlantRepositoryException(
-                        String.format("VK %s konnte nicht gefunden werden um DK abzufragen", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
+                        String.format("Das VK %s konnte nicht gefunden werden, um das DK abzufragen.", virtualPowerPlantAggregate.getVirtualPowerPlantId().getValue())
                 );
             }
         } catch (DecentralizedPowerPlantException | VirtualPowerPlantRepositoryException e) {
@@ -90,13 +90,13 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
                 virtualPowerPlantJpaRepository.save(virtualPowerPlantJpaEntity);
             } else {
                 throw new DecentralizedPowerPlantRepositoryException(
-                        String.format("DK %s konnte VK %s nicht zugewiesen werden, da DK bereits zugewiesen wurde", domainEntity.getDecentralizedPowerPlantId().getValue(),
+                        String.format("Das DK %s konnte dem VK %s nicht zugewiesen werden, da DK bereits zugewiesen wurde.", domainEntity.getDecentralizedPowerPlantId().getValue(),
                                 jpaEntity.getVirtualPowerPlant().getId())
                 );
             }
         } else {
             throw new DecentralizedPowerPlantRepositoryException(
-                    String.format("DK %s konnte VK %s nicht zugewiesen werden", domainEntity.getDecentralizedPowerPlantId().getValue(),
+                    String.format("Das DK %s konnte dem VK %s nicht zugewiesen werden.", domainEntity.getDecentralizedPowerPlantId().getValue(),
                             virtualPowerPlant.getVirtualPowerPlantId().getValue())
             );
         }
@@ -111,7 +111,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
             jpaRepository.save(jpaEntity);
         } else {
             throw new DecentralizedPowerPlantRepositoryException(
-                    String.format("DK %s konnte nicht aktualisiert werden, da DK nicht gefunden wurde", id.getValue())
+                    String.format("Das DK %s konnte nicht aktualisiert werden, da das DK nicht gefunden wurde.", id.getValue())
             );
         }
     }
@@ -131,7 +131,7 @@ public class DecentralizedPowerPlantRepositoryImpl implements IDecentralizedPowe
             jpaRepository.delete(dpp);
         } else {
             throw new DecentralizedPowerPlantRepositoryException(
-                    String.format("DK %s konnte nicht gelöscht werden, da DK nicht gefunden wurde", id.getValue())
+                    String.format("Das DK %s konnte nicht gelöscht werden, da das DK nicht gefunden wurde.", id.getValue())
             );
         }
     }

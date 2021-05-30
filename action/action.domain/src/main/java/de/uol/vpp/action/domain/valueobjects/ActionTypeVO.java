@@ -13,7 +13,7 @@ public class ActionTypeVO {
 
     public ActionTypeVO(ActionTypeEnum value) throws ActionException {
         if (value == null) {
-            throw new ActionException("actionType", "Action");
+            throw new ActionException("actionType", "Handlungsempfehlung");
         }
         this.value = value;
     }

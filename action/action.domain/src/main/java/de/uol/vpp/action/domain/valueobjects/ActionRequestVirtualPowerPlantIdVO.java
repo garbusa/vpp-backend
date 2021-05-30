@@ -12,7 +12,7 @@ public class ActionRequestVirtualPowerPlantIdVO {
 
     public ActionRequestVirtualPowerPlantIdVO(String value) throws ActionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ActionException("virtualPowerPlantId", "ActionRequest");
+            throw new ActionException("virtualPowerPlantId", "Maßnahmenabfrage");
         }
         this.value = value;
     }

@@ -15,7 +15,7 @@ public class WaterEnergyHeightVO {
 
     public WaterEnergyHeightVO(Double value) throws ProducerException {
         if (value == null || value < 0) {
-            throw new ProducerException("height", "WaterEnergy");
+            throw new ProducerException("height", "Wasserkraftanlage");
         }
         this.value = Math.round(1000.0 * value) / 1000.0;
     }

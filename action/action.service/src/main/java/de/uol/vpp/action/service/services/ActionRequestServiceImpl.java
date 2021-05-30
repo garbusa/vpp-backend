@@ -53,7 +53,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                 return actionRequest.get();
             } else {
                 throw new ActionServiceException(
-                        String.format("ActionRequest mit der ID %s konnte nicht gefunden werden", actionRequestId)
+                        String.format("Die Maßnahmenabfrage mit der ID %s konnte nicht gefunden werden.", actionRequestId)
                 );
             }
         } catch (ActionRepositoryException | ActionException e) {
@@ -65,7 +65,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
     public void save(ActionRequestAggregate domainEntity) throws ActionServiceException {
         try {
             if (actionRequestRepository.getActionRequest(domainEntity.getActionRequestId()).isPresent()) {
-                throw new ActionServiceException(String.format("ActionRequest %s existiert bereits", domainEntity.getActionRequestId().getValue()));
+                throw new ActionServiceException(String.format("Die Maßnahmenabfrage %s existiert bereits.", domainEntity.getActionRequestId().getValue()));
             }
             if (masterdataRestClient.isHealthy()) {
                 VirtualPowerPlantDTO vppDTO = masterdataRestClient.getVirtualPowerPlantById(domainEntity.getVirtualPowerPlantId().getValue());
@@ -91,11 +91,11 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                     this.checkProducerCapacity(domainEntity, waters, winds, solars, others);
                     this.checkStorageCapacity(domainEntity, storages);
                 } else {
-                    throw new ActionServiceException(String.format("ActionRequest %s konnte nicht erstellt werden, da VK %s nicht gefunden wurde",
+                    throw new ActionServiceException(String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da VK %s nicht gefunden wurde.",
                             domainEntity.getActionRequestId().getValue(), domainEntity.getVirtualPowerPlantId().getValue()));
                 }
             } else {
-                throw new ActionServiceException(String.format("ActionRequest %s konnte nicht erstellt werden, da Daten-Service nicht erreichbar ist",
+                throw new ActionServiceException(String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da Datenservice nicht erreichbar ist.",
                         domainEntity.getActionRequestId().getValue()));
             }
             domainEntity.setStatus(new ActionRequestStatusVO(StatusEnum.STARTED)); //Setze Maßnahmenabfrage Status auf "gestartet"
@@ -126,7 +126,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
 
             if (!found) {
                 throw new ActionServiceException(
-                        String.format("ActionRequest konnte nicht erstellt, werden da der Produzent %s nicht gefunden werden konnte", producerManipulationEntity.getProducerId().getValue())
+                        String.format("Die Maßnahmenabfrage konnte nicht erstellt werden, da die Erzeugungsanlage %s nicht gefunden werden konnte.", producerManipulationEntity.getProducerId().getValue())
                 );
             }
         }
@@ -143,7 +143,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
 
             if (!found) {
                 throw new ActionServiceException(
-                        String.format("ActionRequest konnte nicht erstellt, werden da der Speicher %s nicht gefunden werden konnte", storageManipulationEntity.getStorageId().getValue())
+                        String.format("Die Maßnahmenabfrage konnte nicht erstellt werden, da die Speicheranlage %s nicht gefunden wurde.", storageManipulationEntity.getStorageId().getValue())
                 );
             }
         }
@@ -262,9 +262,9 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                             entities.get(i).getStartEndTimestamp().getEnd()
                     )) {
                         throw new ActionServiceException(
-                                String.format("ActionRequest %s konnte nicht erstellt werden, " +
+                                String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, " +
                                         "da gleiche Erzeugungsanlagen nicht innerhalb einer Periode " +
-                                        "manipuliert werden dürfen", domainEntity.getActionRequestId().getValue())
+                                        "manipuliert werden dürfen.", domainEntity.getActionRequestId().getValue())
                         );
                     }
                 }
@@ -301,9 +301,9 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                             entities.get(i).getStartEndTimestamp().getEnd()
                     )) {
                         throw new ActionServiceException(
-                                String.format("ActionRequest %s konnte nicht erstellt werden, " +
+                                String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, " +
                                         "da gleiche Speicheranlagen nicht innerhalb einer Periode " +
-                                        "manipuliert werden dürfen", domainEntity.getActionRequestId().getValue())
+                                        "manipuliert werden dürfen.", domainEntity.getActionRequestId().getValue())
                         );
                     }
                 }
@@ -435,7 +435,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
             case PRODUCER_UP:
                 if (100. - capacity < manipulation.getCapacity().getValue()) {
                     throw new ActionServiceException(
-                            String.format("ActionRequest %s konnte nicht erstellt werden, da Erzeugungsanlage %s nicht genügend Kapazitäten hat",
+                            String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da die Erzeugungsanlage %s nicht genügend Kapazitäten besitzt.",
                                     domainEntity.getActionRequestId().getValue(), manipulation.getProducerId().getValue())
                     );
                 }
@@ -443,14 +443,14 @@ public class ActionRequestServiceImpl implements IActionRequestService {
             case PRODUCER_DOWN:
                 if (capacity < manipulation.getCapacity().getValue()) {
                     throw new ActionServiceException(
-                            String.format("ActionRequest %s konnte nicht erstellt werden, da Erzeugungsanlage %s nicht genügend Kapazitäten hat",
+                            String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da Erzeugungsanlage %s nicht genügend Kapazitäten besitzt.",
                                     domainEntity.getActionRequestId().getValue(), manipulation.getProducerId().getValue())
                     );
                 }
                 break;
             default:
                 throw new ActionServiceException(
-                        String.format("ActionRequest %s konnte nicht erstellt werden, da ProducerManipulationType nicht existiert",
+                        String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da ProducerManipulationType nicht existiert.",
                                 domainEntity.getActionRequestId().getValue())
                 );
         }
@@ -471,7 +471,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                 //Wenn Speicher bereits voll ist
                 if (storage.getCapacity() == 100.) {
                     throw new ActionServiceException(
-                            String.format("ActionRequest %s konnte nicht erstellt werden, da Speicher %s bereits voll ist",
+                            String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da Speicher %s bereits voll ist.",
                                     domainEntity.getActionRequestId().getValue(), manipulation.getStorageId().getValue())
                     );
                 } else {
@@ -502,7 +502,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
             case STORAGE_UNLOAD:
                 if (storage.getCapacity() == 0.) {
                     throw new ActionServiceException(
-                            String.format("ActionRequest %s konnte nicht erstellt werden, da Speicher %s leer ist",
+                            String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da Speicher %s leer ist.",
                                     domainEntity.getActionRequestId().getValue(), manipulation.getStorageId().getValue())
                     );
                 } else {
@@ -530,7 +530,7 @@ public class ActionRequestServiceImpl implements IActionRequestService {
                 break;
             default:
                 throw new ActionServiceException(
-                        String.format("ActionRequest %s konnte nicht erstellt werden, da Speicher %s nicht genügend Kapazitäten hat",
+                        String.format("Die Maßnahmenabfrage %s konnte nicht erstellt werden, da die Speicheranlage %s nicht genügend Kapazitäten besitzt.",
                                 domainEntity.getActionRequestId().getValue(), manipulation.getStorageId().getValue())
                 );
         }

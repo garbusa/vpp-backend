@@ -12,7 +12,7 @@ public class ActionRequestIdVO {
 
     public ActionRequestIdVO(String value) throws ActionException {
         if (value == null || value.isEmpty() || value.isBlank()) {
-            throw new ActionException("actionRequestId", "ActionRequest");
+            throw new ActionException("actionRequestId", "Maßnahmenabfrage");
         }
         this.value = value;
     }

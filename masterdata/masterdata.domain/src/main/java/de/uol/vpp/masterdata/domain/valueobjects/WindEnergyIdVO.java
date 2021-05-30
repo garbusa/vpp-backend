@@ -17,7 +17,7 @@ public class WindEnergyIdVO {
 
     public WindEnergyIdVO(String value) throws ProducerException {
         if (value == null || value.isBlank() || value.isEmpty()) {
-            throw new ProducerException("windEnergyId", "WindEnergy");
+            throw new ProducerException("windEnergyId", "Windkraftanlage");
         }
         this.value = value.toUpperCase();
     }

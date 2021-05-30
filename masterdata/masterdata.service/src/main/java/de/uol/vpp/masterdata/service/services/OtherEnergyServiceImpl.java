@@ -45,7 +45,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 return repository.getAllByDecentralizedPowerPlant(dpp.get());
             }
             throw new ProducerServiceException(
-                    String.format("DK %s konnte nicht gefunden werden um alternative Energieanlagen abzufragen", decentralizedPowerPlantId)
+                    String.format("Das DK %s konnte nicht gefunden werden, um dessen alternativen Erzeugungsanlagen abzufragen.", decentralizedPowerPlantId)
             );
         } catch (ProducerRepositoryException | DecentralizedPowerPlantException | DecentralizedPowerPlantRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -61,7 +61,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 return repository.getAllByHousehold(household.get());
             }
             throw new ProducerServiceException(
-                    String.format("Haushalt %s konnte nicht gefunden werden um alternative Energieanlagen abzufragen", householdId)
+                    String.format("Der Haushalt %s konnte nicht gefunden werden, um dessen alternativen Erzeugungsanlagen abzufragenn", householdId)
             );
         } catch (ProducerRepositoryException | HouseholdException | HouseholdRepositoryException e) {
             throw new ProducerServiceException(e.getMessage(), e);
@@ -72,9 +72,9 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
     public OtherEnergyEntity get(String otherEnergyId) throws ProducerServiceException {
         try {
             return repository.getById(new OtherEnergyIdVO(otherEnergyId))
-                    .orElseThrow(() -> new ProducerServiceException(String.format("Alternative Energieanlage %s konnte nicht gefunden werden", otherEnergyId)));
+                    .orElseThrow(() -> new ProducerServiceException(String.format("Die alternative Erzeugungsanlage %s konnte nicht gefunden werden.", otherEnergyId)));
         } catch (ProducerException | ProducerRepositoryException e) {
-            throw new ProducerServiceException(String.format("Alternative Energieanlage %s konnte nicht gefunden werden", otherEnergyId));
+            throw new ProducerServiceException(String.format("Die alternative Erzeugungsanlage %s konnte nicht gefunden werden.", otherEnergyId));
         }
 
     }
@@ -84,7 +84,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Alternative Energieanlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die alternative Erzeugungsanlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<DecentralizedPowerPlantAggregate> dppOptional = decentralizedPowerPlantRepository.getById(
                     new DecentralizedPowerPlantIdVO(decentralizedPowerPlantId)
@@ -96,7 +96,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         dpp.getDecentralizedPowerPlantId())) {
                     throw new ProducerServiceException(
-                            String.format("Alternative Energieanlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die alternative Erzeugungsanlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -105,7 +105,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 repository.assignToDecentralizedPowerPlant(domainEntity, dpp);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Alternative Energieanlage %s konnte DK %s nicht zugewiesen werden, da alternative Energieanlage bereits zugewiesen ist", domainEntity.getId().getValue(),
+                        String.format("Die alternative Erzeugungsanlage %s konnte dem DK %s nicht zugewiesen werden, da das DK nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 decentralizedPowerPlantId)
                 );
             }
@@ -119,7 +119,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
         try {
             if (repository.getById(domainEntity.getId()).isPresent()) {
                 throw new ProducerServiceException(
-                        String.format("Alternative Energieanlage %s existiert bereits", domainEntity.getId().getValue()));
+                        String.format("Die alternative Erzeugungsanlage %s existiert bereits.", domainEntity.getId().getValue()));
             }
             Optional<HouseholdAggregate> householdOptional = householdRepository.getById(
                     new HouseholdIdVO(householdId)
@@ -133,7 +133,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 if (!publishUtil.isEditable(vpp.getVirtualPowerPlantId(),
                         household.getHouseholdId())) {
                     throw new ProducerServiceException(
-                            String.format("Alternative Energieanlage %s konnte nicht gespeichert werden, da VK %s veröffentlicht ist", domainEntity.getId().getValue(),
+                            String.format("Die alternative Erzeugungsanlage %s konnte nicht gespeichert werden, da das VK %s veröffentlicht ist.", domainEntity.getId().getValue(),
                                     vpp.getVirtualPowerPlantId().getValue())
                     );
                 }
@@ -142,7 +142,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 repository.assignToHousehold(domainEntity, household);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Alternative Energieanlage %s konnte Haushalt %s nicht zugewiesen werden, da alternative Energieanlage bereits zugewiesen ist", domainEntity.getId().getValue(),
+                        String.format("Die alternative Erzeugungsanlage %s konnte dem Haushalt %s nicht zugewiesen werden, da der Haushalt nicht gefunden wurde.", domainEntity.getId().getValue(),
                                 householdId)
                 );
             }
@@ -158,7 +158,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 repository.deleteById(new OtherEnergyIdVO(otherEnergyId));
             } else {
                 throw new ProducerServiceException(
-                        String.format("Alternative Energieanlage %s konnte nicht gelöscht werden, da VK veröffentlich ist", otherEnergyId)
+                        String.format("Die alternative Erzeugungsanlage %s konnte nicht gelöscht werden, da das VK %s veröffentlich ist.", otherEnergyId, virtualPowerPlantId)
                 );
             }
         } catch (ProducerRepositoryException | ProducerException | VirtualPowerPlantException | PublishException e) {
@@ -173,7 +173,7 @@ public class OtherEnergyServiceImpl implements IOtherEnergyService {
                 repository.update(new OtherEnergyIdVO(otherEnergyId), domainEntity);
             } else {
                 throw new ProducerServiceException(
-                        String.format("Alternative Energieanlage %s konnte nicht bearbeitet werden, da VK veröffentlich ist", otherEnergyId)
+                        String.format("Die alternative Erzeugungsanlage %s konnte nicht bearbeitet werden, da das VK %s veröffentlich ist", otherEnergyId, virtualPowerPlantId)
                 );
             }
         } catch (PublishException | VirtualPowerPlantException | ProducerException | ProducerRepositoryException e) {
