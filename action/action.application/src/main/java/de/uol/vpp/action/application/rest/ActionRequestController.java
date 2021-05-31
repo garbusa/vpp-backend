@@ -88,7 +88,7 @@ public class ActionRequestController {
         try {
             actionRequestService.save(converter.toDomain(dto));
             return ResponseEntity.ok().body(new ApiResponse(true, false, "" +
-                    "Maßnahmenanfrage wurde erfolgreich angelegt", null));
+                    String.format("Die Maßnahmenanfrage %s wurde erfolgreich angelegt.", dto.getActionRequestId()), null));
         } catch (ActionServiceException | ActionException | ManipulationException e) {
             return new ResponseEntity<>(new ApiResponse(
                     false, false, e.getMessage(), null
