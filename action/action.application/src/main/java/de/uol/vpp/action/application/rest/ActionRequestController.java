@@ -37,7 +37,7 @@ public class ActionRequestController {
     public ResponseEntity<?> getAllActionRequestsByVppId(@PathVariable String virtualPowerPlantId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "Abfrage aller Maßnahmenanfragen war erfolgreich",
+                    new ApiResponse(true, false, "Die Abfrage aller Maßnahmenanfragen war erfolgreich.",
                             actionRequestService.getAllActionRequestByVppId(virtualPowerPlantId)
                                     .stream()
                                     .map(converter::toApplication)
@@ -64,7 +64,7 @@ public class ActionRequestController {
     public ResponseEntity<?> getActionRequestById(@PathVariable String actionRequestId) {
         try {
             return new ResponseEntity<>(
-                    new ApiResponse(true, false, "Abfrage einer Maßnahmenanfrage war erfolgreich",
+                    new ApiResponse(true, false, "Die Abfrage einer Maßnahmenanfrage war erfolgreich.",
                             converter.toApplication(actionRequestService.get(actionRequestId))), HttpStatus.OK);
         } catch (ActionServiceException e) {
             return new ResponseEntity<>(new ApiResponse(
